@@ -9,7 +9,7 @@ Q = $(if $(filter 1,$V),,@)
 M = $(shell printf "\033[34;1m▶\033[0m")
 
 # This is our default target
-# it do all the steps required to build the debian package or docker image
+# it do all the steps required to build the debian package
 # it does not build/run the tests
 .PHONY: all
 all: node ; @ ## Do all
@@ -33,7 +33,7 @@ dist:
 	npm run build:prod
 
 .PHONY: deb
-deb: ; $(info $(M) building debian package…) @ ## Build debian package
+deb: ; $(info $(M) building debian package…) @
 	$Q VERSION=$(VERSION) ./debian.sh
 
 .PHONY: clean
