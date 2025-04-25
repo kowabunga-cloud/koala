@@ -38,10 +38,13 @@ jobs:
         with:
           name: koala-dist
           path: dist/
+      - run: make release
       - run: sudo apt-get -y install debhelper
       - name: Build Debian package
         run: make deb
       - name: Release Debian Package
         uses: softprops/action-gh-release@v2
         with:
-          files: ../*.deb
+          files: |
+            ../*.deb
+            kowabunga-koala-*.tgz
