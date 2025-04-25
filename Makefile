@@ -17,26 +17,26 @@ all: node ; @ ## Do all
 
 .PHONY: node
 node:
-	npm install --legacy-peer-deps
+	$Q npm install --legacy-peer-deps
 
 .PHONY: upgrade
 upgrade:
-	npm install -g npm-check-updates
-	ncu --upgrade
+	$Q npm install -g npm-check-updates
+	$Q ncu --upgrade
 
 .PHONY: run
 run:
-	npm run dev
+	$Q npm run dev
 
 .PHONY: dist
 dist:
-	npm run build:prod
+	$Q npm run build:prod
 
 .PHONY: release
 release:
-	cp -rf dist koala
-	tar cvzf kowabunga-koala-$(VERSION).tgz koala/*
-	rm -rf koala
+	$Q cp -rf dist koala
+	$Q tar czf kowabunga-koala-$(VERSION).tgz koala/*
+	$Q rm -rf koala
 
 .PHONY: deb
 deb: ; $(info $(M) building debian package…) @
@@ -44,4 +44,4 @@ deb: ; $(info $(M) building debian package…) @
 
 .PHONY: clean
 clean:
-	rm -rf node_modules .angular dist package-lock.json
+	$Q rm -rf node_modules .angular dist package-lock.json
