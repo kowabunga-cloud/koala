@@ -8,9 +8,9 @@
   </a>
 </p>
 
-# Official web Client for Kowabunga
+# Official Web Client for Kowabunga
 
-This is **Koala**, the official web client for Kowabunga, based on AngularJS.
+This is **Koala**, the official Web client for Kowabunga, based on AngularJS.
 
 [![License: Apache License, Version 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://spdx.org/licenses/Apache-2.0.html)
 [![Build Status](https://github.com/kowabunga-cloud/koala/actions/workflows/release.yml/badge.svg)](https://github.com/kowabunga-cloud/koala/actions/workflows/release.yml)
