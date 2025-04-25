@@ -2,6 +2,8 @@
 # Apache License, Version 2.0 (see LICENSE or https://www.apache.org/licenses/LICENSE-2.0.txt)
 # SPDX-License-Identifier: Apache-2.0
 
+VERSION=0.2.3
+
 V = 0
 Q = $(if $(filter 1,$V),,@)
 M = $(shell printf "\033[34;1m▶\033[0m")
@@ -29,6 +31,10 @@ run:
 .PHONY: dist
 dist:
 	npm run build:prod
+
+.PHONY: deb
+deb: ; $(info $(M) building debian package…) @ ## Build debian package
+	$Q VERSION=$(VERSION) ./debian.sh
 
 .PHONY: clean
 clean:
