@@ -38,6 +38,7 @@ jobs:
         with:
           name: koala-dist
           path: dist/
+      - run: sudo apt-get -y install debhelper
       - name: Build Debian package
         run: make deb
       - name: Release Debian Package
