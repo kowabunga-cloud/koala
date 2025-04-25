@@ -1,0 +1,42 @@
+<div class="row">
+  <nb-card>
+    <nb-card-header>
+      Welcome <strong>{{ user?.name }}</strong> ({{ user?.role }})
+    </nb-card-header>
+    <nb-card-body>
+      <nb-form-field>
+        <input type="text" nbInput
+               [(ngModel)]="user.email"
+               #email="ngModel"
+               name="email"
+               [status]="email.dirty ? (email.invalid  ? 'danger' : 'success') : ''"
+               pattern=".+@.+\..+"
+               placeholder="Email address"
+               [required]="getConfigValue('forms.validation.email.required')">
+        <ng-container *ngIf="email.invalid && email.touched">
+          <p class="error-message" *ngIf="email.errors?.required">
+            Email is required!
+          </p>
+          <p class="error-message" *ngIf="email.errors?.pattern">
+            Email should be a real one!
+          </p>
+        </ng-container>
+      </nb-form-field>
+      <p></p>
+      <nb-toggle
+        [(ngModel)]="user.notifications"
+        status="primary"
+        labelPosition="start">
+        <strong>Enable Notifications</strong></nb-toggle>
+    </nb-card-body>
+    <nb-card-footer>
+      <button nbButton
+              [status]="email.invalid ? 'danger' : 'success'"
+              outline
+              type="button"
+              (click)="updateUser(!email.invalid)">
+        <nb-icon icon="edit-outline"></nb-icon>Update
+      </button>
+    </nb-card-footer>
+  </nb-card>
+</div>

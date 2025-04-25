@@ -1,0 +1,15 @@
+<div *ngFor="let r of records; let idx = index">
+  <div class="row" *ngIf="idx % 2 === 0">
+    <div class="col-xxl-6" *ngFor="let i2 of [0,1]">
+      <nb-card *ngIf="records[idx + i2] !== undefined" accent="primary">
+        <nb-card-header>
+          {{ records[idx + i2].description }}
+        </nb-card-header>
+        <nb-card-body>
+          <p><strong>Record: </strong>{{ records[idx + i2].name }}.{{ records[idx + i2].domain }}</p>
+          <p><strong>Hosts: </strong>{{ records[idx + i2].addresses.join(', ') }}</p>
+        </nb-card-body>
+      </nb-card>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,44 @@
+<div *ngFor="let i of instances; let idx = index">
+  <div class="row" *ngIf="idx % 3 === 0">
+    <div class="col-xxl-4" *ngFor="let i2 of [0,1,2]">
+      <nb-card *ngIf="instances[idx + i2] !== undefined" accent="primary">
+        <nb-card-header>
+          <nb-actions size="small">
+            <nb-action>
+              <nb-icon [icon]="getInstanceStateIcon(instances[idx + i2].id)" [status]="getInstanceStateStatus(instances[idx + i2].id)" [nbTooltip]="getInstanceStateText(instances[idx + i2].id)"></nb-icon>
+            </nb-action>
+            <nb-action>
+              <nb-icon icon="sync-outline" nbTooltip="Reboot" (click)="rebootInstance(instances[idx + i2])"></nb-icon>
+            </nb-action>
+            <nb-action *ngIf="isInstanceStateOn(instances[idx + i2].id)">
+              <nb-icon icon="power-outline" nbTooltip="Power-Off" (click)="stopInstance(instances[idx + i2])"></nb-icon>
+            </nb-action>
+            <nb-action *ngIf="!isInstanceStateOn(instances[idx + i2].id)">
+              <nb-icon icon="play-circle-outline" nbTooltip="Power-On" (click)="startInstance(instances[idx + i2])"></nb-icon>
+            </nb-action>
+            <nb-action>
+              <nb-icon icon="hash-outline" nbTooltip="Remote Access" (click)="remoteConnect(instances[idx + i2])"></nb-icon>
+            </nb-action>
+            <nb-action>{{ instances[idx + i2].name }}</nb-action>
+          </nb-actions>
+        </nb-card-header>
+        <nb-card-body>
+          <p><strong>Name: </strong>{{ instances[idx + i2].name }}</p>
+          <p><strong>Description: </strong>{{ instances[idx + i2].description }}</p>
+          <p><strong>Hardware: </strong>{{ instances[idx + i2].vcpus }} vCPUs, {{ utilsService.HumanSize(instances[idx + i2].memory) }} memory</p>
+          <p><strong>Network: </strong></p>
+          <ul>
+            <li *ngFor="let a of instancesAdapters.get(instances[idx + i2].id)">{{ a.mac }} <strong *ngIf="utilsService.IsNonEmptyArray(a.addresses)">({{ a.addresses.join(', ') }})</strong></li>
+          </ul>
+          <p><strong>Volumes: </strong></p>
+          <ul>
+            <li *ngFor="let v of instancesVolumes.get(instances[idx + i2].id)">
+              <p><strong>{{ v.name }}</strong></p>
+              <p>{{ v.type | uppercase }} - {{ utilsService.HumanSize(v.size) }}</p>
+            </li>
+          </ul>
+        </nb-card-body>
+      </nb-card>
+    </div>
+  </div>
+</div>

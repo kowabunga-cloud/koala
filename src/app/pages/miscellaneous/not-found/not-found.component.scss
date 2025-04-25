@@ -1,0 +1,27 @@
+/**
+ * Copyright (c) The Kowabunga Project
+ * Apache License, Version 2.0 (see LICENSE or https://www.apache.org/licenses/LICENSE-2.0.txt)
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.flex-centered {
+  margin: auto;
+}
+
+nb-card-body {
+  display: flex;
+}
+
+.title {
+  text-align: center;
+}
+
+.sub-title {
+  text-align: center;
+  display: block;
+  margin-bottom: 3rem;
+}
+
+.home-button {
+  margin-bottom: 2rem;
+}

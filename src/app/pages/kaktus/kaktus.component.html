@@ -1,0 +1,85 @@
+<div class="row">
+  <div class="col-xxl-12">
+    <nb-card>
+      <nb-card-body>
+        <nb-tabset fullWidth>
+
+          <nb-tab tabIcon="layers-outline" tabTitle="Hosts" [badgeText]="kaktuses.length" badgeStatus="primary" badgePosition="top right">
+            <nb-accordion multi>
+              <nb-accordion-item *ngFor="let k of kaktuses">
+                <nb-accordion-item-header>{{ k.name }}</nb-accordion-item-header>
+                <nb-accordion-item-body>
+                  <p><strong>Description: </strong>{{ k.description }}</p>
+                  <p><strong>CPU: </strong>{{ kaktusesCaps.get(k.id)?.cpu.vendor }} {{ kaktusesCaps.get(k.id)?.cpu.model }} ({{ kaktusesCaps.get(k.id)?.cpu.arch }}), {{ kaktusesCaps.get(k.id)?.cpu.cores }}c/{{ kaktusesCaps.get(k.id)?.cpu.threads }}t</p>
+                  <p><strong>Memory: </strong>{{ utilsService.HumanSize(kaktusesCaps.get(k.id)?.memory) }}
+                  <p><strong>Computing Instances: </strong>{{ kaktusesInstances.get(k.id) }}</p>
+                  <p><strong>Monthly Cost: </strong>{{ k.cpu_cost.price + k.memory_cost.price }} {{ k.cpu_cost.currency }}</p>
+                </nb-accordion-item-body>
+              </nb-accordion-item>
+            </nb-accordion>
+          </nb-tab>
+
+          <nb-tab tabIcon="cube-outline" tabTitle="Block Storage Pools" [badgeText]="pools.length" badgeStatus="primary" badgePosition="top right">
+            <nb-accordion multi>
+              <nb-accordion-item *ngFor="let p of pools">
+                <nb-accordion-item-header>{{ p.name }}</nb-accordion-item-header>
+                <nb-accordion-item-body>
+                  <p><strong>Description: </strong>{{ p.description }}</p>
+                  <p><strong>Type: </strong>{{ p.type | uppercase }}</p>
+                  <p><strong>Allocated Volumes: </strong>{{ poolsVolumes.get(p.id) }}</p>
+                  <p><strong>Templates: </strong></p>
+                  <ul>
+                    <li *ngFor="let t of poolsTemplates.get(p.id)"><strong>{{ t.name }}</strong> ({{ t.os | uppercase }}, {{ t.description }})</li>
+                  </ul>
+                  <p><strong>Monthly Cost: </strong>{{ p.cost.price }} {{ p.cost.currency }}</p>
+                </nb-accordion-item-body>
+              </nb-accordion-item>
+            </nb-accordion>
+          </nb-tab>
+
+          <nb-tab tabIcon="file-text-outline" tabTitle="NFS Storage Pools" [badgeText]="nfs.length" badgeStatus="primary" badgePosition="top right">
+            <nb-accordion multi>
+              <nb-accordion-item *ngFor="let n of nfs">
+                <nb-accordion-item-header>{{ n.name }}</nb-accordion-item-header>
+                <nb-accordion-item-body>
+                  <p><strong>Description: </strong>{{ n.description }}</p>
+                  <p><strong>Endpoint: </strong>{{ n.endpoint }}</p>
+                  <p><strong>Filesystem: </strong>{{ n.fs }}</p>
+                  <p><strong>Allocated Volumes: </strong>{{ nfsVolumes.get(n.id) }}</p>
+                  <p><strong>NFS Ganesha Server Backends: </strong></p>
+                  <ul>
+                    <li *ngFor="let b of n.backends">{{ b }}:{{ n.port }}</li>
+                  </ul>
+                </nb-accordion-item-body>
+              </nb-accordion-item>
+            </nb-accordion>
+          </nb-tab>
+
+          <nb-tab tabIcon="shake-outline" tabTitle="Virtual Networks" [badgeText]="vnets.length" badgeStatus="primary" badgePosition="top right">
+            <nb-accordion multi>
+              <nb-accordion-item *ngFor="let v of vnets">
+                <nb-accordion-item-header><nb-badge text="new" status="success"></nb-badge>{{ v.name }}</nb-accordion-item-header>
+                <nb-accordion-item-body>
+                  <p><strong>Description: </strong>{{ v.description }}</p>
+                  <p><strong>Mode: </strong>{{ getSubnetState(v.private) }}</p>
+                  <p><strong>VLAN: </strong>{{ v.vlan || 0 }}</p>
+                  <p><strong>Host Network Interface: </strong>{{ v.interface }}</p>
+                  <p><strong>Subnets: </strong></p>
+                  <ul>
+                    <li *ngFor="let s of vnetsSubnets.get(v.id)">
+                      <p><strong>CIDR: </strong>{{ s.cidr }} ({{ subnetsSize.get(s.id) }} total IPs, {{ subnetsAllocated.get(s.id) }}  allocated, {{ subnetsSize.get(s.id) - subnetsAllocated.get(s.id) }} free)</p>
+                      <p><strong>Gateway: </strong>{{ s.gateway }}</p>
+                      <p *ngIf="utilsService.IsNonEmptyArray(s.extra_routes)"><strong>Extra routes: </strong>{{ s.extra_routes.join(', ') }}</p>
+                      <p><strong>DNS Server: </strong>{{ s.dns }}</p>
+                    </li>
+                  </ul>
+                </nb-accordion-item-body>
+              </nb-accordion-item>
+            </nb-accordion>
+          </nb-tab>
+
+        </nb-tabset>
+      </nb-card-body>
+    </nb-card>
+  </div>
+</div>

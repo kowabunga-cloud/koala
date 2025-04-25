@@ -1,0 +1,22 @@
+<nb-card>
+  <nb-card-header>{{ title }}</nb-card-header>
+  <nb-card-footer>
+    <nb-actions>
+      <nb-action>
+        <button nbButton hero status="primary" (click)="cancel()">Cancel</button>
+      </nb-action>
+      <nb-action *ngIf="action === 'REBOOT'">
+        <button nbButton hero status="danger" (click)="reboot()">Reboot</button>
+      </nb-action>
+      <nb-action *ngIf="action === 'START'">
+        <button nbButton hero status="danger" (click)="start()">Power-On</button>
+      </nb-action>
+      <nb-action *ngIf="action === 'STOP'">
+        <button nbButton hero status="danger" (click)="stop()">Power-Off</button>
+      </nb-action>
+      <nb-action *ngIf="action === 'REMOTE_CONNECT'">
+        <button nbButton hero status="danger" (click)="remoteConnect()">Remote Access</button>
+      </nb-action>
+    </nb-actions>
+  </nb-card-footer>
+</nb-card>

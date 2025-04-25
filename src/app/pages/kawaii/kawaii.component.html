@@ -1,0 +1,42 @@
+<div *ngFor="let k of kawaii; let idx = index">
+  <div class="row" *ngIf="idx % 2 === 0">
+    <div class="col-xxl-6" *ngFor="let i2 of [0,1]">
+      <nb-card *ngIf="kawaii[idx + i2] !== undefined" accent="primary">
+        <nb-card-header>
+          Kawaii Network Gateway #{{ idx + i2 }}
+        </nb-card-header>
+        <nb-card-body>
+          <p *ngIf="utilsService.IsNonEmptyArray(kawaii[idx + i2].netip.zones)"><strong>Private IPv4 Addresses: </strong></p>
+          <ul>
+            <li *ngFor="let zone of kawaii[idx + i2].netip.zones"><strong>{{ zone.zone }}</strong>: {{ zone.private }}</li>
+          </ul>
+
+          <p *ngIf="utilsService.IsNonEmptyArray(kawaii[idx + i2].netip.zones)"><strong>Public IPv4 Addresses: </strong></p>
+          <ul>
+            <li *ngFor="let zone of kawaii[idx + i2].netip.zones"><strong>{{ zone.zone }}</strong>: {{ zone.public }}</li>
+          </ul>
+
+          <p *ngIf="utilsService.IsNonEmptyArray(kawaii[idx + i2].dnat)"><strong>NAT Entries: </strong></p>
+          <ul>
+            <li *ngFor="let n of kawaii[idx + i2].dnat">{{ n?.protocol | uppercase }} forwarding <strong>{{ n.ports }}</strong> to <strong>{{ n.destination }}</strong></li>
+          </ul>
+
+          <p *ngIf="utilsService.IsNonEmptyArray(kawaii[idx + i2].vpc_peerings)"><strong>VPC Peerings: </strong></p>
+          <ul>
+            <li *ngFor="let peering of kawaii[idx + i2].vpc_peerings">Peering with <strong>{{ utilsService.IsNonEmptyArray(kawaiiVpcSubnets.get(peering.subnet)) ? kawaiiVpcSubnets.get(peering.subnet)[0].cidr : "" }}</strong></li>
+          </ul>
+
+          <p *ngIf="utilsService.IsNonEmptyArray(kawaii[idx + i2].ipsec_connections)"><strong>IPsec Connections: </strong></p>
+          <ul>
+            <li *ngFor="let con of kawaii[idx + i2].ipsec_connections">
+              IPsec connection <strong>{{ con.name }}</strong><br/>
+              From <strong>{{ con.ip }}</strong> to <strong>{{ con.remote_ip }}</strong> through <strong>{{ con.phase1_encryption_algorithm }}/{{ con.phase1_integrity_algorithm }}</strong><br/>
+              Established peering with <strong>{{ con.remote_subnet }}</strong> remote network.
+            </li>
+          </ul>
+
+        </nb-card-body>
+      </nb-card>
+    </div>
+  </div>
+</div>

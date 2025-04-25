@@ -1,0 +1,17 @@
+/**
+ * Copyright (c) The Kowabunga Project
+ * Apache License, Version 2.0 (see LICENSE or https://www.apache.org/licenses/LICENSE-2.0.txt)
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+@import './themes';
+
+@mixin nb-overrides() {
+  nb-select.size-medium button {
+    padding: 0.4375rem 2.2rem 0.4375rem 1.125rem !important;
+
+    nb-icon {
+      right: 0.41rem !important;
+    }
+  }
+}

@@ -1,0 +1,17 @@
+<div *ngFor="let k of kylo; let idx = index">
+  <div class="row" *ngIf="idx % 2 === 0">
+    <div class="col-xxl-6" *ngFor="let i2 of [0,1]">
+      <nb-card *ngIf="kylo[idx + i2] !== undefined" accent="primary">
+        <nb-card-header>
+          {{ kylo[idx + i2].name }}
+        </nb-card-header>
+        <nb-card-body>
+          <p><strong>Description: </strong>{{ kylo[idx + i2].description }}</p>
+          <p><strong>Endoint: </strong>{{ kylo[idx + i2].endpoint }}:/{{ kylo[idx + i2].name }}</p>
+          <p><strong>Access Mode: </strong>{{ kylo[idx + i2].access }}</p>
+          <p><strong>NFS Protocol Versions: </strong>{{ kylo[idx + i2].protocols.join(', ') }}</p>
+        </nb-card-body>
+      </nb-card>
+    </div>
+  </div>
+</div>

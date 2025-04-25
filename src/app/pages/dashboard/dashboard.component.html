@@ -1,0 +1,111 @@
+<div class="row">
+  <div class="col-xxl-6">
+    <nb-card accent="primary" size="tiny">
+      <nb-card-header>
+        Kowabunga Regions
+      </nb-card-header>
+      <nb-card-body>
+        {{ regionsCount }}
+      </nb-card-body>
+    </nb-card>
+  </div>
+  <div class="col-xxl-6">
+    <nb-card accent="primary" size="tiny">
+      <nb-card-header>
+        Kowabunga Zones
+      </nb-card-header>
+      <nb-card-body>
+        {{ zonesCount }}
+      </nb-card-body>
+    </nb-card>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xxl-4">
+    <nb-card accent="success" size="tiny">
+      <nb-card-header>
+        Kaktus Hypervisors in {{ currentZoneName }}
+      </nb-card-header>
+      <nb-card-body>
+        {{ kaktusCount }}
+      </nb-card-body>
+    </nb-card>
+  </div>
+  <div class="col-xxl-4">
+    <nb-card accent="success" size="tiny">
+      <nb-card-header>
+        Block Storage Pools in {{ currentZoneName }}
+      </nb-card-header>
+      <nb-card-body>
+        {{ poolsCount }}
+      </nb-card-body>
+    </nb-card>
+  </div>
+  <div class="col-xxl-4">
+    <nb-card accent="success" size="tiny">
+      <nb-card-header>
+        NFS Storage Pools in {{ currentZoneName }}
+      </nb-card-header>
+      <nb-card-body>
+        {{ nfsCount }}
+      </nb-card-body>
+    </nb-card>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xxl-3">
+    <nb-card accent="danger" size="tiny">
+      <nb-card-header>
+        DNS Records
+      </nb-card-header>
+      <nb-card-body>
+        {{ recordsCount }}
+      </nb-card-body>
+    </nb-card>
+  </div>
+  <div class="col-xxl-3">
+    <nb-card accent="danger" size="tiny">
+      <nb-card-header>
+        Kompute Instances
+      </nb-card-header>
+      <nb-card-body>
+        {{ instancesCount }}
+      </nb-card-body>
+    </nb-card>
+  </div>
+  <div class="col-xxl-3">
+    <nb-card accent="danger" size="tiny">
+      <nb-card-header>
+        Kompute Block Storage Volumes
+      </nb-card-header>
+      <nb-card-body>
+        {{ volumesCount }}
+      </nb-card-body>
+    </nb-card>
+  </div>
+  <div class="col-xxl-3">
+    <nb-card accent="danger" size="tiny">
+      <nb-card-header>
+        Kylo Elastic Storage Volumes
+      </nb-card-header>
+      <nb-card-body>
+        {{ kyloCount }}
+      </nb-card-body>
+    </nb-card>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-xxl-12">
+    <nb-card accent="danger" size="tiny">
+      <nb-card-header>
+        Estimated Monthly Cost
+      </nb-card-header>
+      <nb-card-body>
+        {{ utilsService.Round(cost?.price, 2) }} {{ cost?.currency }}
+      </nb-card-body>
+    </nb-card>
+  </div>
+</div>

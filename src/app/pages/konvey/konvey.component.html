@@ -1,0 +1,25 @@
+<div *ngFor="let k of konvey; let idx = index">
+  <div class="row" *ngIf="idx % 2 === 0">
+    <div class="col-xxl-6" *ngFor="let i2 of [0,1]">
+      <nb-card *ngIf="konvey[idx + i2] !== undefined" accent="primary">
+        <nb-card-header>
+          Konvey Network Load-Balancer #{{ idx + i2 }}
+        </nb-card-header>
+        <nb-card-body>
+          <p><strong>Name: </strong>{{ k.name }}</p>
+          <p><strong>Failover: </strong>{{ k.failover ? 'Enabled' : 'Disabled' }}</p>
+          <p><strong>Virtual Private IP Address: </strong>{{ k.vip }}</p>
+          <p *ngIf="utilsService.IsNonEmptyArray(k.endpoints)"><strong>Network Endpoints: </strong></p>
+          <ul>
+            <li *ngFor="let e of k.endpoints"><strong>{{ e.name }}</strong>: {{ e.protocol | uppercase }}/{{ e.port }} with backends at:
+              <ul>
+                <li *ngFor="let h of e.backends.hosts">{{ h }}:{{ e.backends.port }}</li>
+              </ul>
+              <p></p>
+            </li>
+          </ul>
+        </nb-card-body>
+      </nb-card>
+    </div>
+  </div>
+</div>
