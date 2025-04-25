@@ -2,7 +2,7 @@
 # Apache License, Version 2.0 (see LICENSE or https://www.apache.org/licenses/LICENSE-2.0.txt)
 # SPDX-License-Identifier: Apache-2.0
 
-VERSION=0.2.3
+VERSION=0.2.4
 
 V = 0
 Q = $(if $(filter 1,$V),,@)
