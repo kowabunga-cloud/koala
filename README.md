@@ -20,6 +20,8 @@ This is **Koala**, the official Web client for Kowabunga, based on AngularJS.
 | Project            | Release Badge                                                                                       |
 |--------------------|-----------------------------------------------------------------------------------------------------|
 | **Kowabunga**           | [![Kowabunga Release](https://img.shields.io/github/v/release/kowabunga-cloud/kowabunga)](https://github.com/kowabunga-cloud/kowabunga/releases) |
+| **Kowabunga JavaScript SDK**     | [![Kowabunga JavaScript SDK Release](https://img.shields.io/github/v/release/kowa
+bunga-cloud/kowabunga-javascript)](https://github.com/kowabunga-cloud/kowabunga-javascript/releases) |
 | **Kowabunga Koala**     | [![Kowabunga Koala Release](https://img.shields.io/github/v/release/kowabunga-cloud/koala)](https://github.com/kowabunga-cloud/koala/releases) |
 
 ## Installation
