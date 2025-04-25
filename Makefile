@@ -31,6 +31,9 @@ run:
 .PHONY: dist
 dist:
 	npm run build:prod
+	cp -rf dist koala
+	tar cvzf kowabunga-koala-$(VERSION).tgz koala/*
+	rm -rf koala
 
 .PHONY: deb
 deb: ; $(info $(M) building debian package…) @
