@@ -48,3 +48,15 @@ jobs:
           files: |
             ../*.deb
             kowabunga-koala-*.tgz
+
+  publish:
+    name: Trigger packages publishing
+    needs: debian
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger APT repository update
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: '${{ secrets.PAT_PACKAGES_WORKFLOW_TOKEN }}'
+          repository: kowabunga-cloud/packages
+          event-type: Publish-Deb
