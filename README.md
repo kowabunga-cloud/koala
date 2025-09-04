@@ -40,7 +40,7 @@ Check out the [list of released versions](https://github.com/kowabunga-cloud/koa
 
 Koala can be exposed through any Web server.
 
-Here's a few to do so through Nginx, provided **Kowabunga Kahuna engine** is running on 127.0.0.1:8080 and **Koala** content being hosted in **/var/www/kowabunga** directory.
+Here's a few to do so through [Nginx](https://nginx.org/), provided **Kowabunga Kahuna engine** is running on 127.0.0.1:8080 and **Koala** content being hosted in **/var/www/kowabunga** directory.
 
 ```html
 server {
@@ -103,6 +103,35 @@ server {
     proxy_set_header Upgrade $http_upgrade;
     proxy_set_header Connection "Upgrade";
     proxy_set_header Host $host;
+  }
+}
+```
+
+alternatively you can do the same in a much more elegant way with [Caddy](https://caddyserver.com/):
+
+```
+kowabunga.acme.com {
+  encode
+
+  @api path /api/* /confirm /confirmForgotPassword /latest
+  @ws {
+    path /ws
+    header Connection *Upgrade*
+    header Upgrade    websocket
+  }
+
+  # Kahuna Orchestrator
+  handle @api {
+    reverse_proxy 127.0.0.1:8080
+  }
+  handle @ws {
+    reverse_proxy @ws 127.0.0.1:8080
+  }
+  # Koala WebUI
+  handle {
+    root * /var/www/kowabunga
+    try_files {path} /index.html
+    file_server
   }
 }
 ```
