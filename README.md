@@ -113,7 +113,7 @@ alternatively you can do the same in a much more elegant way with [Caddy](https:
 kowabunga.acme.com {
   encode
 
-  @api path /api/* /confirm /confirmForgotPassword /latest
+  @api path /api/* /confirm /confirmForgotPassword /latest/meta-data
   @ws {
     path /ws
     header Connection *Upgrade*
