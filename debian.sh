@@ -20,4 +20,5 @@ ${CHANGES}
  -- The Kowabunga Project <maintainers@kowabunga.cloud>  $(date -R)
 CHANGELOG
 
-dpkg-buildpackage -b -us -uc
+# -d: nothing is compiled (dist/ is prebuilt), so skip the build-essential dependency check
+dpkg-buildpackage -b -us -uc -d
