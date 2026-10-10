@@ -1,16 +1,23 @@
 #!/bin/bash
+# Builds the Debian package from an existing dist/ (see `make deb`).
+set -euo pipefail
 
-export CURRENT_VERSION=$(git tag --sort=-committerdate | head -1)
-export PREVIOUS_VERSION=$(git tag --sort=-committerdate | head -2 | awk '{split($0, tags, "\n")} END {print tags[1]}')
-export CHANGES=$(git log --pretty="- %s" $CURRENT_VERSION...$PREVIOUS_VERSION)
+: "${VERSION:?VERSION must be set}"
 
-cat > debian/changelog <<EOF
+CURRENT=$(git describe --tags --abbrev=0 2>/dev/null || true)
+PREVIOUS=$(git describe --tags --abbrev=0 "${CURRENT}^" 2>/dev/null || true)
+if [ -n "${PREVIOUS}" ]; then
+  CHANGES=$(git log --pretty="  * %s" "${PREVIOUS}..${CURRENT}")
+else
+  CHANGES="  * Release ${VERSION}"
+fi
+
+cat > debian/changelog <<CHANGELOG
 kowabunga-koala (${VERSION}) unstable; urgency=medium
 
 ${CHANGES}
 
  -- The Kowabunga Project <maintainers@kowabunga.cloud>  $(date -R)
-EOF
+CHANGELOG
 
-sed -i 's%^-%  \*%g' debian/changelog
-fakeroot debian/rules binary
+dpkg-buildpackage -b -us -uc
