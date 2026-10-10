@@ -1,13 +1,20 @@
 Source: kowabunga-koala
 Section: web
-Priority: extra
+Priority: optional
 Maintainer: The Kowabunga Project <maintainers@kowabunga.cloud>
 Uploaders: The Kowabunga Project <maintainers@kowabunga.cloud>
-Build-Depends: debhelper
-Standards-Version: 3.9.2
+Build-Depends: debhelper-compat (= 13)
+Standards-Version: 4.6.2
+Homepage: https://www.kowabunga.cloud/
+Vcs-Git: https://github.com/kowabunga-cloud/koala.git
+Rules-Requires-Root: no
 
 Package: kowabunga-koala
 Architecture: all
 Depends: ${misc:Depends}
 Description: Kowabunga Koala Web Client
- Kowabunga stands for 'Kvm Orchestrator With A BUNch of Goods Added'
+ Kowabunga stands for 'Kvm Orchestrator With A BUNch of Goods Added'.
+ .
+ Koala is the official web client for Kowabunga: a static single-page
+ application to be served by any web server, with /api proxied to the
+ Kowabunga Kahuna engine.

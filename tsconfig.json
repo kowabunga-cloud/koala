@@ -1,23 +1,10 @@
 {
-  "compileOnSave": true,
+  "files": [],
   "compilerOptions": {
-    "importHelpers": true,
-    "module": "es2022",
-    "outDir": "./dist/out-tsc",
-    "sourceMap": true,
-    "declaration": false,
-    "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "target": "es2022",
-    "typeRoots": [
-      "node_modules/@types"
-    ],
-    "lib": [
-      "es2017",
-      "dom"
-    ],
-    "plugins": [
-      { "name": "tslint-language-service"}
-    ]
-  }
+    "paths": { "@/*": ["./src/*"] }
+  },
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
 }

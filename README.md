@@ -10,7 +10,7 @@
 
 # Official Web Client for Kowabunga
 
-This is **Koala**, the official Web client for Kowabunga, based on AngularJS.
+This is **Koala**, the official Web client for Kowabunga: a React single-page application generated from the [Kowabunga OpenAPI](https://github.com/kowabunga-cloud/openapi) specification.
 
 [![License: Apache License, Version 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://spdx.org/licenses/Apache-2.0.html)
 [![Build Status](https://github.com/kowabunga-cloud/koala/actions/workflows/release.yml/badge.svg)](https://github.com/kowabunga-cloud/koala/actions/workflows/release.yml)
@@ -81,10 +81,9 @@ server {
     internal;
   }
 
-  # Koala
+  # Koala (single-page app: unknown paths fall back to index.html)
   root /var/www/kowabunga;
-  location ~ (/index.html|/pages|/auth) {
-    root /var/www/kowabunga;
+  location / {
     try_files $uri /index.html;
   }
 
@@ -136,8 +135,77 @@ kowabunga.acme.com {
 }
 ```
 
+## Development
+
+| Concern | Choice |
+|---|---|
+| Build | Vite + TypeScript |
+| API client | [Orval](https://orval.dev), generated from the Kowabunga OpenAPI spec |
+| Server state | TanStack Query |
+| Routing | TanStack Router (file-based, `src/routes/`) |
+| UI | shadcn/ui (Tailwind + Radix), components live in `src/components/ui/` |
+| Forms | react-hook-form + Zod schemas generated from the spec |
+| Mocks | MSW handlers generated from the spec |
+
+### Running locally
+
+```console
+$ make help                                     # list all targets
+$ make dev                                      # /api proxied to https://labs.kowabunga.cloud
+$ make dev KAHUNA_URL=http://127.0.0.1:8080     # or any other Kahuna
+$ make dev-mock                                 # no backend: fake data generated from the spec
+$ make check                                    # lint + type-check
+$ make build                                    # production bundle in dist/
+```
+
+In mock mode any email/password signs you in as `superAdmin`.
+
+### How the API is wired
+
+```
+kowabunga-cloud/openapi  ──(api:fetch, pinned tag)──▶  openapi/openapi.yaml
+                                                             │
+                                                     orval (api:generate)
+                                                             ▼
+src/api/generated/
+  model/                  TypeScript types (Kaktus, Subnet, …)
+  endpoints/<tag>/<tag>.ts       fetch functions + useXxx() query/mutation hooks
+  endpoints/<tag>/<tag>.msw.ts   MSW mock handlers
+  zod/<tag>/<tag>.zod.ts         Zod schemas for request/response bodies
+```
+
+- The spec version is pinned in `package.json` → `config.openapiVersion`. To move to a new API
+  version run `make api-update OPENAPI_VERSION=x.y.z`: it fetches the spec, regenerates the client and
+  type-checks the app, so breaking changes show up as type errors.
+- To try an unreleased spec: `make api-fetch api-generate OPENAPI_SPEC=../openapi/openapi.yaml`.
+- CI runs `make api-check`, which fails if the committed client doesn't match the committed spec.
+- Generated code is committed so spec bumps are reviewable as diffs. Never edit it by hand.
+- Every request goes through `src/api/client.ts` (base URL `/api/v1`, `Authorization: Bearer <jwt>`,
+  sign-out on 401, errors thrown as `ApiError`).
+- `GET` operations become `useXxx()` queries, everything else `useXxx()` mutations:
+
+```tsx
+const { data: kaktus } = useReadKaktus(id)
+const enable = useEnableKaktusMaintenance({
+  mutation: { onSuccess: () => queryClient.invalidateQueries({ queryKey: getReadKaktusQueryKey(id) }) },
+})
+enable.mutate({ kaktusId: id })
+```
+
+### Adding a page
+
+1. Create `src/routes/_app/<name>.tsx` (the route tree is regenerated automatically).
+2. Add it to `NAV` in `src/components/app-sidebar.tsx`.
+3. Use `useScope()` for the current project/region/zone and the generated hooks for data.
+
+`src/routes/_app/kaktus.tsx` is the reference implementation.
+
+## Release
+
+Pushing a tag (e.g. `0.3.0`) runs `.github/workflows/release.yml`: check, build, then `make release`
+(`kowabunga-koala-<version>.tgz`) and `make deb` (`kowabunga-koala_<version>_all.deb`, installs into
+`/var/www/kowabunga`), published as a GitHub release and pushed to the APT repository.
+
 ## License
 
 Licensed under [Apache License, Version 2.0](https://opensource.org/license/apache-2-0), see [`LICENSE`](LICENSE).
-
-This project is based on [Akveo ngx-admin](https://github.com/akveo/ngx-admin), licensed under MIT.
