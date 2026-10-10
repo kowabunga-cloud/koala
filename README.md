@@ -20,7 +20,7 @@ This is **Koala**, the official Web client for Kowabunga: a React single-page ap
 | Project            | Release Badge                                                                                       |
 |--------------------|-----------------------------------------------------------------------------------------------------|
 | **Kowabunga**           | [![Kowabunga Release](https://img.shields.io/github/v/release/kowabunga-cloud/kowabunga)](https://github.com/kowabunga-cloud/kowabunga/releases) |
-| **Kowabunga JavaScript SDK**     | [![Kowabunga JavaScript SDK Release](https://img.shields.io/github/v/release/kowabunga-cloud/kowabunga-javascript)](https://github.com/kowabunga-cloud/kowabunga-javascript/releases) |
+| **Kowabunga OpenAPI**     | [![Kowabunga OpenAPI Release](https://img.shields.io/github/v/release/kowabunga-cloud/openapi)](https://github.com/kowabunga-cloud/openapi/releases) |
 | **Kowabunga Koala**     | [![Kowabunga Koala Release](https://img.shields.io/github/v/release/kowabunga-cloud/koala)](https://github.com/kowabunga-cloud/koala/releases) |
 
 ## Installation
