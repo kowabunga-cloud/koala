@@ -81,10 +81,17 @@ server {
     internal;
   }
 
-  # Koala (single-page app: unknown paths fall back to index.html)
+  # Koala (single-page app: unknown paths fall back to index.html,
+  # revalidated on each load so browsers pick up new releases)
   root /var/www/kowabunga;
   location / {
+    add_header Cache-Control "no-cache";
     try_files $uri /index.html;
+  }
+  # Koala build assets have content-hashed names and never change
+  location /assets/ {
+    add_header Cache-Control "public, max-age=31536000, immutable";
+    try_files $uri =404;
   }
 
   # Kowabunga Orchestrator
@@ -126,10 +133,19 @@ kowabunga.acme.com {
   handle @ws {
     reverse_proxy @ws 127.0.0.1:8080
   }
-  # Koala WebUI
+  # Koala WebUI: build assets have content-hashed names and never change (missing ones are 404s)
+  handle /assets/* {
+    root * /var/www/kowabunga
+    @exists file
+    header @exists Cache-Control "public, max-age=31536000, immutable"
+    file_server
+  }
+  # Koala WebUI: single-page app, any other path (/kompute, /login, ...) is served by index.html,
+  # revalidated on each load so browsers pick up new releases
   handle {
     root * /var/www/kowabunga
     try_files {path} /index.html
+    header Cache-Control "no-cache"
     file_server
   }
 }
