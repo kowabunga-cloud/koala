@@ -3,8 +3,11 @@ name: release
 on:
   push:
     branches: [master]
-    tags: ['*']
   pull_request:
+  # releases are created by semantic-release, whose release commit carries
+  # [skip ci], so that its tag push doesn't trigger workflows
+  release:
+    types: [published]
 
 jobs:
   build:
