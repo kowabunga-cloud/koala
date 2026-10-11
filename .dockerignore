@@ -1,0 +1,10 @@
+.git/
+.github/
+node_modules/
+dist/
+debian/
+*.tgz
+Dockerfile
+.dockerignore
+.claude/
+.tanstack/

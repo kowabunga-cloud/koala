@@ -34,6 +34,12 @@ This is **Koala**, the official Web client for Kowabunga: a React single-page ap
 $ apt-get install kowabunga-koala
 ```
 
+- running its container image (amd64 and arm64), see [Container Image](#container-image):
+
+```console
+$ docker run -p 8080:8080 ghcr.io/kowabunga-cloud/koala:latest
+```
+
 Check out the [list of released versions](https://github.com/kowabunga-cloud/koala/releases).
 
 ## Configuration
@@ -151,6 +157,26 @@ kowabunga.acme.com {
 }
 ```
 
+### Container Image
+
+The `ghcr.io/kowabunga-cloud/koala` image (minimal `scratch` image, running as non-root) serves Koala on port
+**8080** with [static-web-server](https://static-web-server.net/): single-page app fallback to `index.html`,
+compression, security headers, and the same caching policy as above. `GET /health` can be used for liveness and
+readiness probes.
+
+Koala calls the Kahuna API on the same origin: route `/api`, `/confirm`, `/confirmForgotPassword`, `/latest` and
+`/ws` to Kahuna in front of it (e.g. Kubernetes Ingress, reverse proxy). Server settings can be overridden through
+[`SERVER_*` environment variables](https://static-web-server.net/configuration/environment-variables/).
+
+Images are signed (Sigstore keyless signing) and carry SBOM and provenance attestations:
+
+```console
+$ cosign verify ghcr.io/kowabunga-cloud/koala:<version> \
+    --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+    --certificate-identity-regexp '^https://github.com/kowabunga-cloud/'
+$ gh attestation verify oci://ghcr.io/kowabunga-cloud/koala:<version> --owner kowabunga-cloud
+```
+
 ## Development
 
 | Concern | Choice |
@@ -220,7 +246,8 @@ enable.mutate({ kaktusId: id })
 
 Pushing a tag (e.g. `0.3.0`) runs `.github/workflows/release.yml`: check, build, then `make release`
 (`kowabunga-koala-<version>.tgz`) and `make deb` (`kowabunga-koala_<version>_all.deb`, installs into
-`/var/www/kowabunga`), published as a GitHub release and pushed to the APT repository.
+`/var/www/kowabunga`), published as a GitHub release and pushed to the APT repository. The container image
+is built and scanned on every change, and published to `ghcr.io/kowabunga-cloud/koala` on release.
 
 ## License
 

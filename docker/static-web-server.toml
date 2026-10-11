@@ -1,0 +1,17 @@
+# static-web-server advanced settings (general ones are set through SERVER_*
+# environment variables, see Dockerfile).
+
+[advanced]
+
+# HTML and application routes (index.html fallback) are always revalidated, so
+# that a Koala upgrade is picked up on next load...
+[[advanced.headers]]
+source = "**"
+[advanced.headers.headers]
+Cache-Control = "no-cache"
+
+# ...while Vite assets, whose names contain a content hash, are immutable.
+[[advanced.headers]]
+source = "/assets/**"
+[advanced.headers.headers]
+Cache-Control = "public, max-age=31536000, immutable"
