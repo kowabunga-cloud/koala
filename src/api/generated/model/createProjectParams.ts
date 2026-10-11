@@ -3,13 +3,15 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import type { OptionalQuerySubnetSizeParameter } from './optionalQuerySubnetSizeParameter';
 
 export type CreateProjectParams = {
 /**
- * The minimum VPC subnet size to be affected to the project. WARNING, this cannot be changed later.
+ * The minimum VPC subnet size (CIDR prefix length) to be assigned to the project. WARNING, this cannot be changed later.
+ * @minimum 8
+ * @maximum 30
  */
 subnetSize?: OptionalQuerySubnetSizeParameter;
 };

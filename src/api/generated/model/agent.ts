@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import type { AgentType } from './agentType';
 
@@ -11,12 +11,12 @@ import type { AgentType } from './agentType';
  * A Kowabunga remote agent.
  */
 export interface Agent {
-  /** The Kowabunga remote agent ID (auto-generated). */
-  id?: string;
+  /** The Kowabunga remote agent ID (auto-generated) (read-only). */
+  readonly id?: string;
   /** The Kowabunga remote agent name. */
   name: string;
   /** The Kowabunga remote agent description. */
   description?: string;
-  /** The Kowabunga agent type. */
+  /** The Kowabunga agent type. Can only be set at creation time, ignored on updates. */
   type: AgentType;
 }

@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   useMutation,
@@ -26,11 +26,13 @@ import type {
 
 import type {
   Agent,
+  AgentUpdate,
   ApiToken,
   BadRequestResponse,
   ConflictResponse,
   ForbiddenResponse,
   InsufficientResourceResponse,
+  InternalServerErrorResponse,
   NotFoundResponse,
   ObjectIds,
   SetAgentApiTokenParams,
@@ -40,6 +42,33 @@ import type {
 
 import { kowabungaFetch } from '../../../client';
 import type { ErrorType , BodyType } from '../../../client';
+
+// https://stackoverflow.com/questions/49579094/typescript-conditional-types-filter-out-readonly-properties-pick-only-requir/49579497#49579497
+type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <
+T,
+>() => T extends Y ? 1 : 2
+? A
+: B;
+
+type WritableKeys<T> = {
+[P in keyof T]-?: IfEquals<
+  { [Q in P]: T[P] },
+  { -readonly [Q in P]: T[P] },
+  P
+>;
+}[keyof T];
+
+type UnionToIntersection<U> =
+  (U extends any ? (k: U)=>void : never) extends ((k: infer I)=>void) ? I : never;
+type DistributeReadOnlyOverUnions<T> = T extends any ? NonReadonly<T> : never;
+
+type Writable<T> = Pick<T, WritableKeys<T>>;
+type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
+  [P in keyof Writable<T>]: T[P] extends object
+    ? NonReadonly<NonNullable<T[P]>>
+    : T[P];
+} : DistributeReadOnlyOverUnions<T>;
+
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -94,7 +123,7 @@ export const getListAgentsQueryKey = () => {
     }
 
 
-export const getListAgentsQueryOptions = <TData = Awaited<ReturnType<typeof listAgents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAgents>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListAgentsQueryOptions = <TData = Awaited<ReturnType<typeof listAgents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAgents>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -113,10 +142,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListAgentsQueryResult = NonNullable<Awaited<ReturnType<typeof listAgents>>>
-export type ListAgentsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+export type ListAgentsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>
 
 
-export function useListAgents<TData = Awaited<ReturnType<typeof listAgents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListAgents<TData = Awaited<ReturnType<typeof listAgents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAgents>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listAgents>>,
@@ -126,7 +155,7 @@ export function useListAgents<TData = Awaited<ReturnType<typeof listAgents>>, TE
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListAgents<TData = Awaited<ReturnType<typeof listAgents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListAgents<TData = Awaited<ReturnType<typeof listAgents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAgents>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listAgents>>,
@@ -136,12 +165,12 @@ export function useListAgents<TData = Awaited<ReturnType<typeof listAgents>>, TE
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListAgents<TData = Awaited<ReturnType<typeof listAgents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListAgents<TData = Awaited<ReturnType<typeof listAgents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAgents>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListAgents<TData = Awaited<ReturnType<typeof listAgents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListAgents<TData = Awaited<ReturnType<typeof listAgents>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAgents>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -169,7 +198,7 @@ export const getCreateAgentUrl = () => {
 /**
  * Creates a new Kowabunga remote agent.
  */
-export const createAgent = async (agent: Agent, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Agent> => {
+export const createAgent = async (agent: NonReadonly<Agent>, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Agent> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -200,7 +229,7 @@ return kowabungaFetch<Agent>(getCreateAgentUrl(),
 
 export const getCreateAgentMutationKey = () => ['createAgent'] as const;
 
-export const getCreateAgentMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getCreateAgentMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAgent>>, TError,CreateAgentMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createAgent>>, TError,CreateAgentMutationVariables, TContext> => {
 
@@ -228,11 +257,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type CreateAgentMutationResult = NonNullable<Awaited<ReturnType<typeof createAgent>>>
-    export type CreateAgentMutationBody = BodyType<Agent>
-    export type CreateAgentMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateAgentMutationVariables = {data: BodyType<Agent>}
+    export type CreateAgentMutationBody = BodyType<NonReadonly<Agent>>
+    export type CreateAgentMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateAgentMutationVariables = {data: BodyType<NonReadonly<Agent>>}
 
-    export const useCreateAgent = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useCreateAgent = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAgent>>, TError,CreateAgentMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createAgent>>,
@@ -270,7 +299,7 @@ export const deleteAgent = async (agentId: string, options?: Parameters<typeof k
 
 export const getDeleteAgentMutationKey = () => ['deleteAgent'] as const;
 
-export const getDeleteAgentMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+export const getDeleteAgentMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAgent>>, TError,DeleteAgentMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteAgent>>, TError,DeleteAgentMutationVariables, TContext> => {
 
@@ -299,10 +328,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type DeleteAgentMutationResult = NonNullable<Awaited<ReturnType<typeof deleteAgent>>>
 
-    export type DeleteAgentMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>
+    export type DeleteAgentMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type DeleteAgentMutationVariables = {agentId: string}
 
-    export const useDeleteAgent = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+    export const useDeleteAgent = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAgent>>, TError,DeleteAgentMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteAgent>>,
@@ -345,7 +374,7 @@ export const getReadAgentQueryKey = (agentId: string,) => {
     }
 
 
-export const getReadAgentQueryOptions = <TData = Awaited<ReturnType<typeof readAgent>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(agentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readAgent>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getReadAgentQueryOptions = <TData = Awaited<ReturnType<typeof readAgent>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(agentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readAgent>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -364,10 +393,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadAgentQueryResult = NonNullable<Awaited<ReturnType<typeof readAgent>>>
-export type ReadAgentQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadAgentQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadAgent<TData = Awaited<ReturnType<typeof readAgent>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadAgent<TData = Awaited<ReturnType<typeof readAgent>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  agentId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readAgent>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readAgent>>,
@@ -377,7 +406,7 @@ export function useReadAgent<TData = Awaited<ReturnType<typeof readAgent>>, TErr
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadAgent<TData = Awaited<ReturnType<typeof readAgent>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadAgent<TData = Awaited<ReturnType<typeof readAgent>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  agentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readAgent>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readAgent>>,
@@ -387,12 +416,12 @@ export function useReadAgent<TData = Awaited<ReturnType<typeof readAgent>>, TErr
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadAgent<TData = Awaited<ReturnType<typeof readAgent>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadAgent<TData = Awaited<ReturnType<typeof readAgent>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  agentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readAgent>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadAgent<TData = Awaited<ReturnType<typeof readAgent>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadAgent<TData = Awaited<ReturnType<typeof readAgent>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  agentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readAgent>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -421,7 +450,7 @@ export const getUpdateAgentUrl = (agentId: string,) => {
  * Updates a Kowabunga remote agent configuration.
  */
 export const updateAgent = async (agentId: string,
-    agent: Agent, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Agent> => {
+    agentUpdate: AgentUpdate, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Agent> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -442,7 +471,7 @@ return kowabungaFetch<Agent>(getUpdateAgentUrl(agentId),
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(agent)
+    body: JSON.stringify(agentUpdate)
   }
 );}
 
@@ -452,7 +481,7 @@ return kowabungaFetch<Agent>(getUpdateAgentUrl(agentId),
 
 export const getUpdateAgentMutationKey = () => ['updateAgent'] as const;
 
-export const getUpdateAgentMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getUpdateAgentMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAgent>>, TError,UpdateAgentMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateAgent>>, TError,UpdateAgentMutationVariables, TContext> => {
 
@@ -480,11 +509,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateAgentMutationResult = NonNullable<Awaited<ReturnType<typeof updateAgent>>>
-    export type UpdateAgentMutationBody = BodyType<Agent>
-    export type UpdateAgentMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type UpdateAgentMutationVariables = {agentId: string;data: BodyType<Agent>}
+    export type UpdateAgentMutationBody = BodyType<AgentUpdate>
+    export type UpdateAgentMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type UpdateAgentMutationVariables = {agentId: string;data: BodyType<AgentUpdate>}
 
-    export const useUpdateAgent = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useUpdateAgent = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAgent>>, TError,UpdateAgentMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateAgent>>,
@@ -511,7 +540,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 }
 
 /**
- * Performs a Kowabunga remote agent setting of API token (will replace any existing one).
+ * Performs a Kowabunga remote agent setting of API token (will replace any existing one, disconnecting the agent; the generated API key is only sent once, by email, to administrators).
  */
 export const setAgentApiToken = async (agentId: string,
     params?: SetAgentApiTokenParams, options?: Parameters<typeof kowabungaFetch>[1]): Promise<ApiToken> => {
@@ -531,7 +560,7 @@ export const setAgentApiToken = async (agentId: string,
 
 export const getSetAgentApiTokenMutationKey = () => ['setAgentApiToken'] as const;
 
-export const getSetAgentApiTokenMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+export const getSetAgentApiTokenMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setAgentApiToken>>, TError,SetAgentApiTokenMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof setAgentApiToken>>, TError,SetAgentApiTokenMutationVariables, TContext> => {
 
@@ -560,10 +589,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type SetAgentApiTokenMutationResult = NonNullable<Awaited<ReturnType<typeof setAgentApiToken>>>
 
-    export type SetAgentApiTokenMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>
+    export type SetAgentApiTokenMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type SetAgentApiTokenMutationVariables = {agentId: string;params?: SetAgentApiTokenParams}
 
-    export const useSetAgentApiToken = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+    export const useSetAgentApiToken = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setAgentApiToken>>, TError,SetAgentApiTokenMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof setAgentApiToken>>,

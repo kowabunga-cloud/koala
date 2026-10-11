@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   faker
@@ -18,11 +18,11 @@ import type {
 
 export const getListAgentsResponseMock = (): ObjectIds => (Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))))
 
-export const getCreateAgentResponseMock = (overrideResponse: Partial<Extract<Agent, object>> = {}): Agent => ({id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), name: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), type: faker.helpers.arrayElement(['Kiwi','Kaktus'] as const), ...overrideResponse})
+export const getCreateAgentResponseMock = (overrideResponse: Partial<Extract<Agent, object>> = {}): Agent => ({id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), name: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), type: faker.helpers.arrayElement(['Kaktus','Kiwi','Kontroller'] as const), ...overrideResponse})
 
-export const getReadAgentResponseMock = (overrideResponse: Partial<Extract<Agent, object>> = {}): Agent => ({id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), name: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), type: faker.helpers.arrayElement(['Kiwi','Kaktus'] as const), ...overrideResponse})
+export const getReadAgentResponseMock = (overrideResponse: Partial<Extract<Agent, object>> = {}): Agent => ({id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), name: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), type: faker.helpers.arrayElement(['Kaktus','Kiwi','Kontroller'] as const), ...overrideResponse})
 
-export const getUpdateAgentResponseMock = (overrideResponse: Partial<Extract<Agent, object>> = {}): Agent => ({id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), name: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), type: faker.helpers.arrayElement(['Kiwi','Kaktus'] as const), ...overrideResponse})
+export const getUpdateAgentResponseMock = (overrideResponse: Partial<Extract<Agent, object>> = {}): Agent => ({id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), name: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), type: faker.helpers.arrayElement(['Kaktus','Kiwi','Kontroller'] as const), ...overrideResponse})
 
 export const getSetAgentApiTokenResponseMock = (overrideResponse: Partial<Extract<ApiToken, object>> = {}): ApiToken => ({id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), name: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), expire: faker.datatype.boolean(), expiration_date: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 10), undefined]), ...overrideResponse})
 

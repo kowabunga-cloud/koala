@@ -3,18 +3,17 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import * as zod from 'zod';
 
 
 /**
- * Creates a new Kowabunga user login credentials.
+ * Authenticates a Kowabunga user and returns a JWT token for Bearer Authentication.
  */
 export const LoginBody = zod.object({
   "email": zod.string().describe('The user email address for login.'),
-  "password": zod.string().describe('The user password for login.'),
-  "jwt": zod.string().optional().describe('The resulting server-generated JWT token for Bearer Authentication (read-only).')
+  "password": zod.string().describe('The user password for login.')
 }).describe('A Kowabunga user login credentials.')
 
 export const LoginResponse = zod.object({
@@ -24,12 +23,12 @@ export const LoginResponse = zod.object({
 }).describe('A Kowabunga user login credentials.')
 
 /**
- * Creates a new Kowabunga user logout session.
+ * Terminates the Kowabunga user logout session, revoking the JWT token in use.
  */
 export const LogoutResponse = zod.void()
 
 /**
- * Updates a Kowabunga userreset of password for the provided email (server-side generated, will replace any existing one) configuration.
+ * Resets the password of the Kowabunga user with the provided email address. A new password is server-side generated, replacing any existing one, and sent by email. For privacy reasons, the response is the same whether the email address is registered or not.
  */
 export const ResetPasswordBody = zod.object({
   "email": zod.string().describe('The user email address used for login.')
@@ -49,7 +48,6 @@ export const ListUsersResponse = zod.array(ListUsersResponseItem)
 export const createUserBodyNotificationsDefault = false;
 
 export const CreateUserBody = zod.object({
-  "id": zod.string().optional().describe('The Kowabunga user ID (auto-generated).'),
   "name": zod.string().describe('The Kowabunga user name.'),
   "description": zod.string().optional().describe('The Kowabunga user description.'),
   "email": zod.string().describe('User email address.'),
@@ -60,7 +58,7 @@ export const CreateUserBody = zod.object({
 export const createUserResponseNotificationsDefault = false;
 
 export const CreateUserResponse = zod.object({
-  "id": zod.string().optional().describe('The Kowabunga user ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kowabunga user ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kowabunga user name.'),
   "description": zod.string().optional().describe('The Kowabunga user description.'),
   "email": zod.string().describe('User email address.'),
@@ -87,7 +85,7 @@ export const ReadUserParams = zod.object({
 export const readUserResponseNotificationsDefault = false;
 
 export const ReadUserResponse = zod.object({
-  "id": zod.string().optional().describe('The Kowabunga user ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kowabunga user ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kowabunga user name.'),
   "description": zod.string().optional().describe('The Kowabunga user description.'),
   "email": zod.string().describe('User email address.'),
@@ -102,21 +100,18 @@ export const UpdateUserParams = zod.object({
   "userId": zod.string().describe('The ID of the Kowabunga user.')
 })
 
-export const updateUserBodyNotificationsDefault = false;
-
 export const UpdateUserBody = zod.object({
-  "id": zod.string().optional().describe('The Kowabunga user ID (auto-generated).'),
-  "name": zod.string().describe('The Kowabunga user name.'),
+  "name": zod.string().optional().describe('The Kowabunga user name.'),
   "description": zod.string().optional().describe('The Kowabunga user description.'),
-  "email": zod.string().describe('User email address.'),
-  "role": zod.enum(['superAdmin', 'projectAdmin', 'user']).describe('The Kowabunga user role.'),
-  "notifications": zod.boolean().default(updateUserBodyNotificationsDefault).describe('Whether or not to receive email notifications on events.')
-}).describe('A Kowabunga user.')
+  "email": zod.string().optional().describe('User email address.'),
+  "role": zod.enum(['superAdmin', 'projectAdmin', 'user']).optional().describe('The Kowabunga user role.'),
+  "notifications": zod.boolean().optional().describe('Whether or not to receive email notifications on events.')
+}).describe('A Kowabunga user update (unspecified properties are left unchanged).')
 
 export const updateUserResponseNotificationsDefault = false;
 
 export const UpdateUserResponse = zod.object({
-  "id": zod.string().optional().describe('The Kowabunga user ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kowabunga user ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kowabunga user name.'),
   "description": zod.string().optional().describe('The Kowabunga user description.'),
   "email": zod.string().describe('User email address.'),
@@ -147,16 +142,26 @@ export const ResetUserPasswordParams = zod.object({
 export const ResetUserPasswordResponse = zod.unknown()
 
 /**
- * Performs a Kowabunga user setting of API token (will replace any existing one).
+ * Performs a Kowabunga user setting of API token (will replace any existing one; the generated API key is only sent once, by email, to the user).
  */
 export const SetUserApiTokenParams = zod.object({
   "userId": zod.string().describe('The ID of the Kowabunga user.')
 })
 
+export const setUserApiTokenQueryExpireDefaultOne = false;
+
 export const SetUserApiTokenQueryParams = zod.object({
-  "expire": zod.boolean().optional().describe('Whether or not the token should expire.'),
-  "expiration_date": zod.iso.date().optional().describe('Token\'s expiration date (YYYY-MM-DD format).')
+  "expire": zod.boolean().default(setUserApiTokenQueryExpireDefaultOne).describe('Whether or not the token should expire.'),
+  "expirationDate": zod.iso.date().optional().describe('Token\'s expiration date (YYYY-MM-DD format).')
 })
 
-export const SetUserApiTokenResponse = zod.unknown()
+export const setUserApiTokenResponseExpireDefault = false;
+
+export const SetUserApiTokenResponse = zod.object({
+  "id": zod.string().optional().describe('The server-to-server authentication security token ID (auto-generated) (read-only).'),
+  "name": zod.string().describe('The server-to-server authentication security token name.'),
+  "description": zod.string().optional().describe('The server-to-server authentication security token description.'),
+  "expire": zod.boolean().default(setUserApiTokenResponseExpireDefault).describe('Whether the API token expires at some stage.'),
+  "expiration_date": zod.iso.date().optional().describe('Expiration date of the token (YYYY-MM-DD format).')
+}).describe('A Kowabunga authentication security token consists of an API key granting access to resources.')
 

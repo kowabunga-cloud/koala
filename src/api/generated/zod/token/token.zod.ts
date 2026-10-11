@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import * as zod from 'zod';
 
@@ -33,10 +33,10 @@ export const ReadApiTokenParams = zod.object({
 export const readApiTokenResponseExpireDefault = false;
 
 export const ReadApiTokenResponse = zod.object({
-  "id": zod.string().optional().describe('The server-to-server authentication security token ID (auto-generated).'),
+  "id": zod.string().optional().describe('The server-to-server authentication security token ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The server-to-server authentication security token name.'),
   "description": zod.string().optional().describe('The server-to-server authentication security token description.'),
-  "expire": zod.boolean().default(readApiTokenResponseExpireDefault).describe('Does the API token expires at some stage ?.'),
+  "expire": zod.boolean().default(readApiTokenResponseExpireDefault).describe('Whether the API token expires at some stage.'),
   "expiration_date": zod.iso.date().optional().describe('Expiration date of the token (YYYY-MM-DD format).')
 }).describe('A Kowabunga authentication security token consists of an API key granting access to resources.')
 
@@ -47,23 +47,20 @@ export const UpdateApiTokenParams = zod.object({
   "tokenId": zod.string().describe('The ID of the server-to-server authentication security token.')
 })
 
-export const updateApiTokenBodyExpireDefault = false;
-
 export const UpdateApiTokenBody = zod.object({
-  "id": zod.string().optional().describe('The server-to-server authentication security token ID (auto-generated).'),
-  "name": zod.string().describe('The server-to-server authentication security token name.'),
+  "name": zod.string().optional().describe('The server-to-server authentication security token name.'),
   "description": zod.string().optional().describe('The server-to-server authentication security token description.'),
-  "expire": zod.boolean().default(updateApiTokenBodyExpireDefault).describe('Does the API token expires at some stage ?.'),
+  "expire": zod.boolean().optional().describe('Whether the API token expires at some stage.'),
   "expiration_date": zod.iso.date().optional().describe('Expiration date of the token (YYYY-MM-DD format).')
-}).describe('A Kowabunga authentication security token consists of an API key granting access to resources.')
+}).describe('A server-to-server authentication security token update (unspecified properties are left unchanged).')
 
 export const updateApiTokenResponseExpireDefault = false;
 
 export const UpdateApiTokenResponse = zod.object({
-  "id": zod.string().optional().describe('The server-to-server authentication security token ID (auto-generated).'),
+  "id": zod.string().optional().describe('The server-to-server authentication security token ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The server-to-server authentication security token name.'),
   "description": zod.string().optional().describe('The server-to-server authentication security token description.'),
-  "expire": zod.boolean().default(updateApiTokenResponseExpireDefault).describe('Does the API token expires at some stage ?.'),
+  "expire": zod.boolean().default(updateApiTokenResponseExpireDefault).describe('Whether the API token expires at some stage.'),
   "expiration_date": zod.iso.date().optional().describe('Expiration date of the token (YYYY-MM-DD format).')
 }).describe('A Kowabunga authentication security token consists of an API key granting access to resources.')
 

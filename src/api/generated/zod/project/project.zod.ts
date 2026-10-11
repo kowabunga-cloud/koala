@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import * as zod from 'zod';
 
@@ -11,25 +11,36 @@ import * as zod from 'zod';
 /**
  * Returns the IDs of project objects.
  */
-export const ListProjectsQueryParams = zod.object({
-  "subnetSize": zod.int().optional().describe('The minimum VPC subnet size to be affected to the project. WARNING, this cannot be changed later.')
-})
-
 export const ListProjectsResponseItem = zod.string()
 export const ListProjectsResponse = zod.array(ListProjectsResponseItem)
 
 /**
  * Creates a new project.
  */
+export const createProjectQuerySubnetSizeDefault = 26;
+export const createProjectQuerySubnetSizeMin = 8;
+export const createProjectQuerySubnetSizeMax = 30;
+
+
+
 export const CreateProjectQueryParams = zod.object({
-  "subnetSize": zod.int().optional().describe('The minimum VPC subnet size to be affected to the project. WARNING, this cannot be changed later.')
+  "subnetSize": zod.int().min(createProjectQuerySubnetSizeMin).max(createProjectQuerySubnetSizeMax).default(createProjectQuerySubnetSizeDefault).describe('The minimum VPC subnet size (CIDR prefix length) to be assigned to the project. WARNING, this cannot be changed later.')
 })
 
+export const createProjectBodyQuotasOneVcpusMin = 0;
+
+export const createProjectBodyQuotasOneMemoryMin = 0;
+
+export const createProjectBodyQuotasOneStorageMin = 0;
+
+export const createProjectBodyQuotasOneInstancesMin = 0;
+
+
+
 export const CreateProjectBody = zod.object({
-  "id": zod.string().optional().describe('The project ID (auto-generated).'),
   "name": zod.string().describe('The project name.'),
   "description": zod.string().optional().describe('The project description.'),
-  "domain": zod.string().optional().describe('Internal domain name (e.g. myproject.acme.com).'),
+  "domain": zod.string().optional().describe('Internal domain name (e.g. myproject.acme.com). Can only be set at creation time, ignored on updates.'),
   "root_password": zod.string().optional().describe('Default root password, set at cloud-init instance bootstrap phase. Will be randomly auto-generated at each instance creation if unspecified.'),
   "bootstrap_user": zod.string().optional().describe('Default service user name, created at cloud-init instance bootstrap phase. Will use Kowabunga\'s default configuration one if unspecified.'),
   "bootstrap_pubkey": zod.string().optional().describe('Default public SSH key, to be associated to bootstrap user. Will use Kowabunga\'s default configuration one if unspecified.'),
@@ -39,25 +50,30 @@ export const CreateProjectBody = zod.object({
   "value": zod.string().describe('The metadata value.')
 }).describe('A key/value metadata.')).optional().describe('A list of metadata to be associated to the project.'),
   "quotas": zod.object({
-  "vcpus": zod.int().optional().describe('The maximum total number of vCPUs allowed to be consumed by sum of all instances.'),
-  "memory": zod.int().optional().describe('The maximum total memory (in bytes) allowed to be consumed by sum of all instances.'),
-  "storage": zod.int().optional().describe('The maximum total disk capacity allowed to be consumed by sum of all instances.'),
-  "instances": zod.int().optional().describe('The maximum number of instances allowed to be spawned.')
+  "vcpus": zod.int().min(createProjectBodyQuotasOneVcpusMin).optional().describe('The total number of vCPUs consumed by (or allowed for) the sum of all instances.'),
+  "memory": zod.int().min(createProjectBodyQuotasOneMemoryMin).optional().describe('The total memory (in bytes) consumed by (or allowed for) the sum of all instances.'),
+  "storage": zod.int().min(createProjectBodyQuotasOneStorageMin).optional().describe('The total disk capacity (in bytes) consumed by (or allowed for) the sum of all volumes.'),
+  "instances": zod.int().min(createProjectBodyQuotasOneInstancesMin).optional().describe('The number of instances spawned (or allowed to be).')
 }).describe('A global project resource quotas/usage (0 for unlimited).').optional().describe('The global project resource quotas (0 for unlimited).'),
-  "private_subnets": zod.array(zod.object({
-  "key": zod.string().optional().describe('The region key.'),
-  "value": zod.string().optional().describe('The subnet ID.')
-}).describe('A region/subnet map.')).optional().describe('The assigned project VPC private subnets IDs (read-only).'),
-  "reserved_vrrp_ids": zod.array(zod.int()).optional().describe('The list of VRRP IDs used by -as-a-service resources within the project virtual network (read-only). Should your application use VRRP for service redundancy, you should use different IDs to prevent issues..'),
   "teams": zod.array(zod.string()).describe('A list of user teams allowed to administrate the project (i.e. capable of managing internal resources).'),
   "regions": zod.array(zod.string()).describe('A list of Kowabunga regions the project is managing resources from.')
 }).describe('A Kowabunga project corresponds to a single tenant, isolated set of resources.')
 
+export const createProjectResponseQuotasOneVcpusMin = 0;
+
+export const createProjectResponseQuotasOneMemoryMin = 0;
+
+export const createProjectResponseQuotasOneStorageMin = 0;
+
+export const createProjectResponseQuotasOneInstancesMin = 0;
+
+
+
 export const CreateProjectResponse = zod.object({
-  "id": zod.string().optional().describe('The project ID (auto-generated).'),
+  "id": zod.string().optional().describe('The project ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The project name.'),
   "description": zod.string().optional().describe('The project description.'),
-  "domain": zod.string().optional().describe('Internal domain name (e.g. myproject.acme.com).'),
+  "domain": zod.string().optional().describe('Internal domain name (e.g. myproject.acme.com). Can only be set at creation time, ignored on updates.'),
   "root_password": zod.string().optional().describe('Default root password, set at cloud-init instance bootstrap phase. Will be randomly auto-generated at each instance creation if unspecified.'),
   "bootstrap_user": zod.string().optional().describe('Default service user name, created at cloud-init instance bootstrap phase. Will use Kowabunga\'s default configuration one if unspecified.'),
   "bootstrap_pubkey": zod.string().optional().describe('Default public SSH key, to be associated to bootstrap user. Will use Kowabunga\'s default configuration one if unspecified.'),
@@ -67,16 +83,16 @@ export const CreateProjectResponse = zod.object({
   "value": zod.string().describe('The metadata value.')
 }).describe('A key/value metadata.')).optional().describe('A list of metadata to be associated to the project.'),
   "quotas": zod.object({
-  "vcpus": zod.int().optional().describe('The maximum total number of vCPUs allowed to be consumed by sum of all instances.'),
-  "memory": zod.int().optional().describe('The maximum total memory (in bytes) allowed to be consumed by sum of all instances.'),
-  "storage": zod.int().optional().describe('The maximum total disk capacity allowed to be consumed by sum of all instances.'),
-  "instances": zod.int().optional().describe('The maximum number of instances allowed to be spawned.')
+  "vcpus": zod.int().min(createProjectResponseQuotasOneVcpusMin).optional().describe('The total number of vCPUs consumed by (or allowed for) the sum of all instances.'),
+  "memory": zod.int().min(createProjectResponseQuotasOneMemoryMin).optional().describe('The total memory (in bytes) consumed by (or allowed for) the sum of all instances.'),
+  "storage": zod.int().min(createProjectResponseQuotasOneStorageMin).optional().describe('The total disk capacity (in bytes) consumed by (or allowed for) the sum of all volumes.'),
+  "instances": zod.int().min(createProjectResponseQuotasOneInstancesMin).optional().describe('The number of instances spawned (or allowed to be).')
 }).describe('A global project resource quotas/usage (0 for unlimited).').optional().describe('The global project resource quotas (0 for unlimited).'),
   "private_subnets": zod.array(zod.object({
   "key": zod.string().optional().describe('The region key.'),
   "value": zod.string().optional().describe('The subnet ID.')
 }).describe('A region/subnet map.')).optional().describe('The assigned project VPC private subnets IDs (read-only).'),
-  "reserved_vrrp_ids": zod.array(zod.int()).optional().describe('The list of VRRP IDs used by -as-a-service resources within the project virtual network (read-only). Should your application use VRRP for service redundancy, you should use different IDs to prevent issues..'),
+  "reserved_vrrp_ids": zod.array(zod.int()).optional().describe('The list of VRRP IDs used by -as-a-service resources within the project virtual network. Should your application use VRRP for service redundancy, you should use different IDs to prevent issues (read-only).'),
   "teams": zod.array(zod.string()).describe('A list of user teams allowed to administrate the project (i.e. capable of managing internal resources).'),
   "regions": zod.array(zod.string()).describe('A list of Kowabunga regions the project is managing resources from.')
 }).describe('A Kowabunga project corresponds to a single tenant, isolated set of resources.')
@@ -97,11 +113,21 @@ export const ReadProjectParams = zod.object({
   "projectId": zod.string().describe('The ID of the project.')
 })
 
+export const readProjectResponseQuotasOneVcpusMin = 0;
+
+export const readProjectResponseQuotasOneMemoryMin = 0;
+
+export const readProjectResponseQuotasOneStorageMin = 0;
+
+export const readProjectResponseQuotasOneInstancesMin = 0;
+
+
+
 export const ReadProjectResponse = zod.object({
-  "id": zod.string().optional().describe('The project ID (auto-generated).'),
+  "id": zod.string().optional().describe('The project ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The project name.'),
   "description": zod.string().optional().describe('The project description.'),
-  "domain": zod.string().optional().describe('Internal domain name (e.g. myproject.acme.com).'),
+  "domain": zod.string().optional().describe('Internal domain name (e.g. myproject.acme.com). Can only be set at creation time, ignored on updates.'),
   "root_password": zod.string().optional().describe('Default root password, set at cloud-init instance bootstrap phase. Will be randomly auto-generated at each instance creation if unspecified.'),
   "bootstrap_user": zod.string().optional().describe('Default service user name, created at cloud-init instance bootstrap phase. Will use Kowabunga\'s default configuration one if unspecified.'),
   "bootstrap_pubkey": zod.string().optional().describe('Default public SSH key, to be associated to bootstrap user. Will use Kowabunga\'s default configuration one if unspecified.'),
@@ -111,16 +137,16 @@ export const ReadProjectResponse = zod.object({
   "value": zod.string().describe('The metadata value.')
 }).describe('A key/value metadata.')).optional().describe('A list of metadata to be associated to the project.'),
   "quotas": zod.object({
-  "vcpus": zod.int().optional().describe('The maximum total number of vCPUs allowed to be consumed by sum of all instances.'),
-  "memory": zod.int().optional().describe('The maximum total memory (in bytes) allowed to be consumed by sum of all instances.'),
-  "storage": zod.int().optional().describe('The maximum total disk capacity allowed to be consumed by sum of all instances.'),
-  "instances": zod.int().optional().describe('The maximum number of instances allowed to be spawned.')
+  "vcpus": zod.int().min(readProjectResponseQuotasOneVcpusMin).optional().describe('The total number of vCPUs consumed by (or allowed for) the sum of all instances.'),
+  "memory": zod.int().min(readProjectResponseQuotasOneMemoryMin).optional().describe('The total memory (in bytes) consumed by (or allowed for) the sum of all instances.'),
+  "storage": zod.int().min(readProjectResponseQuotasOneStorageMin).optional().describe('The total disk capacity (in bytes) consumed by (or allowed for) the sum of all volumes.'),
+  "instances": zod.int().min(readProjectResponseQuotasOneInstancesMin).optional().describe('The number of instances spawned (or allowed to be).')
 }).describe('A global project resource quotas/usage (0 for unlimited).').optional().describe('The global project resource quotas (0 for unlimited).'),
   "private_subnets": zod.array(zod.object({
   "key": zod.string().optional().describe('The region key.'),
   "value": zod.string().optional().describe('The subnet ID.')
 }).describe('A region/subnet map.')).optional().describe('The assigned project VPC private subnets IDs (read-only).'),
-  "reserved_vrrp_ids": zod.array(zod.int()).optional().describe('The list of VRRP IDs used by -as-a-service resources within the project virtual network (read-only). Should your application use VRRP for service redundancy, you should use different IDs to prevent issues..'),
+  "reserved_vrrp_ids": zod.array(zod.int()).optional().describe('The list of VRRP IDs used by -as-a-service resources within the project virtual network. Should your application use VRRP for service redundancy, you should use different IDs to prevent issues (read-only).'),
   "teams": zod.array(zod.string()).describe('A list of user teams allowed to administrate the project (i.e. capable of managing internal resources).'),
   "regions": zod.array(zod.string()).describe('A list of Kowabunga regions the project is managing resources from.')
 }).describe('A Kowabunga project corresponds to a single tenant, isolated set of resources.')
@@ -132,11 +158,19 @@ export const UpdateProjectParams = zod.object({
   "projectId": zod.string().describe('The ID of the project.')
 })
 
+export const updateProjectBodyQuotasOneVcpusMin = 0;
+
+export const updateProjectBodyQuotasOneMemoryMin = 0;
+
+export const updateProjectBodyQuotasOneStorageMin = 0;
+
+export const updateProjectBodyQuotasOneInstancesMin = 0;
+
+
+
 export const UpdateProjectBody = zod.object({
-  "id": zod.string().optional().describe('The project ID (auto-generated).'),
-  "name": zod.string().describe('The project name.'),
+  "name": zod.string().optional().describe('The project name.'),
   "description": zod.string().optional().describe('The project description.'),
-  "domain": zod.string().optional().describe('Internal domain name (e.g. myproject.acme.com).'),
   "root_password": zod.string().optional().describe('Default root password, set at cloud-init instance bootstrap phase. Will be randomly auto-generated at each instance creation if unspecified.'),
   "bootstrap_user": zod.string().optional().describe('Default service user name, created at cloud-init instance bootstrap phase. Will use Kowabunga\'s default configuration one if unspecified.'),
   "bootstrap_pubkey": zod.string().optional().describe('Default public SSH key, to be associated to bootstrap user. Will use Kowabunga\'s default configuration one if unspecified.'),
@@ -146,25 +180,30 @@ export const UpdateProjectBody = zod.object({
   "value": zod.string().describe('The metadata value.')
 }).describe('A key/value metadata.')).optional().describe('A list of metadata to be associated to the project.'),
   "quotas": zod.object({
-  "vcpus": zod.int().optional().describe('The maximum total number of vCPUs allowed to be consumed by sum of all instances.'),
-  "memory": zod.int().optional().describe('The maximum total memory (in bytes) allowed to be consumed by sum of all instances.'),
-  "storage": zod.int().optional().describe('The maximum total disk capacity allowed to be consumed by sum of all instances.'),
-  "instances": zod.int().optional().describe('The maximum number of instances allowed to be spawned.')
+  "vcpus": zod.int().min(updateProjectBodyQuotasOneVcpusMin).optional().describe('The total number of vCPUs consumed by (or allowed for) the sum of all instances.'),
+  "memory": zod.int().min(updateProjectBodyQuotasOneMemoryMin).optional().describe('The total memory (in bytes) consumed by (or allowed for) the sum of all instances.'),
+  "storage": zod.int().min(updateProjectBodyQuotasOneStorageMin).optional().describe('The total disk capacity (in bytes) consumed by (or allowed for) the sum of all volumes.'),
+  "instances": zod.int().min(updateProjectBodyQuotasOneInstancesMin).optional().describe('The number of instances spawned (or allowed to be).')
 }).describe('A global project resource quotas/usage (0 for unlimited).').optional().describe('The global project resource quotas (0 for unlimited).'),
-  "private_subnets": zod.array(zod.object({
-  "key": zod.string().optional().describe('The region key.'),
-  "value": zod.string().optional().describe('The subnet ID.')
-}).describe('A region/subnet map.')).optional().describe('The assigned project VPC private subnets IDs (read-only).'),
-  "reserved_vrrp_ids": zod.array(zod.int()).optional().describe('The list of VRRP IDs used by -as-a-service resources within the project virtual network (read-only). Should your application use VRRP for service redundancy, you should use different IDs to prevent issues..'),
-  "teams": zod.array(zod.string()).describe('A list of user teams allowed to administrate the project (i.e. capable of managing internal resources).'),
-  "regions": zod.array(zod.string()).describe('A list of Kowabunga regions the project is managing resources from.')
-}).describe('A Kowabunga project corresponds to a single tenant, isolated set of resources.')
+  "teams": zod.array(zod.string()).optional().describe('A list of user teams allowed to administrate the project (i.e. capable of managing internal resources).'),
+  "regions": zod.array(zod.string()).optional().describe('A list of Kowabunga regions the project is managing resources from.')
+}).describe('A project update (unspecified properties are left unchanged).')
+
+export const updateProjectResponseQuotasOneVcpusMin = 0;
+
+export const updateProjectResponseQuotasOneMemoryMin = 0;
+
+export const updateProjectResponseQuotasOneStorageMin = 0;
+
+export const updateProjectResponseQuotasOneInstancesMin = 0;
+
+
 
 export const UpdateProjectResponse = zod.object({
-  "id": zod.string().optional().describe('The project ID (auto-generated).'),
+  "id": zod.string().optional().describe('The project ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The project name.'),
   "description": zod.string().optional().describe('The project description.'),
-  "domain": zod.string().optional().describe('Internal domain name (e.g. myproject.acme.com).'),
+  "domain": zod.string().optional().describe('Internal domain name (e.g. myproject.acme.com). Can only be set at creation time, ignored on updates.'),
   "root_password": zod.string().optional().describe('Default root password, set at cloud-init instance bootstrap phase. Will be randomly auto-generated at each instance creation if unspecified.'),
   "bootstrap_user": zod.string().optional().describe('Default service user name, created at cloud-init instance bootstrap phase. Will use Kowabunga\'s default configuration one if unspecified.'),
   "bootstrap_pubkey": zod.string().optional().describe('Default public SSH key, to be associated to bootstrap user. Will use Kowabunga\'s default configuration one if unspecified.'),
@@ -174,16 +213,16 @@ export const UpdateProjectResponse = zod.object({
   "value": zod.string().describe('The metadata value.')
 }).describe('A key/value metadata.')).optional().describe('A list of metadata to be associated to the project.'),
   "quotas": zod.object({
-  "vcpus": zod.int().optional().describe('The maximum total number of vCPUs allowed to be consumed by sum of all instances.'),
-  "memory": zod.int().optional().describe('The maximum total memory (in bytes) allowed to be consumed by sum of all instances.'),
-  "storage": zod.int().optional().describe('The maximum total disk capacity allowed to be consumed by sum of all instances.'),
-  "instances": zod.int().optional().describe('The maximum number of instances allowed to be spawned.')
+  "vcpus": zod.int().min(updateProjectResponseQuotasOneVcpusMin).optional().describe('The total number of vCPUs consumed by (or allowed for) the sum of all instances.'),
+  "memory": zod.int().min(updateProjectResponseQuotasOneMemoryMin).optional().describe('The total memory (in bytes) consumed by (or allowed for) the sum of all instances.'),
+  "storage": zod.int().min(updateProjectResponseQuotasOneStorageMin).optional().describe('The total disk capacity (in bytes) consumed by (or allowed for) the sum of all volumes.'),
+  "instances": zod.int().min(updateProjectResponseQuotasOneInstancesMin).optional().describe('The number of instances spawned (or allowed to be).')
 }).describe('A global project resource quotas/usage (0 for unlimited).').optional().describe('The global project resource quotas (0 for unlimited).'),
   "private_subnets": zod.array(zod.object({
   "key": zod.string().optional().describe('The region key.'),
   "value": zod.string().optional().describe('The subnet ID.')
 }).describe('A region/subnet map.')).optional().describe('The assigned project VPC private subnets IDs (read-only).'),
-  "reserved_vrrp_ids": zod.array(zod.int()).optional().describe('The list of VRRP IDs used by -as-a-service resources within the project virtual network (read-only). Should your application use VRRP for service redundancy, you should use different IDs to prevent issues..'),
+  "reserved_vrrp_ids": zod.array(zod.int()).optional().describe('The list of VRRP IDs used by -as-a-service resources within the project virtual network. Should your application use VRRP for service redundancy, you should use different IDs to prevent issues (read-only).'),
   "teams": zod.array(zod.string()).describe('A list of user teams allowed to administrate the project (i.e. capable of managing internal resources).'),
   "regions": zod.array(zod.string()).describe('A list of Kowabunga regions the project is managing resources from.')
 }).describe('A Kowabunga project corresponds to a single tenant, isolated set of resources.')
@@ -207,11 +246,21 @@ export const ReadProjectUsageParams = zod.object({
   "projectId": zod.string().describe('The ID of the project.')
 })
 
+export const readProjectUsageResponseVcpusMin = 0;
+
+export const readProjectUsageResponseMemoryMin = 0;
+
+export const readProjectUsageResponseStorageMin = 0;
+
+export const readProjectUsageResponseInstancesMin = 0;
+
+
+
 export const ReadProjectUsageResponse = zod.object({
-  "vcpus": zod.int().optional().describe('The maximum total number of vCPUs allowed to be consumed by sum of all instances.'),
-  "memory": zod.int().optional().describe('The maximum total memory (in bytes) allowed to be consumed by sum of all instances.'),
-  "storage": zod.int().optional().describe('The maximum total disk capacity allowed to be consumed by sum of all instances.'),
-  "instances": zod.int().optional().describe('The maximum number of instances allowed to be spawned.')
+  "vcpus": zod.int().min(readProjectUsageResponseVcpusMin).optional().describe('The total number of vCPUs consumed by (or allowed for) the sum of all instances.'),
+  "memory": zod.int().min(readProjectUsageResponseMemoryMin).optional().describe('The total memory (in bytes) consumed by (or allowed for) the sum of all instances.'),
+  "storage": zod.int().min(readProjectUsageResponseStorageMin).optional().describe('The total disk capacity (in bytes) consumed by (or allowed for) the sum of all volumes.'),
+  "instances": zod.int().min(readProjectUsageResponseInstancesMin).optional().describe('The number of instances spawned (or allowed to be).')
 }).describe('A global project resource quotas/usage (0 for unlimited).')
 
 /**
@@ -224,23 +273,20 @@ export const CreateProjectKwarantineParams = zod.object({
 export const createProjectKwarantineBodyPolicyDefault = `host`;
 
 export const CreateProjectKwarantineBody = zod.object({
-  "id": zod.string().optional().describe('The Kwarantine ID (auto-generated).'),
   "name": zod.string().describe('The Kwarantine name.'),
   "description": zod.string().optional().describe('The Kwarantine description.'),
-  "policy": zod.enum(['host', 'zone']).default(createProjectKwarantineBodyPolicyDefault).describe('The anti-affinity enforcement policy. Use "host" to guarantee no two group members are ever scheduled on the same Kaktus computing node, or "zone" to guarantee no two group members are ever scheduled within the same availability zone.'),
-  "instances": zod.array(zod.string()).optional().describe('A list of existing virtual machine instance IDs that are part of the Kwarantine group. Members are guaranteed to never be co-scheduled according to the group policy, regardless of Kaktus host scheduling score.'),
-  "komputes": zod.array(zod.string()).optional().describe('A list of existing Kompute IDs that are part of the Kwarantine group. Members are guaranteed to never be co-scheduled according to the group policy, regardless of Kaktus host scheduling score.')
+  "policy": zod.enum(['host', 'zone']).default(createProjectKwarantineBodyPolicyDefault).describe('The anti-affinity enforcement policy. Use "host" to guarantee no two group members are ever scheduled on the same Kaktus computing node, or "zone" to guarantee no two group members are ever scheduled within the same availability zone.')
 }).describe('A Kwarantine is an anti-affinity mechanism that ensures its member virtual machine instances or Kompute resources are never co-scheduled on the same Kaktus computing node (host policy) or the same availability zone (zone policy), regardless of Kaktus host scheduling score, so that critical redundant resources stay properly spread out.')
 
 export const createProjectKwarantineResponsePolicyDefault = `host`;
 
 export const CreateProjectKwarantineResponse = zod.object({
-  "id": zod.string().optional().describe('The Kwarantine ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kwarantine ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kwarantine name.'),
   "description": zod.string().optional().describe('The Kwarantine description.'),
   "policy": zod.enum(['host', 'zone']).default(createProjectKwarantineResponsePolicyDefault).describe('The anti-affinity enforcement policy. Use "host" to guarantee no two group members are ever scheduled on the same Kaktus computing node, or "zone" to guarantee no two group members are ever scheduled within the same availability zone.'),
-  "instances": zod.array(zod.string()).optional().describe('A list of existing virtual machine instance IDs that are part of the Kwarantine group. Members are guaranteed to never be co-scheduled according to the group policy, regardless of Kaktus host scheduling score.'),
-  "komputes": zod.array(zod.string()).optional().describe('A list of existing Kompute IDs that are part of the Kwarantine group. Members are guaranteed to never be co-scheduled according to the group policy, regardless of Kaktus host scheduling score.')
+  "instances": zod.array(zod.string()).optional().describe('A list of existing virtual machine instance IDs that are part of the Kwarantine group. Members are guaranteed to never be co-scheduled according to the group policy, regardless of Kaktus host scheduling score. Managed through the dedicated add/remove operations (read-only).'),
+  "komputes": zod.array(zod.string()).optional().describe('A list of existing Kompute IDs that are part of the Kwarantine group. Members are guaranteed to never be co-scheduled according to the group policy, regardless of Kaktus host scheduling score. Managed through the dedicated add/remove operations (read-only).')
 }).describe('A Kwarantine is an anti-affinity mechanism that ensures its member virtual machine instances or Kompute resources are never co-scheduled on the same Kaktus computing node (host policy) or the same availability zone (zone policy), regardless of Kaktus host scheduling score, so that critical redundant resources stay properly spread out.')
 
 /**
@@ -261,18 +307,16 @@ export const CreateProjectDnsRecordParams = zod.object({
 })
 
 export const CreateProjectDnsRecordBody = zod.object({
-  "id": zod.string().optional().describe('The DNS record ID (auto-generated).'),
   "name": zod.string().describe('The DNS record name.'),
   "description": zod.string().optional().describe('The DNS record description.'),
-  "domain": zod.string().optional().describe('The DNS record associated domain (inherited from associated project).'),
   "addresses": zod.array(zod.string()).describe('A list of IPv4 addresses to be associated to the record.')
 }).describe('A DNS record.')
 
 export const CreateProjectDnsRecordResponse = zod.object({
-  "id": zod.string().optional().describe('The DNS record ID (auto-generated).'),
+  "id": zod.string().optional().describe('The DNS record ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The DNS record name.'),
   "description": zod.string().optional().describe('The DNS record description.'),
-  "domain": zod.string().optional().describe('The DNS record associated domain (inherited from associated project).'),
+  "domain": zod.string().optional().describe('The DNS record associated domain, inherited from associated project (read-only).'),
   "addresses": zod.array(zod.string()).describe('A list of IPv4 addresses to be associated to the record.')
 }).describe('A DNS record.')
 
@@ -299,20 +343,27 @@ export const CreateProjectRegionVolumeQueryParams = zod.object({
   "templateId": zod.string().optional().describe('Template to clone the storage volume from (optional, region\'s default if unspecified).')
 })
 
+export const createProjectRegionVolumeBodySizeMin = 0;
+
+
+
 export const CreateProjectRegionVolumeBody = zod.object({
-  "id": zod.string().optional().describe('The storage volume ID (auto-generated).'),
   "name": zod.string().describe('The storage volume name.'),
   "description": zod.string().optional().describe('The storage volume description.'),
-  "type": zod.enum(['os', 'iso', 'raw']).describe('The storage volume type.'),
-  "size": zod.int().describe('The storage volume size (in bytes).')
+  "type": zod.enum(['os', 'iso', 'raw', 'template']).describe('The storage volume type. Can only be set at creation time, ignored on updates.'),
+  "size": zod.int().min(createProjectRegionVolumeBodySizeMin).describe('The storage volume size (in bytes), can only be increased.')
 }).describe('A storage volume.')
 
+export const createProjectRegionVolumeResponseSizeMin = 0;
+
+
+
 export const CreateProjectRegionVolumeResponse = zod.object({
-  "id": zod.string().optional().describe('The storage volume ID (auto-generated).'),
+  "id": zod.string().optional().describe('The storage volume ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The storage volume name.'),
   "description": zod.string().optional().describe('The storage volume description.'),
-  "type": zod.enum(['os', 'iso', 'raw']).describe('The storage volume type.'),
-  "size": zod.int().describe('The storage volume size (in bytes).')
+  "type": zod.enum(['os', 'iso', 'raw', 'template']).describe('The storage volume type. Can only be set at creation time, ignored on updates.'),
+  "size": zod.int().min(createProjectRegionVolumeResponseSizeMin).describe('The storage volume size (in bytes), can only be increased.')
 }).describe('A storage volume.')
 
 /**
@@ -334,35 +385,38 @@ export const CreateProjectZoneInstanceParams = zod.object({
   "zoneId": zod.string().describe('The ID of the availability zone.')
 })
 
+
+
 export const createProjectZoneInstanceBodyUefiDefault = true;
 export const createProjectZoneInstanceBodyKmotionEnabledDefault = true;
 
 export const CreateProjectZoneInstanceBody = zod.object({
-  "id": zod.string().optional().describe('The virtual machine instance ID (auto-generated).'),
   "name": zod.string().describe('The virtual machine instance name.'),
   "description": zod.string().optional().describe('The virtual machine instance description.'),
-  "memory": zod.int().describe('The virtual machine instance memory size (in bytes).'),
-  "vcpus": zod.int().describe('The virtual machine instance number of vCPUs.'),
-  "adapters": zod.array(zod.string()).optional().describe('a list of existing network adapters to be connected to the instance.'),
-  "volumes": zod.array(zod.string()).optional().describe('volumes list of existing storage volumes (i.e. disks) to be connected to the instance.'),
-  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at instance creation time, to elect an initial host consistent with the referenced groups policies and register the instance as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices.'),
-  "uefi": zod.boolean().default(createProjectZoneInstanceBodyUefiDefault).describe('enable UEFI secure firmware (vs. legacy BIOS).'),
+  "memory": zod.int().min(1).describe('The virtual machine instance memory size (in bytes).'),
+  "vcpus": zod.int().min(1).describe('The virtual machine instance number of vCPUs.'),
+  "adapters": zod.array(zod.string()).optional().describe('A list of existing network adapters to be connected to the instance.'),
+  "volumes": zod.array(zod.string()).optional().describe('A list of existing storage volumes (i.e. disks) to be connected to the instance.'),
+  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at instance creation time, to elect an initial host consistent with the referenced groups policies and register the instance as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices. Can only be set at creation time, ignored on updates.'),
+  "uefi": zod.boolean().default(createProjectZoneInstanceBodyUefiDefault).describe('Enable UEFI secure firmware (vs. legacy BIOS). Can only be set at creation time, ignored on updates.'),
   "kmotion_enabled": zod.boolean().default(createProjectZoneInstanceBodyKmotionEnabledDefault).describe('Whether kMotion (live/cold host migration) is enabled for the virtual machine instance. When disabled, the instance remains bound to its original hosting node.')
 }).describe('A virtual machine instance.')
+
+
 
 export const createProjectZoneInstanceResponseUefiDefault = true;
 export const createProjectZoneInstanceResponseKmotionEnabledDefault = true;
 
 export const CreateProjectZoneInstanceResponse = zod.object({
-  "id": zod.string().optional().describe('The virtual machine instance ID (auto-generated).'),
+  "id": zod.string().optional().describe('The virtual machine instance ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The virtual machine instance name.'),
   "description": zod.string().optional().describe('The virtual machine instance description.'),
-  "memory": zod.int().describe('The virtual machine instance memory size (in bytes).'),
-  "vcpus": zod.int().describe('The virtual machine instance number of vCPUs.'),
-  "adapters": zod.array(zod.string()).optional().describe('a list of existing network adapters to be connected to the instance.'),
-  "volumes": zod.array(zod.string()).optional().describe('volumes list of existing storage volumes (i.e. disks) to be connected to the instance.'),
-  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at instance creation time, to elect an initial host consistent with the referenced groups policies and register the instance as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices.'),
-  "uefi": zod.boolean().default(createProjectZoneInstanceResponseUefiDefault).describe('enable UEFI secure firmware (vs. legacy BIOS).'),
+  "memory": zod.int().min(1).describe('The virtual machine instance memory size (in bytes).'),
+  "vcpus": zod.int().min(1).describe('The virtual machine instance number of vCPUs.'),
+  "adapters": zod.array(zod.string()).optional().describe('A list of existing network adapters to be connected to the instance.'),
+  "volumes": zod.array(zod.string()).optional().describe('A list of existing storage volumes (i.e. disks) to be connected to the instance.'),
+  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at instance creation time, to elect an initial host consistent with the referenced groups policies and register the instance as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices. Can only be set at creation time, ignored on updates.'),
+  "uefi": zod.boolean().default(createProjectZoneInstanceResponseUefiDefault).describe('Enable UEFI secure firmware (vs. legacy BIOS). Can only be set at creation time, ignored on updates.'),
   "kmotion_enabled": zod.boolean().default(createProjectZoneInstanceResponseKmotionEnabledDefault).describe('Whether kMotion (live/cold host migration) is enabled for the virtual machine instance. When disabled, the instance remains bound to its original hosting node.')
 }).describe('A virtual machine instance.')
 
@@ -385,35 +439,38 @@ export const CreateProjectRegionInstanceParams = zod.object({
   "regionId": zod.string().describe('The ID of the region.')
 })
 
+
+
 export const createProjectRegionInstanceBodyUefiDefault = true;
 export const createProjectRegionInstanceBodyKmotionEnabledDefault = true;
 
 export const CreateProjectRegionInstanceBody = zod.object({
-  "id": zod.string().optional().describe('The virtual machine instance ID (auto-generated).'),
   "name": zod.string().describe('The virtual machine instance name.'),
   "description": zod.string().optional().describe('The virtual machine instance description.'),
-  "memory": zod.int().describe('The virtual machine instance memory size (in bytes).'),
-  "vcpus": zod.int().describe('The virtual machine instance number of vCPUs.'),
-  "adapters": zod.array(zod.string()).optional().describe('a list of existing network adapters to be connected to the instance.'),
-  "volumes": zod.array(zod.string()).optional().describe('volumes list of existing storage volumes (i.e. disks) to be connected to the instance.'),
-  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at instance creation time, to elect an initial host consistent with the referenced groups policies and register the instance as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices.'),
-  "uefi": zod.boolean().default(createProjectRegionInstanceBodyUefiDefault).describe('enable UEFI secure firmware (vs. legacy BIOS).'),
+  "memory": zod.int().min(1).describe('The virtual machine instance memory size (in bytes).'),
+  "vcpus": zod.int().min(1).describe('The virtual machine instance number of vCPUs.'),
+  "adapters": zod.array(zod.string()).optional().describe('A list of existing network adapters to be connected to the instance.'),
+  "volumes": zod.array(zod.string()).optional().describe('A list of existing storage volumes (i.e. disks) to be connected to the instance.'),
+  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at instance creation time, to elect an initial host consistent with the referenced groups policies and register the instance as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices. Can only be set at creation time, ignored on updates.'),
+  "uefi": zod.boolean().default(createProjectRegionInstanceBodyUefiDefault).describe('Enable UEFI secure firmware (vs. legacy BIOS). Can only be set at creation time, ignored on updates.'),
   "kmotion_enabled": zod.boolean().default(createProjectRegionInstanceBodyKmotionEnabledDefault).describe('Whether kMotion (live/cold host migration) is enabled for the virtual machine instance. When disabled, the instance remains bound to its original hosting node.')
 }).describe('A virtual machine instance.')
+
+
 
 export const createProjectRegionInstanceResponseUefiDefault = true;
 export const createProjectRegionInstanceResponseKmotionEnabledDefault = true;
 
 export const CreateProjectRegionInstanceResponse = zod.object({
-  "id": zod.string().optional().describe('The virtual machine instance ID (auto-generated).'),
+  "id": zod.string().optional().describe('The virtual machine instance ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The virtual machine instance name.'),
   "description": zod.string().optional().describe('The virtual machine instance description.'),
-  "memory": zod.int().describe('The virtual machine instance memory size (in bytes).'),
-  "vcpus": zod.int().describe('The virtual machine instance number of vCPUs.'),
-  "adapters": zod.array(zod.string()).optional().describe('a list of existing network adapters to be connected to the instance.'),
-  "volumes": zod.array(zod.string()).optional().describe('volumes list of existing storage volumes (i.e. disks) to be connected to the instance.'),
-  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at instance creation time, to elect an initial host consistent with the referenced groups policies and register the instance as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices.'),
-  "uefi": zod.boolean().default(createProjectRegionInstanceResponseUefiDefault).describe('enable UEFI secure firmware (vs. legacy BIOS).'),
+  "memory": zod.int().min(1).describe('The virtual machine instance memory size (in bytes).'),
+  "vcpus": zod.int().min(1).describe('The virtual machine instance number of vCPUs.'),
+  "adapters": zod.array(zod.string()).optional().describe('A list of existing network adapters to be connected to the instance.'),
+  "volumes": zod.array(zod.string()).optional().describe('A list of existing storage volumes (i.e. disks) to be connected to the instance.'),
+  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at instance creation time, to elect an initial host consistent with the referenced groups policies and register the instance as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices. Can only be set at creation time, ignored on updates.'),
+  "uefi": zod.boolean().default(createProjectRegionInstanceResponseUefiDefault).describe('Enable UEFI secure firmware (vs. legacy BIOS). Can only be set at creation time, ignored on updates.'),
   "kmotion_enabled": zod.boolean().default(createProjectRegionInstanceResponseKmotionEnabledDefault).describe('Whether kMotion (live/cold host migration) is enabled for the virtual machine instance. When disabled, the instance remains bound to its original hosting node.')
 }).describe('A virtual machine instance.')
 
@@ -436,45 +493,55 @@ export const CreateProjectZoneKomputeParams = zod.object({
   "zoneId": zod.string().describe('The ID of the availability zone.')
 })
 
+export const createProjectZoneKomputeQueryPublicDefaultOne = false;
+
 export const CreateProjectZoneKomputeQueryParams = zod.object({
   "poolId": zod.string().optional().describe('Storage pool ID (optional, region\'s default if unspecified).'),
   "templateId": zod.string().optional().describe('Template to clone the storage volume from (optional, region\'s default if unspecified).'),
-  "public": zod.boolean().optional().describe('Should Kompute be exposed over public Internet ? (a public IPv4 address will then be auto-assigned, default to false).')
+  "public": zod.boolean().default(createProjectZoneKomputeQueryPublicDefaultOne).describe('Whether the Kompute should be exposed over public Internet (a public IPv4 address will then be auto-assigned).')
 })
 
+
+
+
 export const createProjectZoneKomputeBodyDataDiskDefault = 0;
+export const createProjectZoneKomputeBodyDataDiskMin = 0;
+
 export const createProjectZoneKomputeBodyUefiDefault = true;
 export const createProjectZoneKomputeBodyKmotionEnabledDefault = true;
 
 export const CreateProjectZoneKomputeBody = zod.object({
-  "id": zod.string().optional().describe('The Kompute ID (auto-generated).'),
   "name": zod.string().describe('The Kompute name.'),
   "description": zod.string().optional().describe('The Kompute description.'),
-  "memory": zod.int().describe('The Kompute memory size (in bytes).'),
-  "vcpus": zod.int().describe('The Kompute number of vCPUs.'),
-  "disk": zod.int().describe('The Kompute OS disk size (in bytes).'),
-  "data_disk": zod.int().default(createProjectZoneKomputeBodyDataDiskDefault).describe('The Kompute extra data disk size (in bytes). If unspecified, no extra data disk will be assigned.'),
-  "ip": zod.string().optional().describe('The Kompute assigned private IPv4 address (read-only).'),
-  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at Kompute creation time, to elect an initial host consistent with the referenced groups policies and register the Kompute as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices.'),
-  "uefi": zod.boolean().default(createProjectZoneKomputeBodyUefiDefault).describe('enable UEFI secure firmware (vs. legacy BIOS).'),
+  "memory": zod.int().min(1).describe('The Kompute memory size (in bytes).'),
+  "vcpus": zod.int().min(1).describe('The Kompute number of vCPUs.'),
+  "disk": zod.int().min(1).describe('The Kompute OS disk size (in bytes).'),
+  "data_disk": zod.int().min(createProjectZoneKomputeBodyDataDiskMin).default(createProjectZoneKomputeBodyDataDiskDefault).describe('The Kompute extra data disk size (in bytes). If unspecified, no extra data disk will be assigned.'),
+  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at Kompute creation time, to elect an initial host consistent with the referenced groups policies and register the Kompute as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices. Can only be set at creation time, ignored on updates.'),
+  "uefi": zod.boolean().default(createProjectZoneKomputeBodyUefiDefault).describe('Enable UEFI secure firmware (vs. legacy BIOS). Can only be set at creation time, ignored on updates.'),
   "kmotion_enabled": zod.boolean().default(createProjectZoneKomputeBodyKmotionEnabledDefault).describe('Whether kMotion (live/cold host migration) is enabled for the Kompute. When disabled, the instance remains bound to its original hosting node.')
 }).describe('A Kompute is a wrapper object for bare virtual machines. It consists of an instance, one to several attached volumes and 2 network adapters (a private one, a public one). This is the prefered way for creating virtual machines. IP addresses will be automatically assigned.')
 
+
+
+
 export const createProjectZoneKomputeResponseDataDiskDefault = 0;
+export const createProjectZoneKomputeResponseDataDiskMin = 0;
+
 export const createProjectZoneKomputeResponseUefiDefault = true;
 export const createProjectZoneKomputeResponseKmotionEnabledDefault = true;
 
 export const CreateProjectZoneKomputeResponse = zod.object({
-  "id": zod.string().optional().describe('The Kompute ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kompute ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kompute name.'),
   "description": zod.string().optional().describe('The Kompute description.'),
-  "memory": zod.int().describe('The Kompute memory size (in bytes).'),
-  "vcpus": zod.int().describe('The Kompute number of vCPUs.'),
-  "disk": zod.int().describe('The Kompute OS disk size (in bytes).'),
-  "data_disk": zod.int().default(createProjectZoneKomputeResponseDataDiskDefault).describe('The Kompute extra data disk size (in bytes). If unspecified, no extra data disk will be assigned.'),
+  "memory": zod.int().min(1).describe('The Kompute memory size (in bytes).'),
+  "vcpus": zod.int().min(1).describe('The Kompute number of vCPUs.'),
+  "disk": zod.int().min(1).describe('The Kompute OS disk size (in bytes).'),
+  "data_disk": zod.int().min(createProjectZoneKomputeResponseDataDiskMin).default(createProjectZoneKomputeResponseDataDiskDefault).describe('The Kompute extra data disk size (in bytes). If unspecified, no extra data disk will be assigned.'),
   "ip": zod.string().optional().describe('The Kompute assigned private IPv4 address (read-only).'),
-  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at Kompute creation time, to elect an initial host consistent with the referenced groups policies and register the Kompute as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices.'),
-  "uefi": zod.boolean().default(createProjectZoneKomputeResponseUefiDefault).describe('enable UEFI secure firmware (vs. legacy BIOS).'),
+  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at Kompute creation time, to elect an initial host consistent with the referenced groups policies and register the Kompute as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices. Can only be set at creation time, ignored on updates.'),
+  "uefi": zod.boolean().default(createProjectZoneKomputeResponseUefiDefault).describe('Enable UEFI secure firmware (vs. legacy BIOS). Can only be set at creation time, ignored on updates.'),
   "kmotion_enabled": zod.boolean().default(createProjectZoneKomputeResponseKmotionEnabledDefault).describe('Whether kMotion (live/cold host migration) is enabled for the Kompute. When disabled, the instance remains bound to its original hosting node.')
 }).describe('A Kompute is a wrapper object for bare virtual machines. It consists of an instance, one to several attached volumes and 2 network adapters (a private one, a public one). This is the prefered way for creating virtual machines. IP addresses will be automatically assigned.')
 
@@ -497,45 +564,55 @@ export const CreateProjectRegionKomputeParams = zod.object({
   "regionId": zod.string().describe('The ID of the region.')
 })
 
+export const createProjectRegionKomputeQueryPublicDefaultOne = false;
+
 export const CreateProjectRegionKomputeQueryParams = zod.object({
   "poolId": zod.string().optional().describe('Storage pool ID (optional, region\'s default if unspecified).'),
   "templateId": zod.string().optional().describe('Template to clone the storage volume from (optional, region\'s default if unspecified).'),
-  "public": zod.boolean().optional().describe('Should Kompute be exposed over public Internet ? (a public IPv4 address will then be auto-assigned, default to false).')
+  "public": zod.boolean().default(createProjectRegionKomputeQueryPublicDefaultOne).describe('Whether the Kompute should be exposed over public Internet (a public IPv4 address will then be auto-assigned).')
 })
 
+
+
+
 export const createProjectRegionKomputeBodyDataDiskDefault = 0;
+export const createProjectRegionKomputeBodyDataDiskMin = 0;
+
 export const createProjectRegionKomputeBodyUefiDefault = true;
 export const createProjectRegionKomputeBodyKmotionEnabledDefault = true;
 
 export const CreateProjectRegionKomputeBody = zod.object({
-  "id": zod.string().optional().describe('The Kompute ID (auto-generated).'),
   "name": zod.string().describe('The Kompute name.'),
   "description": zod.string().optional().describe('The Kompute description.'),
-  "memory": zod.int().describe('The Kompute memory size (in bytes).'),
-  "vcpus": zod.int().describe('The Kompute number of vCPUs.'),
-  "disk": zod.int().describe('The Kompute OS disk size (in bytes).'),
-  "data_disk": zod.int().default(createProjectRegionKomputeBodyDataDiskDefault).describe('The Kompute extra data disk size (in bytes). If unspecified, no extra data disk will be assigned.'),
-  "ip": zod.string().optional().describe('The Kompute assigned private IPv4 address (read-only).'),
-  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at Kompute creation time, to elect an initial host consistent with the referenced groups policies and register the Kompute as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices.'),
-  "uefi": zod.boolean().default(createProjectRegionKomputeBodyUefiDefault).describe('enable UEFI secure firmware (vs. legacy BIOS).'),
+  "memory": zod.int().min(1).describe('The Kompute memory size (in bytes).'),
+  "vcpus": zod.int().min(1).describe('The Kompute number of vCPUs.'),
+  "disk": zod.int().min(1).describe('The Kompute OS disk size (in bytes).'),
+  "data_disk": zod.int().min(createProjectRegionKomputeBodyDataDiskMin).default(createProjectRegionKomputeBodyDataDiskDefault).describe('The Kompute extra data disk size (in bytes). If unspecified, no extra data disk will be assigned.'),
+  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at Kompute creation time, to elect an initial host consistent with the referenced groups policies and register the Kompute as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices. Can only be set at creation time, ignored on updates.'),
+  "uefi": zod.boolean().default(createProjectRegionKomputeBodyUefiDefault).describe('Enable UEFI secure firmware (vs. legacy BIOS). Can only be set at creation time, ignored on updates.'),
   "kmotion_enabled": zod.boolean().default(createProjectRegionKomputeBodyKmotionEnabledDefault).describe('Whether kMotion (live/cold host migration) is enabled for the Kompute. When disabled, the instance remains bound to its original hosting node.')
 }).describe('A Kompute is a wrapper object for bare virtual machines. It consists of an instance, one to several attached volumes and 2 network adapters (a private one, a public one). This is the prefered way for creating virtual machines. IP addresses will be automatically assigned.')
 
+
+
+
 export const createProjectRegionKomputeResponseDataDiskDefault = 0;
+export const createProjectRegionKomputeResponseDataDiskMin = 0;
+
 export const createProjectRegionKomputeResponseUefiDefault = true;
 export const createProjectRegionKomputeResponseKmotionEnabledDefault = true;
 
 export const CreateProjectRegionKomputeResponse = zod.object({
-  "id": zod.string().optional().describe('The Kompute ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kompute ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kompute name.'),
   "description": zod.string().optional().describe('The Kompute description.'),
-  "memory": zod.int().describe('The Kompute memory size (in bytes).'),
-  "vcpus": zod.int().describe('The Kompute number of vCPUs.'),
-  "disk": zod.int().describe('The Kompute OS disk size (in bytes).'),
-  "data_disk": zod.int().default(createProjectRegionKomputeResponseDataDiskDefault).describe('The Kompute extra data disk size (in bytes). If unspecified, no extra data disk will be assigned.'),
+  "memory": zod.int().min(1).describe('The Kompute memory size (in bytes).'),
+  "vcpus": zod.int().min(1).describe('The Kompute number of vCPUs.'),
+  "disk": zod.int().min(1).describe('The Kompute OS disk size (in bytes).'),
+  "data_disk": zod.int().min(createProjectRegionKomputeResponseDataDiskMin).default(createProjectRegionKomputeResponseDataDiskDefault).describe('The Kompute extra data disk size (in bytes). If unspecified, no extra data disk will be assigned.'),
   "ip": zod.string().optional().describe('The Kompute assigned private IPv4 address (read-only).'),
-  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at Kompute creation time, to elect an initial host consistent with the referenced groups policies and register the Kompute as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices.'),
-  "uefi": zod.boolean().default(createProjectRegionKomputeResponseUefiDefault).describe('enable UEFI secure firmware (vs. legacy BIOS).'),
+  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at Kompute creation time, to elect an initial host consistent with the referenced groups policies and register the Kompute as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices. Can only be set at creation time, ignored on updates.'),
+  "uefi": zod.boolean().default(createProjectRegionKomputeResponseUefiDefault).describe('Enable UEFI secure firmware (vs. legacy BIOS). Can only be set at creation time, ignored on updates.'),
   "kmotion_enabled": zod.boolean().default(createProjectRegionKomputeResponseKmotionEnabledDefault).describe('Whether kMotion (live/cold host migration) is enabled for the Kompute. When disabled, the instance remains bound to its original hosting node.')
 }).describe('A Kompute is a wrapper object for bare virtual machines. It consists of an instance, one to several attached volumes and 2 network adapters (a private one, a public one). This is the prefered way for creating virtual machines. IP addresses will be automatically assigned.')
 
@@ -549,21 +626,6 @@ export const ListProjectRegionKomputesParams = zod.object({
 
 export const ListProjectRegionKomputesResponseItem = zod.string()
 export const ListProjectRegionKomputesResponse = zod.array(ListProjectRegionKomputesResponseItem)
-
-/**
- * Returns the IDs of Kylo objects.
- */
-export const ListProjectRegionKylosParams = zod.object({
-  "projectId": zod.string().describe('The ID of the project.'),
-  "regionId": zod.string().describe('The ID of the region.')
-})
-
-export const ListProjectRegionKylosQueryParams = zod.object({
-  "nfsId": zod.string().optional().describe('NFS storage ID (optional, region\'s default if unspecified).')
-})
-
-export const ListProjectRegionKylosResponseItem = zod.string()
-export const ListProjectRegionKylosResponse = zod.array(ListProjectRegionKylosResponseItem)
 
 /**
  * Creates a new Kylo.
@@ -580,19 +642,16 @@ export const CreateProjectRegionKyloQueryParams = zod.object({
 export const createProjectRegionKyloBodyAccessDefault = `RW`;
 
 export const CreateProjectRegionKyloBody = zod.object({
-  "id": zod.string().optional().describe('The Kylo ID (auto-generated).'),
   "name": zod.string().describe('The Kylo name.'),
   "description": zod.string().optional().describe('The Kylo description.'),
   "access": zod.enum(['RO', 'RW']).default(createProjectRegionKyloBodyAccessDefault).describe('The Kylo volume access type.'),
-  "protocols": zod.array(zod.union([zod.literal(3),zod.literal(4)])).default([3, 4]).describe('The Kylo NFS protocol versions to be supported.'),
-  "endpoint": zod.string().optional().describe('The Kylo endpoint FQDN (read-only).'),
-  "size": zod.int().optional().describe('The Kylo volume bytes used (read-only).')
+  "protocols": zod.array(zod.union([zod.literal(3),zod.literal(4)])).default([3, 4]).describe('The Kylo NFS protocol versions to be supported.')
 }).describe('A Kylo provides an elastic NFS-like remote storage volume.')
 
 export const createProjectRegionKyloResponseAccessDefault = `RW`;
 
 export const CreateProjectRegionKyloResponse = zod.object({
-  "id": zod.string().optional().describe('The Kylo ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kylo ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kylo name.'),
   "description": zod.string().optional().describe('The Kylo description.'),
   "access": zod.enum(['RO', 'RW']).default(createProjectRegionKyloResponseAccessDefault).describe('The Kylo volume access type.'),
@@ -600,6 +659,21 @@ export const CreateProjectRegionKyloResponse = zod.object({
   "endpoint": zod.string().optional().describe('The Kylo endpoint FQDN (read-only).'),
   "size": zod.int().optional().describe('The Kylo volume bytes used (read-only).')
 }).describe('A Kylo provides an elastic NFS-like remote storage volume.')
+
+/**
+ * Returns the IDs of Kylo objects.
+ */
+export const ListProjectRegionKylosParams = zod.object({
+  "projectId": zod.string().describe('The ID of the project.'),
+  "regionId": zod.string().describe('The ID of the region.')
+})
+
+export const ListProjectRegionKylosQueryParams = zod.object({
+  "nfsId": zod.string().optional().describe('NFS storage ID (optional, region\'s default if unspecified).')
+})
+
+export const ListProjectRegionKylosResponseItem = zod.string()
+export const ListProjectRegionKylosResponse = zod.array(ListProjectRegionKylosResponseItem)
 
 /**
  * Creates a new Kawaii.
@@ -618,31 +692,10 @@ export const createProjectRegionKawaiiBodyDnatItemProtocolDefault = `tcp`;
 export const createProjectRegionKawaiiBodyVpcPeeringsItemPolicyDefault = `drop`;
 export const createProjectRegionKawaiiBodyVpcPeeringsItemIngressItemProtocolDefault = `tcp`;
 export const createProjectRegionKawaiiBodyVpcPeeringsItemEgressItemProtocolDefault = `tcp`;
-export const createProjectRegionKawaiiBodyIpsecConnectionsItemDpdTimeoutActionDefault = `restart`;
-export const createProjectRegionKawaiiBodyIpsecConnectionsItemDpdTimeoutDefault = `240s`;
-export const createProjectRegionKawaiiBodyIpsecConnectionsItemStartActionDefault = `start`;
-export const createProjectRegionKawaiiBodyIpsecConnectionsItemRekeyTimeDefault = `2h`;
-export const createProjectRegionKawaiiBodyIpsecConnectionsItemPhase1LifetimeDefault = `1h`;
-export const createProjectRegionKawaiiBodyIpsecConnectionsItemPhase2LifetimeDefault = `1h`;
-export const createProjectRegionKawaiiBodyIpsecConnectionsItemFirewallOneIngressItemSourceDefault = `0.0.0.0/0`;
-export const createProjectRegionKawaiiBodyIpsecConnectionsItemFirewallOneIngressItemProtocolDefault = `tcp`;
-export const createProjectRegionKawaiiBodyIpsecConnectionsItemFirewallOneEgressPolicyDefault = `accept`;
-export const createProjectRegionKawaiiBodyIpsecConnectionsItemFirewallOneEgressItemDestinationDefault = `0.0.0.0/0`;
-export const createProjectRegionKawaiiBodyIpsecConnectionsItemFirewallOneEgressItemProtocolDefault = `tcp`;
 
 export const CreateProjectRegionKawaiiBody = zod.object({
-  "id": zod.string().optional().describe('The Kawaii ID (auto-generated).'),
-  "name": zod.string().optional().describe('The Kawaii name.'),
+  "name": zod.string().optional().describe('The Kawaii name, auto-generated from the project name.'),
   "description": zod.string().optional().describe('The Kawaii description.'),
-  "netip": zod.object({
-  "public": zod.array(zod.string()).describe('The Kawaii global public gateways virtual IP addresses (read-only).'),
-  "private": zod.array(zod.string()).describe('The Kawaii global private gateways virtual IP addresses (read-only).'),
-  "zones": zod.array(zod.object({
-  "zone": zod.string().describe('The Kawaii zone name (read-only).'),
-  "public": zod.string().describe('The Kawaii zone gateway public virtual IP (read-only).'),
-  "private": zod.string().describe('The Kawaii zone gateway private virtual IP (read-only).')
-}).describe('A Kawaii Network IP zone settings.')).describe('The Kawaii per-zone list of Kowabunga virtual IP addresses.')
-}).describe('A Kawaii Network IP settings.').optional().describe('The Kawaii list of assigned virtual IPs per-zone addresses (read-only).'),
   "firewall": zod.object({
   "ingress": zod.array(zod.object({
   "source": zod.string().default(createProjectRegionKawaiiBodyFirewallOneIngressItemSourceDefault).describe('The source IP or CIDR to accept public traffic from.'),
@@ -654,63 +707,30 @@ export const CreateProjectRegionKawaiiBody = zod.object({
   "destination": zod.string().default(createProjectRegionKawaiiBodyFirewallOneEgressItemDestinationDefault).describe('The destination IP or CIDR to accept/drop public traffic to.'),
   "protocol": zod.enum(['tcp', 'udp']).default(createProjectRegionKawaiiBodyFirewallOneEgressItemProtocolDefault).describe('The transport layer protocol to accept/drop public traffic to.'),
   "ports": zod.string().describe('The port (or list of ports) to accept/drop public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall egress rule.')).optional().describe('The Kawaii public firewall list of egress rules. Kawaii default policy is to accept all outgoing traffic, including ICMP. Specified ruleset will be explicitly dropped if egress_policy is set to accept, and explicitly accepted if egress policy is set to drop..')
-}).describe('A Kawaii public firewall settings.').optional().describe('The Kawaii firewall settings from/to public Internet).'),
+}).describe('A Kawaii public firewall egress rule.')).optional().describe('The Kawaii public firewall list of egress rules. Kawaii default policy is to accept all outgoing traffic, including ICMP. Specified ruleset will be explicitly dropped if egress_policy is set to accept, and explicitly accepted if egress policy is set to drop.')
+}).describe('A Kawaii public firewall settings.').optional().describe('The Kawaii firewall settings from/to public Internet.'),
   "dnat": zod.array(zod.object({
   "destination": zod.string().describe('Target private IP address to forward public traffic to.'),
   "protocol": zod.enum(['tcp', 'udp']).default(createProjectRegionKawaiiBodyDnatItemProtocolDefault).describe('The transport layer protocol to forward public traffic to.'),
   "ports": zod.string().describe('The port (or list of ports) to forward public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
 }).describe('A Kawaii public firewall destination NAT rule.')).optional().describe('The Kawaii list of NAT forwarding entries. Kawaii will forward public Internet traffic from all public virtual IPs to requested private subnet IP addresses.'),
   "vpc_peerings": zod.array(zod.object({
-  "subnet": zod.string().describe('Kowabunga Subnet ID to be peered with (subnet local IP addresses will be automatically assigned to Kawaii instances)..'),
+  "subnet": zod.string().describe('Kowabunga Subnet ID to be peered with (subnet local IP addresses will be automatically assigned to Kawaii instances).'),
   "policy": zod.enum(['accept', 'drop']).default(createProjectRegionKawaiiBodyVpcPeeringsItemPolicyDefault).describe('The default VPC traffic forwarding policy.'),
   "ingress": zod.array(zod.object({
-  "protocol": zod.enum(['tcp', 'udp']).default(createProjectRegionKawaiiBodyVpcPeeringsItemIngressItemProtocolDefault).describe('The transport layer protocol to forward public traffic to.'),
-  "ports": zod.string().describe('The port (or list of ports) to forward public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
+  "protocol": zod.enum(['tcp', 'udp']).default(createProjectRegionKawaiiBodyVpcPeeringsItemIngressItemProtocolDefault).describe('The transport layer protocol to forward VPC traffic to.'),
+  "ports": zod.string().describe('The port (or list of ports) to forward VPC traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
 }).describe('A Kawaii VPC firewall forwarding rule.')).optional().describe('The firewall list of forwarding ingress rules from VPC peered subnet. ICMP traffic is always accepted. The specified ruleset will be explicitly accepted if drop is the default policy (useless otherwise).'),
   "egress": zod.array(zod.object({
-  "protocol": zod.enum(['tcp', 'udp']).default(createProjectRegionKawaiiBodyVpcPeeringsItemEgressItemProtocolDefault).describe('The transport layer protocol to forward public traffic to.'),
-  "ports": zod.string().describe('The port (or list of ports) to forward public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
+  "protocol": zod.enum(['tcp', 'udp']).default(createProjectRegionKawaiiBodyVpcPeeringsItemEgressItemProtocolDefault).describe('The transport layer protocol to forward VPC traffic to.'),
+  "ports": zod.string().describe('The port (or list of ports) to forward VPC traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
 }).describe('A Kawaii VPC firewall forwarding rule.')).optional().describe('The firewall list of forwarding egress rules to VPC peered subnet. ICMP traffic is always accepted. The specified ruleset will be explicitly accepted if drop is the default policy (useless otherwise).'),
   "netip": zod.array(zod.object({
   "zone": zod.string().describe('The Kawaii zone name (read-only).'),
-  "private": zod.string().describe('The Kawaii zone gateway private IP address in VPC peered subnet  (read-only).')
-}).describe('A Kawaii VPC Network IP zone settings.')).optional().describe('The per-zone auto-assigned private IPs in peered subnet (read-only).')
-}).describe('A Kawaii internal VPC subnet peering.')).optional().describe('The Kawaii list of Kowabunga private VPC subnet peering entries.'),
-  "ipsec_connections": zod.array(zod.object({
-  "id": zod.string().optional().describe('The Kawaii IPsec connection ID (auto-generated).'),
-  "name": zod.string().describe('The Kawaii IPsec connection name.'),
-  "description": zod.string().optional().describe('The Kawaii IPsec connection description.'),
-  "ip": zod.string().optional().describe('The Kawaii IPsec connection IPSec IP.'),
-  "remote_ip": zod.string().describe('The Kawaii IPsec connection remote peer VPN Gateway.'),
-  "remote_subnet": zod.string().describe('The Kawaii IPsec connection remote subnet.'),
-  "pre_shared_key": zod.string().describe('The Kawaii IPsec connection pre-shared key(PSK).'),
-  "dpd_timeout_action": zod.enum(['clear', 'restart', 'start']).default(createProjectRegionKawaiiBodyIpsecConnectionsItemDpdTimeoutActionDefault).describe('The Kawaii IPsec connection Dead Peer Detection Action (clear,restart or trap).'),
-  "dpd_timeout": zod.string().default(createProjectRegionKawaiiBodyIpsecConnectionsItemDpdTimeoutDefault).describe('The Kawaii IPsec connection Dead Peer Detection Timeout.'),
-  "start_action": zod.enum(['none', 'start', 'trap']).default(createProjectRegionKawaiiBodyIpsecConnectionsItemStartActionDefault).describe('The Kawaii IPsec connection start action (none, start, trap).'),
-  "rekey_time": zod.string().default(createProjectRegionKawaiiBodyIpsecConnectionsItemRekeyTimeDefault).describe('The Kawaii IPsec connection rekey time. Default is 2h.'),
-  "phase1_lifetime": zod.string().default(createProjectRegionKawaiiBodyIpsecConnectionsItemPhase1LifetimeDefault).describe('The Kawaii IPsec connection Lifetime for phase 1 negociation. Default is 1h.'),
-  "phase1_dh_group_number": zod.union([zod.literal(2),zod.literal(5),zod.literal(14),zod.literal(15),zod.literal(16),zod.literal(17),zod.literal(18),zod.literal(19),zod.literal(20),zod.literal(21),zod.literal(22),zod.literal(23),zod.literal(24)]).describe('The Kawaii IPsec connection phase 1 Diffie Hellman IANA algorithm.'),
-  "phase1_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 1 integrity algorithm..'),
-  "phase1_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 1 encryption algorithm..'),
-  "phase2_lifetime": zod.string().default(createProjectRegionKawaiiBodyIpsecConnectionsItemPhase2LifetimeDefault).describe('The Kawaii IPsec connection Lifetime for phase 2 negociation. Default is 1h.'),
-  "phase2_dh_group_number": zod.union([zod.literal(2),zod.literal(5),zod.literal(14),zod.literal(15),zod.literal(16),zod.literal(17),zod.literal(18),zod.literal(19),zod.literal(20),zod.literal(21),zod.literal(22),zod.literal(23),zod.literal(24)]).describe('The Kawaii IPsec connection phase 2 Diffie Hellman IANA algorithm.'),
-  "phase2_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 2 integrity algorithm..'),
-  "phase2_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 2 encryption algorithm..'),
-  "firewall": zod.object({
-  "ingress": zod.array(zod.object({
-  "source": zod.string().default(createProjectRegionKawaiiBodyIpsecConnectionsItemFirewallOneIngressItemSourceDefault).describe('The source IP or CIDR to accept public traffic from.'),
-  "protocol": zod.enum(['tcp', 'udp']).default(createProjectRegionKawaiiBodyIpsecConnectionsItemFirewallOneIngressItemProtocolDefault).describe('The transport layer protocol to accept public traffic from.'),
-  "ports": zod.string().describe('The port (or list of ports) to accept public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall ingress rule.')).optional().describe('The Kawaii public firewall list of ingress rules. Kawaii default policy is to drop all incoming traffic, including ICMP. Specified ruleset will be explicitly accepted.'),
-  "egress_policy": zod.enum(['accept', 'drop']).default(createProjectRegionKawaiiBodyIpsecConnectionsItemFirewallOneEgressPolicyDefault).describe('The default public traffic egress policy.'),
-  "egress": zod.array(zod.object({
-  "destination": zod.string().default(createProjectRegionKawaiiBodyIpsecConnectionsItemFirewallOneEgressItemDestinationDefault).describe('The destination IP or CIDR to accept/drop public traffic to.'),
-  "protocol": zod.enum(['tcp', 'udp']).default(createProjectRegionKawaiiBodyIpsecConnectionsItemFirewallOneEgressItemProtocolDefault).describe('The transport layer protocol to accept/drop public traffic to.'),
-  "ports": zod.string().describe('The port (or list of ports) to accept/drop public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall egress rule.')).optional().describe('The Kawaii public firewall list of egress rules. Kawaii default policy is to accept all outgoing traffic, including ICMP. Specified ruleset will be explicitly dropped if egress_policy is set to accept, and explicitly accepted if egress policy is set to drop..')
-}).describe('A Kawaii public firewall settings.').optional().describe('The Kawaii IPsec connection firewall settings on the IPsec interface.')
-}).describe('A Kawaii IPsec connection.')).optional().describe('The Kawaii list of Kowabunga IPsec connections.')
+  "public": zod.string().optional().describe('The Kawaii zone gateway public virtual IP (unset for VPC peered subnets) (read-only).'),
+  "private": zod.string().describe('The Kawaii zone gateway private virtual IP (read-only).')
+}).describe('A Kawaii Network IP zone settings.')).optional().describe('The per-zone auto-assigned private IPs in peered subnet (read-only).')
+}).describe('A Kawaii internal VPC subnet peering.')).optional().describe('The Kawaii list of Kowabunga private VPC subnet peering entries. Can only be set at creation time, ignored on updates.')
 }).describe('A Kawaii (Kowabunga Adapative WAn Intelligent Interface) is a network gateway used for your Internet inbound and outbound traffic.')
 
 export const createProjectRegionKawaiiResponseFirewallOneIngressItemSourceDefault = `0.0.0.0/0`;
@@ -722,30 +742,19 @@ export const createProjectRegionKawaiiResponseDnatItemProtocolDefault = `tcp`;
 export const createProjectRegionKawaiiResponseVpcPeeringsItemPolicyDefault = `drop`;
 export const createProjectRegionKawaiiResponseVpcPeeringsItemIngressItemProtocolDefault = `tcp`;
 export const createProjectRegionKawaiiResponseVpcPeeringsItemEgressItemProtocolDefault = `tcp`;
-export const createProjectRegionKawaiiResponseIpsecConnectionsItemDpdTimeoutActionDefault = `restart`;
-export const createProjectRegionKawaiiResponseIpsecConnectionsItemDpdTimeoutDefault = `240s`;
-export const createProjectRegionKawaiiResponseIpsecConnectionsItemStartActionDefault = `start`;
-export const createProjectRegionKawaiiResponseIpsecConnectionsItemRekeyTimeDefault = `2h`;
-export const createProjectRegionKawaiiResponseIpsecConnectionsItemPhase1LifetimeDefault = `1h`;
-export const createProjectRegionKawaiiResponseIpsecConnectionsItemPhase2LifetimeDefault = `1h`;
-export const createProjectRegionKawaiiResponseIpsecConnectionsItemFirewallOneIngressItemSourceDefault = `0.0.0.0/0`;
-export const createProjectRegionKawaiiResponseIpsecConnectionsItemFirewallOneIngressItemProtocolDefault = `tcp`;
-export const createProjectRegionKawaiiResponseIpsecConnectionsItemFirewallOneEgressPolicyDefault = `accept`;
-export const createProjectRegionKawaiiResponseIpsecConnectionsItemFirewallOneEgressItemDestinationDefault = `0.0.0.0/0`;
-export const createProjectRegionKawaiiResponseIpsecConnectionsItemFirewallOneEgressItemProtocolDefault = `tcp`;
 
 export const CreateProjectRegionKawaiiResponse = zod.object({
-  "id": zod.string().optional().describe('The Kawaii ID (auto-generated).'),
-  "name": zod.string().optional().describe('The Kawaii name.'),
+  "id": zod.string().optional().describe('The Kawaii ID (auto-generated) (read-only).'),
+  "name": zod.string().optional().describe('The Kawaii name, auto-generated from the project name.'),
   "description": zod.string().optional().describe('The Kawaii description.'),
   "netip": zod.object({
   "public": zod.array(zod.string()).describe('The Kawaii global public gateways virtual IP addresses (read-only).'),
   "private": zod.array(zod.string()).describe('The Kawaii global private gateways virtual IP addresses (read-only).'),
   "zones": zod.array(zod.object({
   "zone": zod.string().describe('The Kawaii zone name (read-only).'),
-  "public": zod.string().describe('The Kawaii zone gateway public virtual IP (read-only).'),
+  "public": zod.string().optional().describe('The Kawaii zone gateway public virtual IP (unset for VPC peered subnets) (read-only).'),
   "private": zod.string().describe('The Kawaii zone gateway private virtual IP (read-only).')
-}).describe('A Kawaii Network IP zone settings.')).describe('The Kawaii per-zone list of Kowabunga virtual IP addresses.')
+}).describe('A Kawaii Network IP zone settings.')).describe('The Kawaii per-zone list of Kowabunga virtual IP addresses (read-only).')
 }).describe('A Kawaii Network IP settings.').optional().describe('The Kawaii list of assigned virtual IPs per-zone addresses (read-only).'),
   "firewall": zod.object({
   "ingress": zod.array(zod.object({
@@ -758,63 +767,30 @@ export const CreateProjectRegionKawaiiResponse = zod.object({
   "destination": zod.string().default(createProjectRegionKawaiiResponseFirewallOneEgressItemDestinationDefault).describe('The destination IP or CIDR to accept/drop public traffic to.'),
   "protocol": zod.enum(['tcp', 'udp']).default(createProjectRegionKawaiiResponseFirewallOneEgressItemProtocolDefault).describe('The transport layer protocol to accept/drop public traffic to.'),
   "ports": zod.string().describe('The port (or list of ports) to accept/drop public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall egress rule.')).optional().describe('The Kawaii public firewall list of egress rules. Kawaii default policy is to accept all outgoing traffic, including ICMP. Specified ruleset will be explicitly dropped if egress_policy is set to accept, and explicitly accepted if egress policy is set to drop..')
-}).describe('A Kawaii public firewall settings.').optional().describe('The Kawaii firewall settings from/to public Internet).'),
+}).describe('A Kawaii public firewall egress rule.')).optional().describe('The Kawaii public firewall list of egress rules. Kawaii default policy is to accept all outgoing traffic, including ICMP. Specified ruleset will be explicitly dropped if egress_policy is set to accept, and explicitly accepted if egress policy is set to drop.')
+}).describe('A Kawaii public firewall settings.').optional().describe('The Kawaii firewall settings from/to public Internet.'),
   "dnat": zod.array(zod.object({
   "destination": zod.string().describe('Target private IP address to forward public traffic to.'),
   "protocol": zod.enum(['tcp', 'udp']).default(createProjectRegionKawaiiResponseDnatItemProtocolDefault).describe('The transport layer protocol to forward public traffic to.'),
   "ports": zod.string().describe('The port (or list of ports) to forward public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
 }).describe('A Kawaii public firewall destination NAT rule.')).optional().describe('The Kawaii list of NAT forwarding entries. Kawaii will forward public Internet traffic from all public virtual IPs to requested private subnet IP addresses.'),
   "vpc_peerings": zod.array(zod.object({
-  "subnet": zod.string().describe('Kowabunga Subnet ID to be peered with (subnet local IP addresses will be automatically assigned to Kawaii instances)..'),
+  "subnet": zod.string().describe('Kowabunga Subnet ID to be peered with (subnet local IP addresses will be automatically assigned to Kawaii instances).'),
   "policy": zod.enum(['accept', 'drop']).default(createProjectRegionKawaiiResponseVpcPeeringsItemPolicyDefault).describe('The default VPC traffic forwarding policy.'),
   "ingress": zod.array(zod.object({
-  "protocol": zod.enum(['tcp', 'udp']).default(createProjectRegionKawaiiResponseVpcPeeringsItemIngressItemProtocolDefault).describe('The transport layer protocol to forward public traffic to.'),
-  "ports": zod.string().describe('The port (or list of ports) to forward public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
+  "protocol": zod.enum(['tcp', 'udp']).default(createProjectRegionKawaiiResponseVpcPeeringsItemIngressItemProtocolDefault).describe('The transport layer protocol to forward VPC traffic to.'),
+  "ports": zod.string().describe('The port (or list of ports) to forward VPC traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
 }).describe('A Kawaii VPC firewall forwarding rule.')).optional().describe('The firewall list of forwarding ingress rules from VPC peered subnet. ICMP traffic is always accepted. The specified ruleset will be explicitly accepted if drop is the default policy (useless otherwise).'),
   "egress": zod.array(zod.object({
-  "protocol": zod.enum(['tcp', 'udp']).default(createProjectRegionKawaiiResponseVpcPeeringsItemEgressItemProtocolDefault).describe('The transport layer protocol to forward public traffic to.'),
-  "ports": zod.string().describe('The port (or list of ports) to forward public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
+  "protocol": zod.enum(['tcp', 'udp']).default(createProjectRegionKawaiiResponseVpcPeeringsItemEgressItemProtocolDefault).describe('The transport layer protocol to forward VPC traffic to.'),
+  "ports": zod.string().describe('The port (or list of ports) to forward VPC traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
 }).describe('A Kawaii VPC firewall forwarding rule.')).optional().describe('The firewall list of forwarding egress rules to VPC peered subnet. ICMP traffic is always accepted. The specified ruleset will be explicitly accepted if drop is the default policy (useless otherwise).'),
   "netip": zod.array(zod.object({
   "zone": zod.string().describe('The Kawaii zone name (read-only).'),
-  "private": zod.string().describe('The Kawaii zone gateway private IP address in VPC peered subnet  (read-only).')
-}).describe('A Kawaii VPC Network IP zone settings.')).optional().describe('The per-zone auto-assigned private IPs in peered subnet (read-only).')
-}).describe('A Kawaii internal VPC subnet peering.')).optional().describe('The Kawaii list of Kowabunga private VPC subnet peering entries.'),
-  "ipsec_connections": zod.array(zod.object({
-  "id": zod.string().optional().describe('The Kawaii IPsec connection ID (auto-generated).'),
-  "name": zod.string().describe('The Kawaii IPsec connection name.'),
-  "description": zod.string().optional().describe('The Kawaii IPsec connection description.'),
-  "ip": zod.string().optional().describe('The Kawaii IPsec connection IPSec IP.'),
-  "remote_ip": zod.string().describe('The Kawaii IPsec connection remote peer VPN Gateway.'),
-  "remote_subnet": zod.string().describe('The Kawaii IPsec connection remote subnet.'),
-  "pre_shared_key": zod.string().describe('The Kawaii IPsec connection pre-shared key(PSK).'),
-  "dpd_timeout_action": zod.enum(['clear', 'restart', 'start']).default(createProjectRegionKawaiiResponseIpsecConnectionsItemDpdTimeoutActionDefault).describe('The Kawaii IPsec connection Dead Peer Detection Action (clear,restart or trap).'),
-  "dpd_timeout": zod.string().default(createProjectRegionKawaiiResponseIpsecConnectionsItemDpdTimeoutDefault).describe('The Kawaii IPsec connection Dead Peer Detection Timeout.'),
-  "start_action": zod.enum(['none', 'start', 'trap']).default(createProjectRegionKawaiiResponseIpsecConnectionsItemStartActionDefault).describe('The Kawaii IPsec connection start action (none, start, trap).'),
-  "rekey_time": zod.string().default(createProjectRegionKawaiiResponseIpsecConnectionsItemRekeyTimeDefault).describe('The Kawaii IPsec connection rekey time. Default is 2h.'),
-  "phase1_lifetime": zod.string().default(createProjectRegionKawaiiResponseIpsecConnectionsItemPhase1LifetimeDefault).describe('The Kawaii IPsec connection Lifetime for phase 1 negociation. Default is 1h.'),
-  "phase1_dh_group_number": zod.union([zod.literal(2),zod.literal(5),zod.literal(14),zod.literal(15),zod.literal(16),zod.literal(17),zod.literal(18),zod.literal(19),zod.literal(20),zod.literal(21),zod.literal(22),zod.literal(23),zod.literal(24)]).describe('The Kawaii IPsec connection phase 1 Diffie Hellman IANA algorithm.'),
-  "phase1_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 1 integrity algorithm..'),
-  "phase1_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 1 encryption algorithm..'),
-  "phase2_lifetime": zod.string().default(createProjectRegionKawaiiResponseIpsecConnectionsItemPhase2LifetimeDefault).describe('The Kawaii IPsec connection Lifetime for phase 2 negociation. Default is 1h.'),
-  "phase2_dh_group_number": zod.union([zod.literal(2),zod.literal(5),zod.literal(14),zod.literal(15),zod.literal(16),zod.literal(17),zod.literal(18),zod.literal(19),zod.literal(20),zod.literal(21),zod.literal(22),zod.literal(23),zod.literal(24)]).describe('The Kawaii IPsec connection phase 2 Diffie Hellman IANA algorithm.'),
-  "phase2_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 2 integrity algorithm..'),
-  "phase2_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 2 encryption algorithm..'),
-  "firewall": zod.object({
-  "ingress": zod.array(zod.object({
-  "source": zod.string().default(createProjectRegionKawaiiResponseIpsecConnectionsItemFirewallOneIngressItemSourceDefault).describe('The source IP or CIDR to accept public traffic from.'),
-  "protocol": zod.enum(['tcp', 'udp']).default(createProjectRegionKawaiiResponseIpsecConnectionsItemFirewallOneIngressItemProtocolDefault).describe('The transport layer protocol to accept public traffic from.'),
-  "ports": zod.string().describe('The port (or list of ports) to accept public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall ingress rule.')).optional().describe('The Kawaii public firewall list of ingress rules. Kawaii default policy is to drop all incoming traffic, including ICMP. Specified ruleset will be explicitly accepted.'),
-  "egress_policy": zod.enum(['accept', 'drop']).default(createProjectRegionKawaiiResponseIpsecConnectionsItemFirewallOneEgressPolicyDefault).describe('The default public traffic egress policy.'),
-  "egress": zod.array(zod.object({
-  "destination": zod.string().default(createProjectRegionKawaiiResponseIpsecConnectionsItemFirewallOneEgressItemDestinationDefault).describe('The destination IP or CIDR to accept/drop public traffic to.'),
-  "protocol": zod.enum(['tcp', 'udp']).default(createProjectRegionKawaiiResponseIpsecConnectionsItemFirewallOneEgressItemProtocolDefault).describe('The transport layer protocol to accept/drop public traffic to.'),
-  "ports": zod.string().describe('The port (or list of ports) to accept/drop public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall egress rule.')).optional().describe('The Kawaii public firewall list of egress rules. Kawaii default policy is to accept all outgoing traffic, including ICMP. Specified ruleset will be explicitly dropped if egress_policy is set to accept, and explicitly accepted if egress policy is set to drop..')
-}).describe('A Kawaii public firewall settings.').optional().describe('The Kawaii IPsec connection firewall settings on the IPsec interface.')
-}).describe('A Kawaii IPsec connection.')).optional().describe('The Kawaii list of Kowabunga IPsec connections.')
+  "public": zod.string().optional().describe('The Kawaii zone gateway public virtual IP (unset for VPC peered subnets) (read-only).'),
+  "private": zod.string().describe('The Kawaii zone gateway private virtual IP (read-only).')
+}).describe('A Kawaii Network IP zone settings.')).optional().describe('The per-zone auto-assigned private IPs in peered subnet (read-only).')
+}).describe('A Kawaii internal VPC subnet peering.')).optional().describe('The Kawaii list of Kowabunga private VPC subnet peering entries. Can only be set at creation time, ignored on updates.')
 }).describe('A Kawaii (Kowabunga Adapative WAn Intelligent Interface) is a network gateway used for your Internet inbound and outbound traffic.')
 
 /**
@@ -837,41 +813,49 @@ export const CreateProjectZoneKonveyParams = zod.object({
 })
 
 export const createProjectZoneKonveyBodyFailoverDefault = true;
+export const createProjectZoneKonveyBodyEndpointsItemPortMax = 65535;
+
 export const createProjectZoneKonveyBodyEndpointsItemProtocolDefault = `tcp`;
+export const createProjectZoneKonveyBodyEndpointsItemBackendsOnePortMax = 65535;
+
+
 
 export const CreateProjectZoneKonveyBody = zod.object({
-  "id": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) ID (auto-generated).'),
-  "name": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) name.'),
+  "name": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) name, prefixed with konvey- (project name if unspecified).'),
   "description": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) description.'),
-  "vip": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) assigned private virtual IP address (read-only).'),
-  "failover": zod.boolean().default(createProjectZoneKonveyBodyFailoverDefault).describe('Whether Konvey (Kowabunga Network Load-Balancer) must be deployed in a highly-available replicated state to support service failover.'),
+  "failover": zod.boolean().default(createProjectZoneKonveyBodyFailoverDefault).describe('Whether Konvey (Kowabunga Network Load-Balancer) must be deployed in a highly-available replicated state to support service failover. Can only be set at creation time, ignored on updates.'),
   "endpoints": zod.array(zod.object({
   "name": zod.string().describe('The Konvey (Kowabunga Network Load-Balancer) endpoint name.'),
-  "port": zod.int().describe('The port to be exposed.'),
+  "port": zod.int().min(1).max(createProjectZoneKonveyBodyEndpointsItemPortMax).describe('The port to be exposed.'),
   "protocol": zod.enum(['tcp', 'udp']).default(createProjectZoneKonveyBodyEndpointsItemProtocolDefault).describe('The transport layer protocol to be exposed.'),
   "backends": zod.object({
   "hosts": zod.array(zod.string()).describe('The Konvey (Kowabunga Network Load-Balancer) endpoint list of load-balanced backend hosts.'),
-  "port": zod.int().describe('The Konvey (Kowabunga Network Load-Balancer) endpoint backend service port.')
+  "port": zod.int().min(1).max(createProjectZoneKonveyBodyEndpointsItemBackendsOnePortMax).describe('The Konvey (Kowabunga Network Load-Balancer) endpoint backend service port.')
 }).describe('A Konvey Backends settings.').describe('The Konvey (Kowabunga Network Load-Balancer) list of load-balanced backends.')
 }).describe('A Konvey Endpoint Service settings.')).describe('The Konvey (Kowabunga Network Load-Balancer) list of load-balanced endpoints.')
 }).describe('A Kowabunga Konvey is a layer-4 network load-balancer used to distribute service requests to associated backend instances.')
 
 export const createProjectZoneKonveyResponseFailoverDefault = true;
+export const createProjectZoneKonveyResponseEndpointsItemPortMax = 65535;
+
 export const createProjectZoneKonveyResponseEndpointsItemProtocolDefault = `tcp`;
+export const createProjectZoneKonveyResponseEndpointsItemBackendsOnePortMax = 65535;
+
+
 
 export const CreateProjectZoneKonveyResponse = zod.object({
-  "id": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) ID (auto-generated).'),
-  "name": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) name.'),
+  "id": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) ID (auto-generated) (read-only).'),
+  "name": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) name, prefixed with konvey- (project name if unspecified).'),
   "description": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) description.'),
   "vip": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) assigned private virtual IP address (read-only).'),
-  "failover": zod.boolean().default(createProjectZoneKonveyResponseFailoverDefault).describe('Whether Konvey (Kowabunga Network Load-Balancer) must be deployed in a highly-available replicated state to support service failover.'),
+  "failover": zod.boolean().default(createProjectZoneKonveyResponseFailoverDefault).describe('Whether Konvey (Kowabunga Network Load-Balancer) must be deployed in a highly-available replicated state to support service failover. Can only be set at creation time, ignored on updates.'),
   "endpoints": zod.array(zod.object({
   "name": zod.string().describe('The Konvey (Kowabunga Network Load-Balancer) endpoint name.'),
-  "port": zod.int().describe('The port to be exposed.'),
+  "port": zod.int().min(1).max(createProjectZoneKonveyResponseEndpointsItemPortMax).describe('The port to be exposed.'),
   "protocol": zod.enum(['tcp', 'udp']).default(createProjectZoneKonveyResponseEndpointsItemProtocolDefault).describe('The transport layer protocol to be exposed.'),
   "backends": zod.object({
   "hosts": zod.array(zod.string()).describe('The Konvey (Kowabunga Network Load-Balancer) endpoint list of load-balanced backend hosts.'),
-  "port": zod.int().describe('The Konvey (Kowabunga Network Load-Balancer) endpoint backend service port.')
+  "port": zod.int().min(1).max(createProjectZoneKonveyResponseEndpointsItemBackendsOnePortMax).describe('The Konvey (Kowabunga Network Load-Balancer) endpoint backend service port.')
 }).describe('A Konvey Backends settings.').describe('The Konvey (Kowabunga Network Load-Balancer) list of load-balanced backends.')
 }).describe('A Konvey Endpoint Service settings.')).describe('The Konvey (Kowabunga Network Load-Balancer) list of load-balanced endpoints.')
 }).describe('A Kowabunga Konvey is a layer-4 network load-balancer used to distribute service requests to associated backend instances.')
@@ -896,41 +880,49 @@ export const CreateProjectRegionKonveyParams = zod.object({
 })
 
 export const createProjectRegionKonveyBodyFailoverDefault = true;
+export const createProjectRegionKonveyBodyEndpointsItemPortMax = 65535;
+
 export const createProjectRegionKonveyBodyEndpointsItemProtocolDefault = `tcp`;
+export const createProjectRegionKonveyBodyEndpointsItemBackendsOnePortMax = 65535;
+
+
 
 export const CreateProjectRegionKonveyBody = zod.object({
-  "id": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) ID (auto-generated).'),
-  "name": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) name.'),
+  "name": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) name, prefixed with konvey- (project name if unspecified).'),
   "description": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) description.'),
-  "vip": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) assigned private virtual IP address (read-only).'),
-  "failover": zod.boolean().default(createProjectRegionKonveyBodyFailoverDefault).describe('Whether Konvey (Kowabunga Network Load-Balancer) must be deployed in a highly-available replicated state to support service failover.'),
+  "failover": zod.boolean().default(createProjectRegionKonveyBodyFailoverDefault).describe('Whether Konvey (Kowabunga Network Load-Balancer) must be deployed in a highly-available replicated state to support service failover. Can only be set at creation time, ignored on updates.'),
   "endpoints": zod.array(zod.object({
   "name": zod.string().describe('The Konvey (Kowabunga Network Load-Balancer) endpoint name.'),
-  "port": zod.int().describe('The port to be exposed.'),
+  "port": zod.int().min(1).max(createProjectRegionKonveyBodyEndpointsItemPortMax).describe('The port to be exposed.'),
   "protocol": zod.enum(['tcp', 'udp']).default(createProjectRegionKonveyBodyEndpointsItemProtocolDefault).describe('The transport layer protocol to be exposed.'),
   "backends": zod.object({
   "hosts": zod.array(zod.string()).describe('The Konvey (Kowabunga Network Load-Balancer) endpoint list of load-balanced backend hosts.'),
-  "port": zod.int().describe('The Konvey (Kowabunga Network Load-Balancer) endpoint backend service port.')
+  "port": zod.int().min(1).max(createProjectRegionKonveyBodyEndpointsItemBackendsOnePortMax).describe('The Konvey (Kowabunga Network Load-Balancer) endpoint backend service port.')
 }).describe('A Konvey Backends settings.').describe('The Konvey (Kowabunga Network Load-Balancer) list of load-balanced backends.')
 }).describe('A Konvey Endpoint Service settings.')).describe('The Konvey (Kowabunga Network Load-Balancer) list of load-balanced endpoints.')
 }).describe('A Kowabunga Konvey is a layer-4 network load-balancer used to distribute service requests to associated backend instances.')
 
 export const createProjectRegionKonveyResponseFailoverDefault = true;
+export const createProjectRegionKonveyResponseEndpointsItemPortMax = 65535;
+
 export const createProjectRegionKonveyResponseEndpointsItemProtocolDefault = `tcp`;
+export const createProjectRegionKonveyResponseEndpointsItemBackendsOnePortMax = 65535;
+
+
 
 export const CreateProjectRegionKonveyResponse = zod.object({
-  "id": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) ID (auto-generated).'),
-  "name": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) name.'),
+  "id": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) ID (auto-generated) (read-only).'),
+  "name": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) name, prefixed with konvey- (project name if unspecified).'),
   "description": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) description.'),
   "vip": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) assigned private virtual IP address (read-only).'),
-  "failover": zod.boolean().default(createProjectRegionKonveyResponseFailoverDefault).describe('Whether Konvey (Kowabunga Network Load-Balancer) must be deployed in a highly-available replicated state to support service failover.'),
+  "failover": zod.boolean().default(createProjectRegionKonveyResponseFailoverDefault).describe('Whether Konvey (Kowabunga Network Load-Balancer) must be deployed in a highly-available replicated state to support service failover. Can only be set at creation time, ignored on updates.'),
   "endpoints": zod.array(zod.object({
   "name": zod.string().describe('The Konvey (Kowabunga Network Load-Balancer) endpoint name.'),
-  "port": zod.int().describe('The port to be exposed.'),
+  "port": zod.int().min(1).max(createProjectRegionKonveyResponseEndpointsItemPortMax).describe('The port to be exposed.'),
   "protocol": zod.enum(['tcp', 'udp']).default(createProjectRegionKonveyResponseEndpointsItemProtocolDefault).describe('The transport layer protocol to be exposed.'),
   "backends": zod.object({
   "hosts": zod.array(zod.string()).describe('The Konvey (Kowabunga Network Load-Balancer) endpoint list of load-balanced backend hosts.'),
-  "port": zod.int().describe('The Konvey (Kowabunga Network Load-Balancer) endpoint backend service port.')
+  "port": zod.int().min(1).max(createProjectRegionKonveyResponseEndpointsItemBackendsOnePortMax).describe('The Konvey (Kowabunga Network Load-Balancer) endpoint backend service port.')
 }).describe('A Konvey Backends settings.').describe('The Konvey (Kowabunga Network Load-Balancer) list of load-balanced backends.')
 }).describe('A Konvey Endpoint Service settings.')).describe('The Konvey (Kowabunga Network Load-Balancer) list of load-balanced endpoints.')
 }).describe('A Kowabunga Konvey is a layer-4 network load-balancer used to distribute service requests to associated backend instances.')

@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   HttpResponse,
@@ -20,14 +20,14 @@ import type {
 } from '../../model';
 
 import {
-  getCreateAdapterResponseMock,
+  getCreateSubnetAdapterResponseMock,
   getListSubnetAdaptersResponseMock,
   getListSubnetsResponseMock,
   getReadSubnetResponseMock,
   getUpdateSubnetResponseMock
 } from './subnet.faker';
 
-export { getListSubnetsResponseMock, getReadSubnetResponseMock, getUpdateSubnetResponseMock, getCreateAdapterResponseMock, getListSubnetAdaptersResponseMock } from './subnet.faker';
+export { getListSubnetsResponseMock, getReadSubnetResponseMock, getUpdateSubnetResponseMock, getCreateSubnetAdapterResponseMock, getListSubnetAdaptersResponseMock } from './subnet.faker';
 
 
 export const getListSubnetsMockHandler = (overrideResponse?: ObjectIds | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ObjectIds> | ObjectIds), options?: RequestHandlerOptions) => {
@@ -76,13 +76,13 @@ export const getUpdateSubnetMockHandler = (overrideResponse?: Subnet | ((info: P
   }, options)
 }
 
-export const getCreateAdapterMockHandler = (overrideResponse?: Adapter | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<Adapter> | Adapter), options?: RequestHandlerOptions) => {
+export const getCreateSubnetAdapterMockHandler = (overrideResponse?: Adapter | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<Adapter> | Adapter), options?: RequestHandlerOptions) => {
   return http.post('/api/v1/subnet/:subnetId/adapter', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
 
 
     return HttpResponse.json(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getCreateAdapterResponseMock(),
+    : getCreateSubnetAdapterResponseMock(),
       { status: 201
       })
   }, options)
@@ -104,6 +104,6 @@ export const getSubnetMock = () => [
   getDeleteSubnetMockHandler(),
   getReadSubnetMockHandler(),
   getUpdateSubnetMockHandler(),
-  getCreateAdapterMockHandler(),
+  getCreateSubnetAdapterMockHandler(),
   getListSubnetAdaptersMockHandler()
 ]

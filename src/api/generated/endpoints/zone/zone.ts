@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   useMutation,
@@ -29,16 +29,45 @@ import type {
   ConflictResponse,
   ForbiddenResponse,
   InsufficientResourceResponse,
+  InternalServerErrorResponse,
   Kaktus,
   NotFoundResponse,
   ObjectIds,
   UnauthorizedResponse,
   UnprocessableEntityResponse,
-  Zone
+  Zone,
+  ZoneUpdate
 } from '../../model';
 
 import { kowabungaFetch } from '../../../client';
 import type { ErrorType , BodyType } from '../../../client';
+
+// https://stackoverflow.com/questions/49579094/typescript-conditional-types-filter-out-readonly-properties-pick-only-requir/49579497#49579497
+type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <
+T,
+>() => T extends Y ? 1 : 2
+? A
+: B;
+
+type WritableKeys<T> = {
+[P in keyof T]-?: IfEquals<
+  { [Q in P]: T[P] },
+  { -readonly [Q in P]: T[P] },
+  P
+>;
+}[keyof T];
+
+type UnionToIntersection<U> =
+  (U extends any ? (k: U)=>void : never) extends ((k: infer I)=>void) ? I : never;
+type DistributeReadOnlyOverUnions<T> = T extends any ? NonReadonly<T> : never;
+
+type Writable<T> = Pick<T, WritableKeys<T>>;
+type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
+  [P in keyof Writable<T>]: T[P] extends object
+    ? NonReadonly<NonNullable<T[P]>>
+    : T[P];
+} : DistributeReadOnlyOverUnions<T>;
+
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -93,7 +122,7 @@ export const getListZonesQueryKey = () => {
     }
 
 
-export const getListZonesQueryOptions = <TData = Awaited<ReturnType<typeof listZones>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listZones>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListZonesQueryOptions = <TData = Awaited<ReturnType<typeof listZones>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listZones>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -112,10 +141,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListZonesQueryResult = NonNullable<Awaited<ReturnType<typeof listZones>>>
-export type ListZonesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+export type ListZonesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>
 
 
-export function useListZones<TData = Awaited<ReturnType<typeof listZones>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListZones<TData = Awaited<ReturnType<typeof listZones>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listZones>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listZones>>,
@@ -125,7 +154,7 @@ export function useListZones<TData = Awaited<ReturnType<typeof listZones>>, TErr
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListZones<TData = Awaited<ReturnType<typeof listZones>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListZones<TData = Awaited<ReturnType<typeof listZones>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listZones>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listZones>>,
@@ -135,12 +164,12 @@ export function useListZones<TData = Awaited<ReturnType<typeof listZones>>, TErr
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListZones<TData = Awaited<ReturnType<typeof listZones>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListZones<TData = Awaited<ReturnType<typeof listZones>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listZones>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListZones<TData = Awaited<ReturnType<typeof listZones>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListZones<TData = Awaited<ReturnType<typeof listZones>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listZones>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -185,7 +214,7 @@ export const deleteZone = async (zoneId: string, options?: Parameters<typeof kow
 
 export const getDeleteZoneMutationKey = () => ['deleteZone'] as const;
 
-export const getDeleteZoneMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+export const getDeleteZoneMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteZone>>, TError,DeleteZoneMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteZone>>, TError,DeleteZoneMutationVariables, TContext> => {
 
@@ -214,10 +243,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type DeleteZoneMutationResult = NonNullable<Awaited<ReturnType<typeof deleteZone>>>
 
-    export type DeleteZoneMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>
+    export type DeleteZoneMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type DeleteZoneMutationVariables = {zoneId: string}
 
-    export const useDeleteZone = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+    export const useDeleteZone = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteZone>>, TError,DeleteZoneMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteZone>>,
@@ -260,7 +289,7 @@ export const getReadZoneQueryKey = (zoneId: string,) => {
     }
 
 
-export const getReadZoneQueryOptions = <TData = Awaited<ReturnType<typeof readZone>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(zoneId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readZone>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getReadZoneQueryOptions = <TData = Awaited<ReturnType<typeof readZone>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(zoneId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readZone>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -279,10 +308,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadZoneQueryResult = NonNullable<Awaited<ReturnType<typeof readZone>>>
-export type ReadZoneQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadZoneQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadZone<TData = Awaited<ReturnType<typeof readZone>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadZone<TData = Awaited<ReturnType<typeof readZone>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  zoneId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readZone>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readZone>>,
@@ -292,7 +321,7 @@ export function useReadZone<TData = Awaited<ReturnType<typeof readZone>>, TError
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadZone<TData = Awaited<ReturnType<typeof readZone>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadZone<TData = Awaited<ReturnType<typeof readZone>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  zoneId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readZone>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readZone>>,
@@ -302,12 +331,12 @@ export function useReadZone<TData = Awaited<ReturnType<typeof readZone>>, TError
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadZone<TData = Awaited<ReturnType<typeof readZone>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadZone<TData = Awaited<ReturnType<typeof readZone>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  zoneId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readZone>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadZone<TData = Awaited<ReturnType<typeof readZone>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadZone<TData = Awaited<ReturnType<typeof readZone>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  zoneId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readZone>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -336,7 +365,7 @@ export const getUpdateZoneUrl = (zoneId: string,) => {
  * Updates a availability zone configuration.
  */
 export const updateZone = async (zoneId: string,
-    zone: Zone, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Zone> => {
+    zoneUpdate: ZoneUpdate, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Zone> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -357,7 +386,7 @@ return kowabungaFetch<Zone>(getUpdateZoneUrl(zoneId),
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(zone)
+    body: JSON.stringify(zoneUpdate)
   }
 );}
 
@@ -367,7 +396,7 @@ return kowabungaFetch<Zone>(getUpdateZoneUrl(zoneId),
 
 export const getUpdateZoneMutationKey = () => ['updateZone'] as const;
 
-export const getUpdateZoneMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getUpdateZoneMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateZone>>, TError,UpdateZoneMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateZone>>, TError,UpdateZoneMutationVariables, TContext> => {
 
@@ -395,11 +424,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateZoneMutationResult = NonNullable<Awaited<ReturnType<typeof updateZone>>>
-    export type UpdateZoneMutationBody = BodyType<Zone>
-    export type UpdateZoneMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type UpdateZoneMutationVariables = {zoneId: string;data: BodyType<Zone>}
+    export type UpdateZoneMutationBody = BodyType<ZoneUpdate>
+    export type UpdateZoneMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type UpdateZoneMutationVariables = {zoneId: string;data: BodyType<ZoneUpdate>}
 
-    export const useUpdateZone = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useUpdateZone = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateZone>>, TError,UpdateZoneMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateZone>>,
@@ -409,7 +438,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getUpdateZoneMutationOptions(options), queryClient);
     }
-    export const getCreateKaktusUrl = (zoneId: string,) => {
+    export const getCreateZoneKaktusUrl = (zoneId: string,) => {
 
 
 
@@ -420,8 +449,8 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 /**
  * Creates a new Kaktus computing node.
  */
-export const createKaktus = async (zoneId: string,
-    kaktus: Kaktus, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Kaktus> => {
+export const createZoneKaktus = async (zoneId: string,
+    kaktus: NonReadonly<Kaktus>, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Kaktus> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -437,7 +466,7 @@ export const createKaktus = async (zoneId: string,
     }
     return headers;
   };
-return kowabungaFetch<Kaktus>(getCreateKaktusUrl(zoneId),
+return kowabungaFetch<Kaktus>(getCreateZoneKaktusUrl(zoneId),
   {
     ...options,
     method: 'POST',
@@ -450,13 +479,13 @@ return kowabungaFetch<Kaktus>(getCreateKaktusUrl(zoneId),
 
 
 
-export const getCreateKaktusMutationKey = () => ['createKaktus'] as const;
+export const getCreateZoneKaktusMutationKey = () => ['createZoneKaktus'] as const;
 
-export const getCreateKaktusMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createKaktus>>, TError,CreateKaktusMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createKaktus>>, TError,CreateKaktusMutationVariables, TContext> => {
+export const getCreateZoneKaktusMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createZoneKaktus>>, TError,CreateZoneKaktusMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createZoneKaktus>>, TError,CreateZoneKaktusMutationVariables, TContext> => {
 
-const mutationKey = getCreateKaktusMutationKey();
+const mutationKey = getCreateZoneKaktusMutationKey();
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -466,10 +495,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createKaktus>>, CreateKaktusMutationVariables> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createZoneKaktus>>, CreateZoneKaktusMutationVariables> = (props) => {
           const {zoneId,data} = props ?? {};
 
-          return  createKaktus(zoneId,data,requestOptions)
+          return  createZoneKaktus(zoneId,data,requestOptions)
         }
 
 
@@ -479,20 +508,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type CreateKaktusMutationResult = NonNullable<Awaited<ReturnType<typeof createKaktus>>>
-    export type CreateKaktusMutationBody = BodyType<Kaktus>
-    export type CreateKaktusMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateKaktusMutationVariables = {zoneId: string;data: BodyType<Kaktus>}
+    export type CreateZoneKaktusMutationResult = NonNullable<Awaited<ReturnType<typeof createZoneKaktus>>>
+    export type CreateZoneKaktusMutationBody = BodyType<NonReadonly<Kaktus>>
+    export type CreateZoneKaktusMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateZoneKaktusMutationVariables = {zoneId: string;data: BodyType<NonReadonly<Kaktus>>}
 
-    export const useCreateKaktus = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createKaktus>>, TError,CreateKaktusMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
+    export const useCreateZoneKaktus = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createZoneKaktus>>, TError,CreateZoneKaktusMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof createKaktus>>,
+        Awaited<ReturnType<typeof createZoneKaktus>>,
         TError,
-        CreateKaktusMutationVariables,
+        CreateZoneKaktusMutationVariables,
         TContext
       > => {
-      return useMutation(getCreateKaktusMutationOptions(options), queryClient);
+      return useMutation(getCreateZoneKaktusMutationOptions(options), queryClient);
     }
     export const getListZoneKaktusesUrl = (zoneId: string,) => {
 
@@ -527,7 +556,7 @@ export const getListZoneKaktusesQueryKey = (zoneId: string,) => {
     }
 
 
-export const getListZoneKaktusesQueryOptions = <TData = Awaited<ReturnType<typeof listZoneKaktuses>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(zoneId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listZoneKaktuses>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListZoneKaktusesQueryOptions = <TData = Awaited<ReturnType<typeof listZoneKaktuses>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(zoneId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listZoneKaktuses>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -546,10 +575,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListZoneKaktusesQueryResult = NonNullable<Awaited<ReturnType<typeof listZoneKaktuses>>>
-export type ListZoneKaktusesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ListZoneKaktusesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useListZoneKaktuses<TData = Awaited<ReturnType<typeof listZoneKaktuses>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListZoneKaktuses<TData = Awaited<ReturnType<typeof listZoneKaktuses>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  zoneId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listZoneKaktuses>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listZoneKaktuses>>,
@@ -559,7 +588,7 @@ export function useListZoneKaktuses<TData = Awaited<ReturnType<typeof listZoneKa
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListZoneKaktuses<TData = Awaited<ReturnType<typeof listZoneKaktuses>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListZoneKaktuses<TData = Awaited<ReturnType<typeof listZoneKaktuses>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  zoneId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listZoneKaktuses>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listZoneKaktuses>>,
@@ -569,12 +598,12 @@ export function useListZoneKaktuses<TData = Awaited<ReturnType<typeof listZoneKa
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListZoneKaktuses<TData = Awaited<ReturnType<typeof listZoneKaktuses>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListZoneKaktuses<TData = Awaited<ReturnType<typeof listZoneKaktuses>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  zoneId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listZoneKaktuses>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListZoneKaktuses<TData = Awaited<ReturnType<typeof listZoneKaktuses>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListZoneKaktuses<TData = Awaited<ReturnType<typeof listZoneKaktuses>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  zoneId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listZoneKaktuses>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {

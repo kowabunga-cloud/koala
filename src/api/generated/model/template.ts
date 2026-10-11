@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import type { TemplateOs } from './templateOs';
 
@@ -11,14 +11,14 @@ import type { TemplateOs } from './templateOs';
  * A image template.
  */
 export interface Template {
-  /** The image template ID (auto-generated). */
-  id?: string;
+  /** The image template ID (auto-generated) (read-only). */
+  readonly id?: string;
   /** The image template name. */
   name: string;
   /** The image template description. */
   description?: string;
-  /** Type of operating system if OS kind (useful to determine cloud-init parameters for instance). */
+  /** Type of operating system (useful to determine cloud-init parameters for instance). Can only be set at creation time, ignored on updates. */
   os?: TemplateOs;
-  /** HTTP(s) source URL of the KVM-ready OS image. */
+  /** HTTP(s) source URL of the KVM-ready OS image. Can only be set at creation time, ignored on updates. */
   source: string;
 }

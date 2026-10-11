@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   faker
@@ -15,11 +15,11 @@ import type {
 } from '../../model';
 
 
-export const getListStorageNFSsResponseMock = (): ObjectIds => (Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))))
+export const getListStorageNFSesResponseMock = (): ObjectIds => (Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))))
 
-export const getReadStorageNFSResponseMock = (overrideResponse: Partial<Extract<StorageNFS, object>> = {}): StorageNFS => ({id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), name: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), endpoint: faker.string.alpha({length: {min: 10, max: 20}}), fs: faker.string.alpha({length: {min: 10, max: 20}}), backends: faker.helpers.arrayElement([Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), undefined]), port: faker.number.int(), ...overrideResponse})
+export const getReadStorageNFSResponseMock = (overrideResponse: Partial<Extract<StorageNFS, object>> = {}): StorageNFS => ({id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), name: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), endpoint: faker.string.alpha({length: {min: 10, max: 20}}), fs: faker.string.alpha({length: {min: 10, max: 20}}), backends: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), port: faker.number.int({min: 1, max: 65535}), ...overrideResponse})
 
-export const getUpdateStorageNFSResponseMock = (overrideResponse: Partial<Extract<StorageNFS, object>> = {}): StorageNFS => ({id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), name: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), endpoint: faker.string.alpha({length: {min: 10, max: 20}}), fs: faker.string.alpha({length: {min: 10, max: 20}}), backends: faker.helpers.arrayElement([Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), undefined]), port: faker.number.int(), ...overrideResponse})
+export const getUpdateStorageNFSResponseMock = (overrideResponse: Partial<Extract<StorageNFS, object>> = {}): StorageNFS => ({id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), name: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), endpoint: faker.string.alpha({length: {min: 10, max: 20}}), fs: faker.string.alpha({length: {min: 10, max: 20}}), backends: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), port: faker.number.int({min: 1, max: 65535}), ...overrideResponse})
 
 export const getListStorageNFSKylosResponseMock = (): ObjectIds => (Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))))
 

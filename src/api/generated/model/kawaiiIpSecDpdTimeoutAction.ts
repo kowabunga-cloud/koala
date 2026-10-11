@@ -3,17 +3,17 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 
 /**
- * The Kawaii IPsec connection Dead Peer Detection Action (clear,restart or trap).
+ * The Kawaii IPsec connection Dead Peer Detection (DPD) timeout action.
  */
 export type KawaiiIpSecDpdTimeoutAction = typeof KawaiiIpSecDpdTimeoutAction[keyof typeof KawaiiIpSecDpdTimeoutAction];
 
 
 export const KawaiiIpSecDpdTimeoutAction = {
   clear: 'clear',
+  trap: 'trap',
   restart: 'restart',
-  start: 'start',
 } as const;

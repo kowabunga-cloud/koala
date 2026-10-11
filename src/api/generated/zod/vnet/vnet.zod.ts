@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import * as zod from 'zod';
 
@@ -30,15 +30,18 @@ export const ReadVNetParams = zod.object({
   "vnetId": zod.string().describe('The ID of the virtual network.')
 })
 
+export const readVNetResponseVlanMin = 0;
+export const readVNetResponseVlanMax = 4094;
+
 export const readVNetResponsePrivateDefault = true;
 
 export const ReadVNetResponse = zod.object({
-  "id": zod.string().optional().describe('The virtual network ID (auto-generated).'),
+  "id": zod.string().optional().describe('The virtual network ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The virtual network name.'),
   "description": zod.string().optional().describe('The virtual network description.'),
-  "vlan": zod.int().optional().describe('The VLAN identifier (0 if unspecified).'),
+  "vlan": zod.int().min(readVNetResponseVlanMin).max(readVNetResponseVlanMax).optional().describe('The VLAN identifier (0 if unspecified).'),
   "interface": zod.string().describe('The libvirt\'s bridge network interface (brX).'),
-  "private": zod.boolean().default(readVNetResponsePrivateDefault).describe('Is the virtual network adapter connected to private (LAN) or public (WAN) physical network ?.')
+  "private": zod.boolean().default(readVNetResponsePrivateDefault).describe('Whether the virtual network is connected to private (LAN) or public (WAN) physical network. Can only be set at creation time, ignored on updates.')
 }).describe('A virtual network.')
 
 /**
@@ -48,45 +51,48 @@ export const UpdateVNetParams = zod.object({
   "vnetId": zod.string().describe('The ID of the virtual network.')
 })
 
-export const updateVNetBodyPrivateDefault = true;
+export const updateVNetBodyVlanMin = 0;
+export const updateVNetBodyVlanMax = 4094;
+
+
 
 export const UpdateVNetBody = zod.object({
-  "id": zod.string().optional().describe('The virtual network ID (auto-generated).'),
-  "name": zod.string().describe('The virtual network name.'),
+  "name": zod.string().optional().describe('The virtual network name.'),
   "description": zod.string().optional().describe('The virtual network description.'),
-  "vlan": zod.int().optional().describe('The VLAN identifier (0 if unspecified).'),
-  "interface": zod.string().describe('The libvirt\'s bridge network interface (brX).'),
-  "private": zod.boolean().default(updateVNetBodyPrivateDefault).describe('Is the virtual network adapter connected to private (LAN) or public (WAN) physical network ?.')
-}).describe('A virtual network.')
+  "vlan": zod.int().min(updateVNetBodyVlanMin).max(updateVNetBodyVlanMax).optional().describe('The VLAN identifier (0 if unspecified).'),
+  "interface": zod.string().optional().describe('The libvirt\'s bridge network interface (brX).')
+}).describe('A virtual network update (unspecified properties are left unchanged).')
+
+export const updateVNetResponseVlanMin = 0;
+export const updateVNetResponseVlanMax = 4094;
 
 export const updateVNetResponsePrivateDefault = true;
 
 export const UpdateVNetResponse = zod.object({
-  "id": zod.string().optional().describe('The virtual network ID (auto-generated).'),
+  "id": zod.string().optional().describe('The virtual network ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The virtual network name.'),
   "description": zod.string().optional().describe('The virtual network description.'),
-  "vlan": zod.int().optional().describe('The VLAN identifier (0 if unspecified).'),
+  "vlan": zod.int().min(updateVNetResponseVlanMin).max(updateVNetResponseVlanMax).optional().describe('The VLAN identifier (0 if unspecified).'),
   "interface": zod.string().describe('The libvirt\'s bridge network interface (brX).'),
-  "private": zod.boolean().default(updateVNetResponsePrivateDefault).describe('Is the virtual network adapter connected to private (LAN) or public (WAN) physical network ?.')
+  "private": zod.boolean().default(updateVNetResponsePrivateDefault).describe('Whether the virtual network is connected to private (LAN) or public (WAN) physical network. Can only be set at creation time, ignored on updates.')
 }).describe('A virtual network.')
 
 /**
  * Creates a new network subnet.
  */
-export const CreateSubnetParams = zod.object({
+export const CreateVNetSubnetParams = zod.object({
   "vnetId": zod.string().describe('The ID of the virtual network.')
 })
 
-export const createSubnetBodyApplicationDefault = `user`;
+export const createVNetSubnetBodyApplicationDefault = `user`;
 
-export const CreateSubnetBody = zod.object({
-  "id": zod.string().optional().describe('The network subnet ID (auto-generated).'),
+export const CreateVNetSubnetBody = zod.object({
   "name": zod.string().describe('The network subnet name.'),
   "description": zod.string().optional().describe('The network subnet description.'),
-  "cidr": zod.string().describe('The network subnet CIDR (e.g. 192.168.0.0/24).'),
+  "cidr": zod.string().describe('The network subnet CIDR (e.g. 192.168.0.0/24). Can only be set at creation time, ignored on updates.'),
   "gateway": zod.string().describe('The network subnet router/gateway IP address (e.g. 192.168.0.254).'),
   "dns": zod.string().optional().describe('The network subnet DNS server IP address (gateway value if unspecified).'),
-  "extra_routes": zod.array(zod.string()).optional().describe('The list of extra routes to be access through designated gateway (format is 10.0.0.0/8).'),
+  "extra_routes": zod.array(zod.string()).optional().describe('The list of extra routes to be accessed through designated gateway (format is 10.0.0.0/8).'),
   "reserved": zod.array(zod.object({
   "first": zod.string().describe('The range\'s first IP address.'),
   "last": zod.string().describe('The range\'s last IP address.')
@@ -95,19 +101,19 @@ export const CreateSubnetBody = zod.object({
   "first": zod.string().describe('The range\'s first IP address.'),
   "last": zod.string().describe('The range\'s last IP address.')
 }).describe('A reserved IPv4 addresses pool range, non-addressable by Kowabunga.')).optional().describe('The network subnet IPv4 ranges reserved for per-zone local network gateways (range size must be at least equal to region number of zones).'),
-  "application": zod.enum(['ceph', 'user']).default(createSubnetBodyApplicationDefault).describe('Optional application service type.')
+  "application": zod.enum(['ceph', 'user']).default(createVNetSubnetBodyApplicationDefault).describe('Optional application service type.')
 }).describe('A network subnet.')
 
-export const createSubnetResponseApplicationDefault = `user`;
+export const createVNetSubnetResponseApplicationDefault = `user`;
 
-export const CreateSubnetResponse = zod.object({
-  "id": zod.string().optional().describe('The network subnet ID (auto-generated).'),
+export const CreateVNetSubnetResponse = zod.object({
+  "id": zod.string().optional().describe('The network subnet ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The network subnet name.'),
   "description": zod.string().optional().describe('The network subnet description.'),
-  "cidr": zod.string().describe('The network subnet CIDR (e.g. 192.168.0.0/24).'),
+  "cidr": zod.string().describe('The network subnet CIDR (e.g. 192.168.0.0/24). Can only be set at creation time, ignored on updates.'),
   "gateway": zod.string().describe('The network subnet router/gateway IP address (e.g. 192.168.0.254).'),
   "dns": zod.string().optional().describe('The network subnet DNS server IP address (gateway value if unspecified).'),
-  "extra_routes": zod.array(zod.string()).optional().describe('The list of extra routes to be access through designated gateway (format is 10.0.0.0/8).'),
+  "extra_routes": zod.array(zod.string()).optional().describe('The list of extra routes to be accessed through designated gateway (format is 10.0.0.0/8).'),
   "reserved": zod.array(zod.object({
   "first": zod.string().describe('The range\'s first IP address.'),
   "last": zod.string().describe('The range\'s last IP address.')
@@ -116,7 +122,7 @@ export const CreateSubnetResponse = zod.object({
   "first": zod.string().describe('The range\'s first IP address.'),
   "last": zod.string().describe('The range\'s last IP address.')
 }).describe('A reserved IPv4 addresses pool range, non-addressable by Kowabunga.')).optional().describe('The network subnet IPv4 ranges reserved for per-zone local network gateways (range size must be at least equal to region number of zones).'),
-  "application": zod.enum(['ceph', 'user']).default(createSubnetResponseApplicationDefault).describe('Optional application service type.')
+  "application": zod.enum(['ceph', 'user']).default(createVNetSubnetResponseApplicationDefault).describe('Optional application service type.')
 }).describe('A network subnet.')
 
 /**

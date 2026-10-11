@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import * as zod from 'zod';
 
@@ -11,8 +11,8 @@ import * as zod from 'zod';
 /**
  * Returns the IDs of Kaktus computing node objects.
  */
-export const ListKaktussResponseItem = zod.string()
-export const ListKaktussResponse = zod.array(ListKaktussResponseItem)
+export const ListKaktusesResponseItem = zod.string()
+export const ListKaktusesResponse = zod.array(ListKaktusesResponseItem)
 
 /**
  * Deletes an existing Kaktus computing node.
@@ -31,11 +31,13 @@ export const ReadKaktusParams = zod.object({
 })
 
 export const readKaktusResponseOvercommitCpuRatioDefault = 3;
+
 export const readKaktusResponseOvercommitMemoryRatioDefault = 2;
-export const readKaktusResponseMaintenanceDefault = false;
+
+
 
 export const ReadKaktusResponse = zod.object({
-  "id": zod.string().optional().describe('The Kaktus computing node ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kaktus computing node ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kaktus computing node name.'),
   "description": zod.string().optional().describe('The Kaktus computing node description.'),
   "cpu_cost": zod.object({
@@ -46,10 +48,10 @@ export const ReadKaktusResponse = zod.object({
   "price": zod.number().describe('The unit price information.'),
   "currency": zod.string().describe('The associated currency.')
 }).describe('A resource cost.').optional().describe('Cost associated to the Kaktus node\'s memory resources.'),
-  "overcommit_cpu_ratio": zod.int().default(readKaktusResponseOvercommitCpuRatioDefault).describe('The Kaktus node CPU resource over-commit ratio. Overcommitting CPU resources for VMs means allocating more virtual CPUs (vCPUs) to the virtual machines (VMs) than the physical cores available on the node. This can help optimize the utilization of the node CPU and increase the density of VMs per node.'),
-  "overcommit_memory_ratio": zod.int().default(readKaktusResponseOvercommitMemoryRatioDefault).describe('The Kaktus node memory resource over-commit ratio. Memory overcommitment is a concept in computing that covers the assignment of more memory to virtual computing devices (or processes) than the physical machine they are hosted, or running on, actually has.'),
+  "overcommit_cpu_ratio": zod.int().min(1).default(readKaktusResponseOvercommitCpuRatioDefault).describe('The Kaktus node CPU resource over-commit ratio. Overcommitting CPU resources for VMs means allocating more virtual CPUs (vCPUs) to the virtual machines (VMs) than the physical cores available on the node. This can help optimize the utilization of the node CPU and increase the density of VMs per node.'),
+  "overcommit_memory_ratio": zod.int().min(1).default(readKaktusResponseOvercommitMemoryRatioDefault).describe('The Kaktus node memory resource over-commit ratio. Memory overcommitment is a concept in computing that covers the assignment of more memory to virtual computing devices (or processes) than the physical machine they are hosted, or running on, actually has.'),
   "agents": zod.array(zod.string()).describe('a list of existing remote agents managing the Kaktus node.'),
-  "maintenance": zod.boolean().default(readKaktusResponseMaintenanceDefault).describe('Whether the Kaktus node is under maintenance. A node under maintenance keeps running its existing instances but is excluded from scheduling of newly created workloads.')
+  "maintenance": zod.boolean().optional().describe('Whether the Kaktus node is under maintenance. A node under maintenance keeps running its existing instances but is excluded from scheduling of newly created workloads. Use the maintenance enable/disable operations to change it (read-only).')
 }).describe('A Kaktus (Kowabunga Affordable KVM and Tight Underneath Storage) is an hyper-converged infrastructure (HCI) bare-metal node offering computing and distributed storage capabilites.')
 
 /**
@@ -59,13 +61,12 @@ export const UpdateKaktusParams = zod.object({
   "kaktusId": zod.string().describe('The ID of the Kaktus computing node.')
 })
 
-export const updateKaktusBodyOvercommitCpuRatioDefault = 3;
-export const updateKaktusBodyOvercommitMemoryRatioDefault = 2;
-export const updateKaktusBodyMaintenanceDefault = false;
+
+
+
 
 export const UpdateKaktusBody = zod.object({
-  "id": zod.string().optional().describe('The Kaktus computing node ID (auto-generated).'),
-  "name": zod.string().describe('The Kaktus computing node name.'),
+  "name": zod.string().optional().describe('The Kaktus computing node name.'),
   "description": zod.string().optional().describe('The Kaktus computing node description.'),
   "cpu_cost": zod.object({
   "price": zod.number().describe('The unit price information.'),
@@ -75,18 +76,19 @@ export const UpdateKaktusBody = zod.object({
   "price": zod.number().describe('The unit price information.'),
   "currency": zod.string().describe('The associated currency.')
 }).describe('A resource cost.').optional().describe('Cost associated to the Kaktus node\'s memory resources.'),
-  "overcommit_cpu_ratio": zod.int().default(updateKaktusBodyOvercommitCpuRatioDefault).describe('The Kaktus node CPU resource over-commit ratio. Overcommitting CPU resources for VMs means allocating more virtual CPUs (vCPUs) to the virtual machines (VMs) than the physical cores available on the node. This can help optimize the utilization of the node CPU and increase the density of VMs per node.'),
-  "overcommit_memory_ratio": zod.int().default(updateKaktusBodyOvercommitMemoryRatioDefault).describe('The Kaktus node memory resource over-commit ratio. Memory overcommitment is a concept in computing that covers the assignment of more memory to virtual computing devices (or processes) than the physical machine they are hosted, or running on, actually has.'),
-  "agents": zod.array(zod.string()).describe('a list of existing remote agents managing the Kaktus node.'),
-  "maintenance": zod.boolean().default(updateKaktusBodyMaintenanceDefault).describe('Whether the Kaktus node is under maintenance. A node under maintenance keeps running its existing instances but is excluded from scheduling of newly created workloads.')
-}).describe('A Kaktus (Kowabunga Affordable KVM and Tight Underneath Storage) is an hyper-converged infrastructure (HCI) bare-metal node offering computing and distributed storage capabilites.')
+  "overcommit_cpu_ratio": zod.int().min(1).optional().describe('The Kaktus node CPU resource over-commit ratio. Overcommitting CPU resources for VMs means allocating more virtual CPUs (vCPUs) to the virtual machines (VMs) than the physical cores available on the node. This can help optimize the utilization of the node CPU and increase the density of VMs per node.'),
+  "overcommit_memory_ratio": zod.int().min(1).optional().describe('The Kaktus node memory resource over-commit ratio. Memory overcommitment is a concept in computing that covers the assignment of more memory to virtual computing devices (or processes) than the physical machine they are hosted, or running on, actually has.'),
+  "agents": zod.array(zod.string()).optional().describe('a list of existing remote agents managing the Kaktus node.')
+}).describe('A Kaktus computing node update (unspecified properties are left unchanged).')
 
 export const updateKaktusResponseOvercommitCpuRatioDefault = 3;
+
 export const updateKaktusResponseOvercommitMemoryRatioDefault = 2;
-export const updateKaktusResponseMaintenanceDefault = false;
+
+
 
 export const UpdateKaktusResponse = zod.object({
-  "id": zod.string().optional().describe('The Kaktus computing node ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kaktus computing node ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kaktus computing node name.'),
   "description": zod.string().optional().describe('The Kaktus computing node description.'),
   "cpu_cost": zod.object({
@@ -97,10 +99,10 @@ export const UpdateKaktusResponse = zod.object({
   "price": zod.number().describe('The unit price information.'),
   "currency": zod.string().describe('The associated currency.')
 }).describe('A resource cost.').optional().describe('Cost associated to the Kaktus node\'s memory resources.'),
-  "overcommit_cpu_ratio": zod.int().default(updateKaktusResponseOvercommitCpuRatioDefault).describe('The Kaktus node CPU resource over-commit ratio. Overcommitting CPU resources for VMs means allocating more virtual CPUs (vCPUs) to the virtual machines (VMs) than the physical cores available on the node. This can help optimize the utilization of the node CPU and increase the density of VMs per node.'),
-  "overcommit_memory_ratio": zod.int().default(updateKaktusResponseOvercommitMemoryRatioDefault).describe('The Kaktus node memory resource over-commit ratio. Memory overcommitment is a concept in computing that covers the assignment of more memory to virtual computing devices (or processes) than the physical machine they are hosted, or running on, actually has.'),
+  "overcommit_cpu_ratio": zod.int().min(1).default(updateKaktusResponseOvercommitCpuRatioDefault).describe('The Kaktus node CPU resource over-commit ratio. Overcommitting CPU resources for VMs means allocating more virtual CPUs (vCPUs) to the virtual machines (VMs) than the physical cores available on the node. This can help optimize the utilization of the node CPU and increase the density of VMs per node.'),
+  "overcommit_memory_ratio": zod.int().min(1).default(updateKaktusResponseOvercommitMemoryRatioDefault).describe('The Kaktus node memory resource over-commit ratio. Memory overcommitment is a concept in computing that covers the assignment of more memory to virtual computing devices (or processes) than the physical machine they are hosted, or running on, actually has.'),
   "agents": zod.array(zod.string()).describe('a list of existing remote agents managing the Kaktus node.'),
-  "maintenance": zod.boolean().default(updateKaktusResponseMaintenanceDefault).describe('Whether the Kaktus node is under maintenance. A node under maintenance keeps running its existing instances but is excluded from scheduling of newly created workloads.')
+  "maintenance": zod.boolean().optional().describe('Whether the Kaktus node is under maintenance. A node under maintenance keeps running its existing instances but is excluded from scheduling of newly created workloads. Use the maintenance enable/disable operations to change it (read-only).')
 }).describe('A Kaktus (Kowabunga Affordable KVM and Tight Underneath Storage) is an hyper-converged infrastructure (HCI) bare-metal node offering computing and distributed storage capabilites.')
 
 /**
@@ -128,6 +130,10 @@ export const ReadKaktusCapsParams = zod.object({
   "kaktusId": zod.string().describe('The ID of the Kaktus computing node.')
 })
 
+export const readKaktusCapsResponseMemoryMin = 0;
+
+
+
 export const ReadKaktusCapsResponse = zod.object({
   "cpu": zod.object({
   "arch": zod.string().describe('The Kaktus computing node CPU architecture.'),
@@ -137,7 +143,7 @@ export const ReadKaktusCapsResponse = zod.object({
   "cores": zod.int().describe('The Kaktus computing node CPU number of cores.'),
   "threads": zod.int().describe('The Kaktus computing node CPU number of threads.')
 }).describe('A Kaktus computing node CPU characteristics.').describe('The Kaktus computing node CPU characteristics.'),
-  "memory": zod.int().describe('The Kaktus computing node memory size (bytes).')
+  "memory": zod.int().min(readKaktusCapsResponseMemoryMin).describe('The Kaktus computing node memory size (bytes).')
 }).describe('A Kaktus computing node capability.')
 
 /**

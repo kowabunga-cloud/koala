@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import * as zod from 'zod';
 
@@ -33,13 +33,13 @@ export const ReadSubnetParams = zod.object({
 export const readSubnetResponseApplicationDefault = `user`;
 
 export const ReadSubnetResponse = zod.object({
-  "id": zod.string().optional().describe('The network subnet ID (auto-generated).'),
+  "id": zod.string().optional().describe('The network subnet ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The network subnet name.'),
   "description": zod.string().optional().describe('The network subnet description.'),
-  "cidr": zod.string().describe('The network subnet CIDR (e.g. 192.168.0.0/24).'),
+  "cidr": zod.string().describe('The network subnet CIDR (e.g. 192.168.0.0/24). Can only be set at creation time, ignored on updates.'),
   "gateway": zod.string().describe('The network subnet router/gateway IP address (e.g. 192.168.0.254).'),
   "dns": zod.string().optional().describe('The network subnet DNS server IP address (gateway value if unspecified).'),
-  "extra_routes": zod.array(zod.string()).optional().describe('The list of extra routes to be access through designated gateway (format is 10.0.0.0/8).'),
+  "extra_routes": zod.array(zod.string()).optional().describe('The list of extra routes to be accessed through designated gateway (format is 10.0.0.0/8).'),
   "reserved": zod.array(zod.object({
   "first": zod.string().describe('The range\'s first IP address.'),
   "last": zod.string().describe('The range\'s last IP address.')
@@ -58,16 +58,12 @@ export const UpdateSubnetParams = zod.object({
   "subnetId": zod.string().describe('The ID of the network subnet.')
 })
 
-export const updateSubnetBodyApplicationDefault = `user`;
-
 export const UpdateSubnetBody = zod.object({
-  "id": zod.string().optional().describe('The network subnet ID (auto-generated).'),
-  "name": zod.string().describe('The network subnet name.'),
+  "name": zod.string().optional().describe('The network subnet name.'),
   "description": zod.string().optional().describe('The network subnet description.'),
-  "cidr": zod.string().describe('The network subnet CIDR (e.g. 192.168.0.0/24).'),
-  "gateway": zod.string().describe('The network subnet router/gateway IP address (e.g. 192.168.0.254).'),
+  "gateway": zod.string().optional().describe('The network subnet router/gateway IP address (e.g. 192.168.0.254).'),
   "dns": zod.string().optional().describe('The network subnet DNS server IP address (gateway value if unspecified).'),
-  "extra_routes": zod.array(zod.string()).optional().describe('The list of extra routes to be access through designated gateway (format is 10.0.0.0/8).'),
+  "extra_routes": zod.array(zod.string()).optional().describe('The list of extra routes to be accessed through designated gateway (format is 10.0.0.0/8).'),
   "reserved": zod.array(zod.object({
   "first": zod.string().describe('The range\'s first IP address.'),
   "last": zod.string().describe('The range\'s last IP address.')
@@ -76,19 +72,19 @@ export const UpdateSubnetBody = zod.object({
   "first": zod.string().describe('The range\'s first IP address.'),
   "last": zod.string().describe('The range\'s last IP address.')
 }).describe('A reserved IPv4 addresses pool range, non-addressable by Kowabunga.')).optional().describe('The network subnet IPv4 ranges reserved for per-zone local network gateways (range size must be at least equal to region number of zones).'),
-  "application": zod.enum(['ceph', 'user']).default(updateSubnetBodyApplicationDefault).describe('Optional application service type.')
-}).describe('A network subnet.')
+  "application": zod.enum(['ceph', 'user']).optional().describe('Optional application service type.')
+}).describe('A network subnet update (unspecified properties are left unchanged).')
 
 export const updateSubnetResponseApplicationDefault = `user`;
 
 export const UpdateSubnetResponse = zod.object({
-  "id": zod.string().optional().describe('The network subnet ID (auto-generated).'),
+  "id": zod.string().optional().describe('The network subnet ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The network subnet name.'),
   "description": zod.string().optional().describe('The network subnet description.'),
-  "cidr": zod.string().describe('The network subnet CIDR (e.g. 192.168.0.0/24).'),
+  "cidr": zod.string().describe('The network subnet CIDR (e.g. 192.168.0.0/24). Can only be set at creation time, ignored on updates.'),
   "gateway": zod.string().describe('The network subnet router/gateway IP address (e.g. 192.168.0.254).'),
   "dns": zod.string().optional().describe('The network subnet DNS server IP address (gateway value if unspecified).'),
-  "extra_routes": zod.array(zod.string()).optional().describe('The list of extra routes to be access through designated gateway (format is 10.0.0.0/8).'),
+  "extra_routes": zod.array(zod.string()).optional().describe('The list of extra routes to be accessed through designated gateway (format is 10.0.0.0/8).'),
   "reserved": zod.array(zod.object({
   "first": zod.string().describe('The range\'s first IP address.'),
   "last": zod.string().describe('The range\'s last IP address.')
@@ -103,34 +99,35 @@ export const UpdateSubnetResponse = zod.object({
 /**
  * Creates a new network adapter.
  */
-export const CreateAdapterParams = zod.object({
+export const CreateSubnetAdapterParams = zod.object({
   "subnetId": zod.string().describe('The ID of the network subnet.')
 })
 
-export const CreateAdapterQueryParams = zod.object({
-  "assignIP": zod.boolean().optional().describe('Whether Kowabunga should pick and assign an IP address to this adapter.')
+export const createSubnetAdapterQueryAssignIPDefault = false;
+
+export const CreateSubnetAdapterQueryParams = zod.object({
+  "assignIP": zod.boolean().default(createSubnetAdapterQueryAssignIPDefault).describe('Whether Kowabunga should pick and assign an IP address to this adapter.')
 })
 
-export const createAdapterBodyReservedDefault = false;
+export const createSubnetAdapterBodyReservedDefault = false;
 
-export const CreateAdapterBody = zod.object({
-  "id": zod.string().optional().describe('The network adapter ID (auto-generated).'),
+export const CreateSubnetAdapterBody = zod.object({
   "name": zod.string().describe('The network adapter name.'),
   "description": zod.string().optional().describe('The network adapter description.'),
   "mac": zod.string().optional().describe('The network adapter hardware address (e.g. 00:11:22:33:44:55). Auto-generated if unspecified.'),
   "addresses": zod.array(zod.string()).optional().describe('The network adapter list of associated IPv4 addresses.'),
-  "reserved": zod.boolean().default(createAdapterBodyReservedDefault).describe('The network adapter is a reserved adapter (e.g. router), where the same hardware address can be reused over several subnets.')
+  "reserved": zod.boolean().default(createSubnetAdapterBodyReservedDefault).describe('The network adapter is a reserved adapter (e.g. router), where the same hardware address can be reused over several subnets.')
 }).describe('A network adapter.')
 
-export const createAdapterResponseReservedDefault = false;
+export const createSubnetAdapterResponseReservedDefault = false;
 
-export const CreateAdapterResponse = zod.object({
-  "id": zod.string().optional().describe('The network adapter ID (auto-generated).'),
+export const CreateSubnetAdapterResponse = zod.object({
+  "id": zod.string().optional().describe('The network adapter ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The network adapter name.'),
   "description": zod.string().optional().describe('The network adapter description.'),
   "mac": zod.string().optional().describe('The network adapter hardware address (e.g. 00:11:22:33:44:55). Auto-generated if unspecified.'),
   "addresses": zod.array(zod.string()).optional().describe('The network adapter list of associated IPv4 addresses.'),
-  "reserved": zod.boolean().default(createAdapterResponseReservedDefault).describe('The network adapter is a reserved adapter (e.g. router), where the same hardware address can be reused over several subnets.')
+  "reserved": zod.boolean().default(createSubnetAdapterResponseReservedDefault).describe('The network adapter is a reserved adapter (e.g. router), where the same hardware address can be reused over several subnets.')
 }).describe('A network adapter.')
 
 /**

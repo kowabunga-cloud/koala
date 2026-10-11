@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import * as zod from 'zod';
 
@@ -33,11 +33,11 @@ export const ReadTemplateParams = zod.object({
 export const readTemplateResponseOsDefault = `linux`;
 
 export const ReadTemplateResponse = zod.object({
-  "id": zod.string().optional().describe('The image template ID (auto-generated).'),
+  "id": zod.string().optional().describe('The image template ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The image template name.'),
   "description": zod.string().optional().describe('The image template description.'),
-  "os": zod.enum(['linux', 'windows']).default(readTemplateResponseOsDefault).describe('Type of operating system if OS kind (useful to determine cloud-init parameters for instance).'),
-  "source": zod.string().describe('HTTP(s) source URL of the KVM-ready OS image.')
+  "os": zod.enum(['linux', 'windows']).default(readTemplateResponseOsDefault).describe('Type of operating system (useful to determine cloud-init parameters for instance). Can only be set at creation time, ignored on updates.'),
+  "source": zod.string().describe('HTTP(s) source URL of the KVM-ready OS image. Can only be set at creation time, ignored on updates.')
 }).describe('A image template.')
 
 /**
@@ -47,23 +47,18 @@ export const UpdateTemplateParams = zod.object({
   "templateId": zod.string().describe('The ID of the image template.')
 })
 
-export const updateTemplateBodyOsDefault = `linux`;
-
 export const UpdateTemplateBody = zod.object({
-  "id": zod.string().optional().describe('The image template ID (auto-generated).'),
-  "name": zod.string().describe('The image template name.'),
-  "description": zod.string().optional().describe('The image template description.'),
-  "os": zod.enum(['linux', 'windows']).default(updateTemplateBodyOsDefault).describe('Type of operating system if OS kind (useful to determine cloud-init parameters for instance).'),
-  "source": zod.string().describe('HTTP(s) source URL of the KVM-ready OS image.')
-}).describe('A image template.')
+  "name": zod.string().optional().describe('The image template name.'),
+  "description": zod.string().optional().describe('The image template description.')
+}).describe('A image template update (unspecified properties are left unchanged).')
 
 export const updateTemplateResponseOsDefault = `linux`;
 
 export const UpdateTemplateResponse = zod.object({
-  "id": zod.string().optional().describe('The image template ID (auto-generated).'),
+  "id": zod.string().optional().describe('The image template ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The image template name.'),
   "description": zod.string().optional().describe('The image template description.'),
-  "os": zod.enum(['linux', 'windows']).default(updateTemplateResponseOsDefault).describe('Type of operating system if OS kind (useful to determine cloud-init parameters for instance).'),
-  "source": zod.string().describe('HTTP(s) source URL of the KVM-ready OS image.')
+  "os": zod.enum(['linux', 'windows']).default(updateTemplateResponseOsDefault).describe('Type of operating system (useful to determine cloud-init parameters for instance). Can only be set at creation time, ignored on updates.'),
+  "source": zod.string().describe('HTTP(s) source URL of the KVM-ready OS image. Can only be set at creation time, ignored on updates.')
 }).describe('A image template.')
 

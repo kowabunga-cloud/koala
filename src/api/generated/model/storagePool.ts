@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import type { Cost } from './cost';
 
@@ -11,8 +11,8 @@ import type { Cost } from './cost';
  * A storage pool.
  */
 export interface StoragePool {
-  /** The storage pool ID (auto-generated). */
-  id?: string;
+  /** The storage pool ID (auto-generated) (read-only). */
+  readonly id?: string;
   /** The storage pool name. */
   name: string;
   /** The storage pool description. */
@@ -21,7 +21,11 @@ export interface StoragePool {
   pool: string;
   /** Ceph Monitor(s) address or FQDN. */
   ceph_address?: string;
-  /** Ceph Monitor(s) port (default 3300). */
+  /**
+     * Ceph Monitor(s) port.
+     * @minimum 1
+     * @maximum 65535
+     */
   ceph_port?: number;
   /** The libvirt secret UUID for CephX authentication. */
   ceph_secret_uuid?: string;

@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   useMutation,
@@ -29,11 +29,13 @@ import type {
   ConflictResponse,
   ForbiddenResponse,
   InsufficientResourceResponse,
+  InternalServerErrorResponse,
   NotFoundResponse,
   ObjectIds,
   UnauthorizedResponse,
   UnprocessableEntityResponse,
-  Volume
+  Volume,
+  VolumeUpdate
 } from '../../model';
 
 import { kowabungaFetch } from '../../../client';
@@ -92,7 +94,7 @@ export const getListVolumesQueryKey = () => {
     }
 
 
-export const getListVolumesQueryOptions = <TData = Awaited<ReturnType<typeof listVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVolumes>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListVolumesQueryOptions = <TData = Awaited<ReturnType<typeof listVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVolumes>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -111,10 +113,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListVolumesQueryResult = NonNullable<Awaited<ReturnType<typeof listVolumes>>>
-export type ListVolumesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+export type ListVolumesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>
 
 
-export function useListVolumes<TData = Awaited<ReturnType<typeof listVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListVolumes<TData = Awaited<ReturnType<typeof listVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVolumes>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listVolumes>>,
@@ -124,7 +126,7 @@ export function useListVolumes<TData = Awaited<ReturnType<typeof listVolumes>>, 
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListVolumes<TData = Awaited<ReturnType<typeof listVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListVolumes<TData = Awaited<ReturnType<typeof listVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVolumes>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listVolumes>>,
@@ -134,12 +136,12 @@ export function useListVolumes<TData = Awaited<ReturnType<typeof listVolumes>>, 
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListVolumes<TData = Awaited<ReturnType<typeof listVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListVolumes<TData = Awaited<ReturnType<typeof listVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVolumes>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListVolumes<TData = Awaited<ReturnType<typeof listVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListVolumes<TData = Awaited<ReturnType<typeof listVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVolumes>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -184,7 +186,7 @@ export const deleteVolume = async (volumeId: string, options?: Parameters<typeof
 
 export const getDeleteVolumeMutationKey = () => ['deleteVolume'] as const;
 
-export const getDeleteVolumeMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+export const getDeleteVolumeMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteVolume>>, TError,DeleteVolumeMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteVolume>>, TError,DeleteVolumeMutationVariables, TContext> => {
 
@@ -213,10 +215,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type DeleteVolumeMutationResult = NonNullable<Awaited<ReturnType<typeof deleteVolume>>>
 
-    export type DeleteVolumeMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>
+    export type DeleteVolumeMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type DeleteVolumeMutationVariables = {volumeId: string}
 
-    export const useDeleteVolume = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+    export const useDeleteVolume = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteVolume>>, TError,DeleteVolumeMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteVolume>>,
@@ -259,7 +261,7 @@ export const getReadVolumeQueryKey = (volumeId: string,) => {
     }
 
 
-export const getReadVolumeQueryOptions = <TData = Awaited<ReturnType<typeof readVolume>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(volumeId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readVolume>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getReadVolumeQueryOptions = <TData = Awaited<ReturnType<typeof readVolume>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(volumeId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readVolume>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -278,10 +280,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadVolumeQueryResult = NonNullable<Awaited<ReturnType<typeof readVolume>>>
-export type ReadVolumeQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadVolumeQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadVolume<TData = Awaited<ReturnType<typeof readVolume>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadVolume<TData = Awaited<ReturnType<typeof readVolume>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  volumeId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readVolume>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readVolume>>,
@@ -291,7 +293,7 @@ export function useReadVolume<TData = Awaited<ReturnType<typeof readVolume>>, TE
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadVolume<TData = Awaited<ReturnType<typeof readVolume>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadVolume<TData = Awaited<ReturnType<typeof readVolume>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  volumeId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readVolume>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readVolume>>,
@@ -301,12 +303,12 @@ export function useReadVolume<TData = Awaited<ReturnType<typeof readVolume>>, TE
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadVolume<TData = Awaited<ReturnType<typeof readVolume>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadVolume<TData = Awaited<ReturnType<typeof readVolume>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  volumeId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readVolume>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadVolume<TData = Awaited<ReturnType<typeof readVolume>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadVolume<TData = Awaited<ReturnType<typeof readVolume>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  volumeId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readVolume>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -335,7 +337,7 @@ export const getUpdateVolumeUrl = (volumeId: string,) => {
  * Updates a storage volume configuration.
  */
 export const updateVolume = async (volumeId: string,
-    volume: Volume, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Volume> => {
+    volumeUpdate: VolumeUpdate, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Volume> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -356,7 +358,7 @@ return kowabungaFetch<Volume>(getUpdateVolumeUrl(volumeId),
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(volume)
+    body: JSON.stringify(volumeUpdate)
   }
 );}
 
@@ -366,7 +368,7 @@ return kowabungaFetch<Volume>(getUpdateVolumeUrl(volumeId),
 
 export const getUpdateVolumeMutationKey = () => ['updateVolume'] as const;
 
-export const getUpdateVolumeMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getUpdateVolumeMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateVolume>>, TError,UpdateVolumeMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateVolume>>, TError,UpdateVolumeMutationVariables, TContext> => {
 
@@ -394,11 +396,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateVolumeMutationResult = NonNullable<Awaited<ReturnType<typeof updateVolume>>>
-    export type UpdateVolumeMutationBody = BodyType<Volume>
-    export type UpdateVolumeMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type UpdateVolumeMutationVariables = {volumeId: string;data: BodyType<Volume>}
+    export type UpdateVolumeMutationBody = BodyType<VolumeUpdate>
+    export type UpdateVolumeMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type UpdateVolumeMutationVariables = {volumeId: string;data: BodyType<VolumeUpdate>}
 
-    export const useUpdateVolume = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useUpdateVolume = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateVolume>>, TError,UpdateVolumeMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateVolume>>,

@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import type { KonveyEndpoint } from './konveyEndpoint';
 
@@ -11,15 +11,15 @@ import type { KonveyEndpoint } from './konveyEndpoint';
  * A Kowabunga Konvey is a layer-4 network load-balancer used to distribute service requests to associated backend instances.
  */
 export interface Konvey {
-  /** The Konvey (Kowabunga Network Load-Balancer) ID (auto-generated). */
-  id?: string;
-  /** The Konvey (Kowabunga Network Load-Balancer) name. */
+  /** The Konvey (Kowabunga Network Load-Balancer) ID (auto-generated) (read-only). */
+  readonly id?: string;
+  /** The Konvey (Kowabunga Network Load-Balancer) name, prefixed with konvey- (project name if unspecified). */
   name?: string;
   /** The Konvey (Kowabunga Network Load-Balancer) description. */
   description?: string;
   /** The Konvey (Kowabunga Network Load-Balancer) assigned private virtual IP address (read-only). */
-  vip?: string;
-  /** Whether Konvey (Kowabunga Network Load-Balancer) must be deployed in a highly-available replicated state to support service failover. */
+  readonly vip?: string;
+  /** Whether Konvey (Kowabunga Network Load-Balancer) must be deployed in a highly-available replicated state to support service failover. Can only be set at creation time, ignored on updates. */
   failover?: boolean;
   /** The Konvey (Kowabunga Network Load-Balancer) list of load-balanced endpoints. */
   endpoints: KonveyEndpoint[];

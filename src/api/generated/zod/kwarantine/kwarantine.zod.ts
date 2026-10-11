@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import * as zod from 'zod';
 
@@ -33,12 +33,12 @@ export const ReadKwarantineParams = zod.object({
 export const readKwarantineResponsePolicyDefault = `host`;
 
 export const ReadKwarantineResponse = zod.object({
-  "id": zod.string().optional().describe('The Kwarantine ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kwarantine ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kwarantine name.'),
   "description": zod.string().optional().describe('The Kwarantine description.'),
   "policy": zod.enum(['host', 'zone']).default(readKwarantineResponsePolicyDefault).describe('The anti-affinity enforcement policy. Use "host" to guarantee no two group members are ever scheduled on the same Kaktus computing node, or "zone" to guarantee no two group members are ever scheduled within the same availability zone.'),
-  "instances": zod.array(zod.string()).optional().describe('A list of existing virtual machine instance IDs that are part of the Kwarantine group. Members are guaranteed to never be co-scheduled according to the group policy, regardless of Kaktus host scheduling score.'),
-  "komputes": zod.array(zod.string()).optional().describe('A list of existing Kompute IDs that are part of the Kwarantine group. Members are guaranteed to never be co-scheduled according to the group policy, regardless of Kaktus host scheduling score.')
+  "instances": zod.array(zod.string()).optional().describe('A list of existing virtual machine instance IDs that are part of the Kwarantine group. Members are guaranteed to never be co-scheduled according to the group policy, regardless of Kaktus host scheduling score. Managed through the dedicated add/remove operations (read-only).'),
+  "komputes": zod.array(zod.string()).optional().describe('A list of existing Kompute IDs that are part of the Kwarantine group. Members are guaranteed to never be co-scheduled according to the group policy, regardless of Kaktus host scheduling score. Managed through the dedicated add/remove operations (read-only).')
 }).describe('A Kwarantine is an anti-affinity mechanism that ensures its member virtual machine instances or Kompute resources are never co-scheduled on the same Kaktus computing node (host policy) or the same availability zone (zone policy), regardless of Kaktus host scheduling score, so that critical redundant resources stay properly spread out.')
 
 /**
@@ -48,26 +48,21 @@ export const UpdateKwarantineParams = zod.object({
   "kwarantineId": zod.string().describe('The ID of the Kwarantine.')
 })
 
-export const updateKwarantineBodyPolicyDefault = `host`;
-
 export const UpdateKwarantineBody = zod.object({
-  "id": zod.string().optional().describe('The Kwarantine ID (auto-generated).'),
-  "name": zod.string().describe('The Kwarantine name.'),
+  "name": zod.string().optional().describe('The Kwarantine name.'),
   "description": zod.string().optional().describe('The Kwarantine description.'),
-  "policy": zod.enum(['host', 'zone']).default(updateKwarantineBodyPolicyDefault).describe('The anti-affinity enforcement policy. Use "host" to guarantee no two group members are ever scheduled on the same Kaktus computing node, or "zone" to guarantee no two group members are ever scheduled within the same availability zone.'),
-  "instances": zod.array(zod.string()).optional().describe('A list of existing virtual machine instance IDs that are part of the Kwarantine group. Members are guaranteed to never be co-scheduled according to the group policy, regardless of Kaktus host scheduling score.'),
-  "komputes": zod.array(zod.string()).optional().describe('A list of existing Kompute IDs that are part of the Kwarantine group. Members are guaranteed to never be co-scheduled according to the group policy, regardless of Kaktus host scheduling score.')
-}).describe('A Kwarantine is an anti-affinity mechanism that ensures its member virtual machine instances or Kompute resources are never co-scheduled on the same Kaktus computing node (host policy) or the same availability zone (zone policy), regardless of Kaktus host scheduling score, so that critical redundant resources stay properly spread out.')
+  "policy": zod.enum(['host', 'zone']).optional().describe('The anti-affinity enforcement policy. Use "host" to guarantee no two group members are ever scheduled on the same Kaktus computing node, or "zone" to guarantee no two group members are ever scheduled within the same availability zone.')
+}).describe('A Kwarantine update (unspecified properties are left unchanged).')
 
 export const updateKwarantineResponsePolicyDefault = `host`;
 
 export const UpdateKwarantineResponse = zod.object({
-  "id": zod.string().optional().describe('The Kwarantine ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kwarantine ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kwarantine name.'),
   "description": zod.string().optional().describe('The Kwarantine description.'),
   "policy": zod.enum(['host', 'zone']).default(updateKwarantineResponsePolicyDefault).describe('The anti-affinity enforcement policy. Use "host" to guarantee no two group members are ever scheduled on the same Kaktus computing node, or "zone" to guarantee no two group members are ever scheduled within the same availability zone.'),
-  "instances": zod.array(zod.string()).optional().describe('A list of existing virtual machine instance IDs that are part of the Kwarantine group. Members are guaranteed to never be co-scheduled according to the group policy, regardless of Kaktus host scheduling score.'),
-  "komputes": zod.array(zod.string()).optional().describe('A list of existing Kompute IDs that are part of the Kwarantine group. Members are guaranteed to never be co-scheduled according to the group policy, regardless of Kaktus host scheduling score.')
+  "instances": zod.array(zod.string()).optional().describe('A list of existing virtual machine instance IDs that are part of the Kwarantine group. Members are guaranteed to never be co-scheduled according to the group policy, regardless of Kaktus host scheduling score. Managed through the dedicated add/remove operations (read-only).'),
+  "komputes": zod.array(zod.string()).optional().describe('A list of existing Kompute IDs that are part of the Kwarantine group. Members are guaranteed to never be co-scheduled according to the group policy, regardless of Kaktus host scheduling score. Managed through the dedicated add/remove operations (read-only).')
 }).describe('A Kwarantine is an anti-affinity mechanism that ensures its member virtual machine instances or Kompute resources are never co-scheduled on the same Kaktus computing node (host policy) or the same availability zone (zone policy), regardless of Kaktus host scheduling score, so that critical redundant resources stay properly spread out.')
 
 /**
@@ -91,12 +86,12 @@ export const AddKwarantineInstanceParams = zod.object({
 export const addKwarantineInstanceResponsePolicyDefault = `host`;
 
 export const AddKwarantineInstanceResponse = zod.object({
-  "id": zod.string().optional().describe('The Kwarantine ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kwarantine ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kwarantine name.'),
   "description": zod.string().optional().describe('The Kwarantine description.'),
   "policy": zod.enum(['host', 'zone']).default(addKwarantineInstanceResponsePolicyDefault).describe('The anti-affinity enforcement policy. Use "host" to guarantee no two group members are ever scheduled on the same Kaktus computing node, or "zone" to guarantee no two group members are ever scheduled within the same availability zone.'),
-  "instances": zod.array(zod.string()).optional().describe('A list of existing virtual machine instance IDs that are part of the Kwarantine group. Members are guaranteed to never be co-scheduled according to the group policy, regardless of Kaktus host scheduling score.'),
-  "komputes": zod.array(zod.string()).optional().describe('A list of existing Kompute IDs that are part of the Kwarantine group. Members are guaranteed to never be co-scheduled according to the group policy, regardless of Kaktus host scheduling score.')
+  "instances": zod.array(zod.string()).optional().describe('A list of existing virtual machine instance IDs that are part of the Kwarantine group. Members are guaranteed to never be co-scheduled according to the group policy, regardless of Kaktus host scheduling score. Managed through the dedicated add/remove operations (read-only).'),
+  "komputes": zod.array(zod.string()).optional().describe('A list of existing Kompute IDs that are part of the Kwarantine group. Members are guaranteed to never be co-scheduled according to the group policy, regardless of Kaktus host scheduling score. Managed through the dedicated add/remove operations (read-only).')
 }).describe('A Kwarantine is an anti-affinity mechanism that ensures its member virtual machine instances or Kompute resources are never co-scheduled on the same Kaktus computing node (host policy) or the same availability zone (zone policy), regardless of Kaktus host scheduling score, so that critical redundant resources stay properly spread out.')
 
 /**
@@ -120,11 +115,11 @@ export const AddKwarantineKomputeParams = zod.object({
 export const addKwarantineKomputeResponsePolicyDefault = `host`;
 
 export const AddKwarantineKomputeResponse = zod.object({
-  "id": zod.string().optional().describe('The Kwarantine ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kwarantine ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kwarantine name.'),
   "description": zod.string().optional().describe('The Kwarantine description.'),
   "policy": zod.enum(['host', 'zone']).default(addKwarantineKomputeResponsePolicyDefault).describe('The anti-affinity enforcement policy. Use "host" to guarantee no two group members are ever scheduled on the same Kaktus computing node, or "zone" to guarantee no two group members are ever scheduled within the same availability zone.'),
-  "instances": zod.array(zod.string()).optional().describe('A list of existing virtual machine instance IDs that are part of the Kwarantine group. Members are guaranteed to never be co-scheduled according to the group policy, regardless of Kaktus host scheduling score.'),
-  "komputes": zod.array(zod.string()).optional().describe('A list of existing Kompute IDs that are part of the Kwarantine group. Members are guaranteed to never be co-scheduled according to the group policy, regardless of Kaktus host scheduling score.')
+  "instances": zod.array(zod.string()).optional().describe('A list of existing virtual machine instance IDs that are part of the Kwarantine group. Members are guaranteed to never be co-scheduled according to the group policy, regardless of Kaktus host scheduling score. Managed through the dedicated add/remove operations (read-only).'),
+  "komputes": zod.array(zod.string()).optional().describe('A list of existing Kompute IDs that are part of the Kwarantine group. Members are guaranteed to never be co-scheduled according to the group policy, regardless of Kaktus host scheduling score. Managed through the dedicated add/remove operations (read-only).')
 }).describe('A Kwarantine is an anti-affinity mechanism that ensures its member virtual machine instances or Kompute resources are never co-scheduled on the same Kaktus computing node (host policy) or the same availability zone (zone policy), regardless of Kaktus host scheduling score, so that critical redundant resources stay properly spread out.')
 

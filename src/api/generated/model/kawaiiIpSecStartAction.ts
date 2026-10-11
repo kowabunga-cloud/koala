@@ -3,11 +3,11 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 
 /**
- * The Kawaii IPsec connection start action (none, start, trap).
+ * The Kawaii IPsec connection start action.
  */
 export type KawaiiIpSecStartAction = typeof KawaiiIpSecStartAction[keyof typeof KawaiiIpSecStartAction];
 

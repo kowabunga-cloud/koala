@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   useMutation,
@@ -29,7 +29,9 @@ import type {
   ConflictResponse,
   ForbiddenResponse,
   InsufficientResourceResponse,
+  InternalServerErrorResponse,
   Konvey,
+  KonveyUpdate,
   NotFoundResponse,
   ObjectIds,
   UnauthorizedResponse,
@@ -92,7 +94,7 @@ export const getListKonveysQueryKey = () => {
     }
 
 
-export const getListKonveysQueryOptions = <TData = Awaited<ReturnType<typeof listKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKonveys>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListKonveysQueryOptions = <TData = Awaited<ReturnType<typeof listKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKonveys>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -111,10 +113,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListKonveysQueryResult = NonNullable<Awaited<ReturnType<typeof listKonveys>>>
-export type ListKonveysQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+export type ListKonveysQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>
 
 
-export function useListKonveys<TData = Awaited<ReturnType<typeof listKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListKonveys<TData = Awaited<ReturnType<typeof listKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKonveys>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listKonveys>>,
@@ -124,7 +126,7 @@ export function useListKonveys<TData = Awaited<ReturnType<typeof listKonveys>>, 
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListKonveys<TData = Awaited<ReturnType<typeof listKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListKonveys<TData = Awaited<ReturnType<typeof listKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKonveys>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listKonveys>>,
@@ -134,12 +136,12 @@ export function useListKonveys<TData = Awaited<ReturnType<typeof listKonveys>>, 
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListKonveys<TData = Awaited<ReturnType<typeof listKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListKonveys<TData = Awaited<ReturnType<typeof listKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKonveys>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListKonveys<TData = Awaited<ReturnType<typeof listKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListKonveys<TData = Awaited<ReturnType<typeof listKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKonveys>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -184,7 +186,7 @@ export const deleteKonvey = async (konveyId: string, options?: Parameters<typeof
 
 export const getDeleteKonveyMutationKey = () => ['deleteKonvey'] as const;
 
-export const getDeleteKonveyMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+export const getDeleteKonveyMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteKonvey>>, TError,DeleteKonveyMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteKonvey>>, TError,DeleteKonveyMutationVariables, TContext> => {
 
@@ -213,10 +215,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type DeleteKonveyMutationResult = NonNullable<Awaited<ReturnType<typeof deleteKonvey>>>
 
-    export type DeleteKonveyMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>
+    export type DeleteKonveyMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type DeleteKonveyMutationVariables = {konveyId: string}
 
-    export const useDeleteKonvey = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+    export const useDeleteKonvey = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteKonvey>>, TError,DeleteKonveyMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteKonvey>>,
@@ -259,7 +261,7 @@ export const getReadKonveyQueryKey = (konveyId: string,) => {
     }
 
 
-export const getReadKonveyQueryOptions = <TData = Awaited<ReturnType<typeof readKonvey>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(konveyId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKonvey>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getReadKonveyQueryOptions = <TData = Awaited<ReturnType<typeof readKonvey>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(konveyId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKonvey>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -278,10 +280,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadKonveyQueryResult = NonNullable<Awaited<ReturnType<typeof readKonvey>>>
-export type ReadKonveyQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadKonveyQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadKonvey<TData = Awaited<ReturnType<typeof readKonvey>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKonvey<TData = Awaited<ReturnType<typeof readKonvey>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  konveyId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKonvey>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readKonvey>>,
@@ -291,7 +293,7 @@ export function useReadKonvey<TData = Awaited<ReturnType<typeof readKonvey>>, TE
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadKonvey<TData = Awaited<ReturnType<typeof readKonvey>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKonvey<TData = Awaited<ReturnType<typeof readKonvey>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  konveyId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKonvey>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readKonvey>>,
@@ -301,12 +303,12 @@ export function useReadKonvey<TData = Awaited<ReturnType<typeof readKonvey>>, TE
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadKonvey<TData = Awaited<ReturnType<typeof readKonvey>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKonvey<TData = Awaited<ReturnType<typeof readKonvey>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  konveyId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKonvey>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadKonvey<TData = Awaited<ReturnType<typeof readKonvey>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKonvey<TData = Awaited<ReturnType<typeof readKonvey>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  konveyId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKonvey>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -335,7 +337,7 @@ export const getUpdateKonveyUrl = (konveyId: string,) => {
  * Updates a Konvey (Kowabunga Network Load-Balancer) configuration.
  */
 export const updateKonvey = async (konveyId: string,
-    konvey: Konvey, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Konvey> => {
+    konveyUpdate: KonveyUpdate, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Konvey> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -356,7 +358,7 @@ return kowabungaFetch<Konvey>(getUpdateKonveyUrl(konveyId),
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(konvey)
+    body: JSON.stringify(konveyUpdate)
   }
 );}
 
@@ -366,7 +368,7 @@ return kowabungaFetch<Konvey>(getUpdateKonveyUrl(konveyId),
 
 export const getUpdateKonveyMutationKey = () => ['updateKonvey'] as const;
 
-export const getUpdateKonveyMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getUpdateKonveyMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKonvey>>, TError,UpdateKonveyMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateKonvey>>, TError,UpdateKonveyMutationVariables, TContext> => {
 
@@ -394,11 +396,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateKonveyMutationResult = NonNullable<Awaited<ReturnType<typeof updateKonvey>>>
-    export type UpdateKonveyMutationBody = BodyType<Konvey>
-    export type UpdateKonveyMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type UpdateKonveyMutationVariables = {konveyId: string;data: BodyType<Konvey>}
+    export type UpdateKonveyMutationBody = BodyType<KonveyUpdate>
+    export type UpdateKonveyMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type UpdateKonveyMutationVariables = {konveyId: string;data: BodyType<KonveyUpdate>}
 
-    export const useUpdateKonvey = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useUpdateKonvey = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKonvey>>, TError,UpdateKonveyMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateKonvey>>,

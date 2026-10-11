@@ -3,16 +3,17 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 
 /**
- * The Kowabunga agent type.
+ * The Kowabunga agent type. Can only be set at creation time, ignored on updates.
  */
 export type AgentType = typeof AgentType[keyof typeof AgentType];
 
 
 export const AgentType = {
-  Kiwi: 'Kiwi',
   Kaktus: 'Kaktus',
+  Kiwi: 'Kiwi',
+  Kontroller: 'Kontroller',
 } as const;

@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   HttpResponse,
@@ -20,21 +20,21 @@ import type {
 
 import {
   getListStorageNFSKylosResponseMock,
-  getListStorageNFSsResponseMock,
+  getListStorageNFSesResponseMock,
   getReadStorageNFSResponseMock,
   getUpdateStorageNFSResponseMock
 } from './nfs.faker';
 
-export { getListStorageNFSsResponseMock, getReadStorageNFSResponseMock, getUpdateStorageNFSResponseMock, getListStorageNFSKylosResponseMock } from './nfs.faker';
+export { getListStorageNFSesResponseMock, getReadStorageNFSResponseMock, getUpdateStorageNFSResponseMock, getListStorageNFSKylosResponseMock } from './nfs.faker';
 
 
-export const getListStorageNFSsMockHandler = (overrideResponse?: ObjectIds | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ObjectIds> | ObjectIds), options?: RequestHandlerOptions) => {
+export const getListStorageNFSesMockHandler = (overrideResponse?: ObjectIds | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ObjectIds> | ObjectIds), options?: RequestHandlerOptions) => {
   return http.get('/api/v1/nfs', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
 
 
     return HttpResponse.json(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getListStorageNFSsResponseMock(),
+    : getListStorageNFSesResponseMock(),
       { status: 200
       })
   }, options)
@@ -75,7 +75,7 @@ export const getUpdateStorageNFSMockHandler = (overrideResponse?: StorageNFS | (
 }
 
 export const getListStorageNFSKylosMockHandler = (overrideResponse?: ObjectIds | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ObjectIds> | ObjectIds), options?: RequestHandlerOptions) => {
-  return http.get('/api/v1/nfs/:nfsId/kylo', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+  return http.get('/api/v1/nfs/:nfsId/kylos', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
 
 
     return HttpResponse.json(overrideResponse !== undefined
@@ -86,7 +86,7 @@ export const getListStorageNFSKylosMockHandler = (overrideResponse?: ObjectIds |
   }, options)
 }
 export const getNfsMock = () => [
-  getListStorageNFSsMockHandler(),
+  getListStorageNFSesMockHandler(),
   getDeleteStorageNFSMockHandler(),
   getReadStorageNFSMockHandler(),
   getUpdateStorageNFSMockHandler(),

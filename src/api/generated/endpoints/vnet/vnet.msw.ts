@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   HttpResponse,
@@ -20,14 +20,14 @@ import type {
 } from '../../model';
 
 import {
-  getCreateSubnetResponseMock,
+  getCreateVNetSubnetResponseMock,
   getListVNetSubnetsResponseMock,
   getListVNetsResponseMock,
   getReadVNetResponseMock,
   getUpdateVNetResponseMock
 } from './vnet.faker';
 
-export { getListVNetsResponseMock, getReadVNetResponseMock, getUpdateVNetResponseMock, getCreateSubnetResponseMock, getListVNetSubnetsResponseMock } from './vnet.faker';
+export { getListVNetsResponseMock, getReadVNetResponseMock, getUpdateVNetResponseMock, getCreateVNetSubnetResponseMock, getListVNetSubnetsResponseMock } from './vnet.faker';
 
 
 export const getListVNetsMockHandler = (overrideResponse?: ObjectIds | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ObjectIds> | ObjectIds), options?: RequestHandlerOptions) => {
@@ -76,13 +76,13 @@ export const getUpdateVNetMockHandler = (overrideResponse?: VNet | ((info: Param
   }, options)
 }
 
-export const getCreateSubnetMockHandler = (overrideResponse?: Subnet | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<Subnet> | Subnet), options?: RequestHandlerOptions) => {
+export const getCreateVNetSubnetMockHandler = (overrideResponse?: Subnet | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<Subnet> | Subnet), options?: RequestHandlerOptions) => {
   return http.post('/api/v1/vnet/:vnetId/subnet', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
 
 
     return HttpResponse.json(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getCreateSubnetResponseMock(),
+    : getCreateVNetSubnetResponseMock(),
       { status: 201
       })
   }, options)
@@ -114,7 +114,7 @@ export const getVnetMock = () => [
   getDeleteVNetMockHandler(),
   getReadVNetMockHandler(),
   getUpdateVNetMockHandler(),
-  getCreateSubnetMockHandler(),
+  getCreateVNetSubnetMockHandler(),
   getSetVNetDefaultSubnetMockHandler(),
   getListVNetSubnetsMockHandler()
 ]

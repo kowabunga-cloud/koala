@@ -3,13 +3,14 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   faker
 } from '@faker-js/faker';
 
 import type {
+  ApiToken,
   ObjectIds,
   User,
   UserCredentials
@@ -25,4 +26,6 @@ export const getCreateUserResponseMock = (overrideResponse: Partial<Extract<User
 export const getReadUserResponseMock = (overrideResponse: Partial<Extract<User, object>> = {}): User => ({id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), name: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), email: faker.string.alpha({length: {min: 10, max: 20}}), role: faker.helpers.arrayElement(['superAdmin','projectAdmin','user'] as const), notifications: faker.datatype.boolean(), ...overrideResponse})
 
 export const getUpdateUserResponseMock = (overrideResponse: Partial<Extract<User, object>> = {}): User => ({id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), name: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), email: faker.string.alpha({length: {min: 10, max: 20}}), role: faker.helpers.arrayElement(['superAdmin','projectAdmin','user'] as const), notifications: faker.datatype.boolean(), ...overrideResponse})
+
+export const getSetUserApiTokenResponseMock = (overrideResponse: Partial<Extract<ApiToken, object>> = {}): ApiToken => ({id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), name: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), expire: faker.datatype.boolean(), expiration_date: faker.helpers.arrayElement([faker.date.past().toISOString().slice(0, 10), undefined]), ...overrideResponse})
 

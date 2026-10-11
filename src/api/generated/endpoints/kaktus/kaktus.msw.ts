@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   HttpResponse,
@@ -21,22 +21,22 @@ import type {
 
 import {
   getListKaktusInstancesResponseMock,
-  getListKaktussResponseMock,
+  getListKaktusesResponseMock,
   getReadKaktusCapsResponseMock,
   getReadKaktusResponseMock,
   getUpdateKaktusResponseMock
 } from './kaktus.faker';
 
-export { getListKaktussResponseMock, getReadKaktusResponseMock, getUpdateKaktusResponseMock, getReadKaktusCapsResponseMock, getListKaktusInstancesResponseMock } from './kaktus.faker';
+export { getListKaktusesResponseMock, getReadKaktusResponseMock, getUpdateKaktusResponseMock, getReadKaktusCapsResponseMock, getListKaktusInstancesResponseMock } from './kaktus.faker';
 
 
-export const getListKaktussMockHandler = (overrideResponse?: ObjectIds | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ObjectIds> | ObjectIds), options?: RequestHandlerOptions) => {
+export const getListKaktusesMockHandler = (overrideResponse?: ObjectIds | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ObjectIds> | ObjectIds), options?: RequestHandlerOptions) => {
   return http.get('/api/v1/kaktus', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
 
 
     return HttpResponse.json(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getListKaktussResponseMock(),
+    : getListKaktusesResponseMock(),
       { status: 200
       })
   }, options)
@@ -120,7 +120,7 @@ export const getListKaktusInstancesMockHandler = (overrideResponse?: ObjectIds |
   }, options)
 }
 export const getKaktusMock = () => [
-  getListKaktussMockHandler(),
+  getListKaktusesMockHandler(),
   getDeleteKaktusMockHandler(),
   getReadKaktusMockHandler(),
   getUpdateKaktusMockHandler(),

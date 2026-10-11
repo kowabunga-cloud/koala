@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import * as zod from 'zod';
 
@@ -18,14 +18,13 @@ export const ListRegionsResponse = zod.array(ListRegionsResponseItem)
  * Creates a new region.
  */
 export const CreateRegionBody = zod.object({
-  "id": zod.string().optional().describe('The region ID (auto-generated).'),
   "name": zod.string().describe('The region name.'),
   "description": zod.string().optional().describe('The region description.'),
   "domain": zod.string().describe('Region domain name (e.g. myregion.kowabunga.acme.com).')
 }).describe('A region.')
 
 export const CreateRegionResponse = zod.object({
-  "id": zod.string().optional().describe('The region ID (auto-generated).'),
+  "id": zod.string().optional().describe('The region ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The region name.'),
   "description": zod.string().optional().describe('The region description.'),
   "domain": zod.string().describe('Region domain name (e.g. myregion.kowabunga.acme.com).')
@@ -48,7 +47,7 @@ export const ReadRegionParams = zod.object({
 })
 
 export const ReadRegionResponse = zod.object({
-  "id": zod.string().optional().describe('The region ID (auto-generated).'),
+  "id": zod.string().optional().describe('The region ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The region name.'),
   "description": zod.string().optional().describe('The region description.'),
   "domain": zod.string().describe('Region domain name (e.g. myregion.kowabunga.acme.com).')
@@ -62,14 +61,13 @@ export const UpdateRegionParams = zod.object({
 })
 
 export const UpdateRegionBody = zod.object({
-  "id": zod.string().optional().describe('The region ID (auto-generated).'),
-  "name": zod.string().describe('The region name.'),
+  "name": zod.string().optional().describe('The region name.'),
   "description": zod.string().optional().describe('The region description.'),
-  "domain": zod.string().describe('Region domain name (e.g. myregion.kowabunga.acme.com).')
-}).describe('A region.')
+  "domain": zod.string().optional().describe('Region domain name (e.g. myregion.kowabunga.acme.com).')
+}).describe('A region update (unspecified properties are left unchanged).')
 
 export const UpdateRegionResponse = zod.object({
-  "id": zod.string().optional().describe('The region ID (auto-generated).'),
+  "id": zod.string().optional().describe('The region ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The region name.'),
   "description": zod.string().optional().describe('The region description.'),
   "domain": zod.string().describe('Region domain name (e.g. myregion.kowabunga.acme.com).')
@@ -78,18 +76,17 @@ export const UpdateRegionResponse = zod.object({
 /**
  * Creates a new availability zone.
  */
-export const CreateZoneParams = zod.object({
+export const CreateRegionZoneParams = zod.object({
   "regionId": zod.string().describe('The ID of the region.')
 })
 
-export const CreateZoneBody = zod.object({
-  "id": zod.string().optional().describe('The availability zone ID (auto-generated).'),
+export const CreateRegionZoneBody = zod.object({
   "name": zod.string().describe('The availability zone name.'),
   "description": zod.string().optional().describe('The availability zone description.')
 }).describe('A availability zone.')
 
-export const CreateZoneResponse = zod.object({
-  "id": zod.string().optional().describe('The availability zone ID (auto-generated).'),
+export const CreateRegionZoneResponse = zod.object({
+  "id": zod.string().optional().describe('The availability zone ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The availability zone name.'),
   "description": zod.string().optional().describe('The availability zone description.')
 }).describe('A availability zone.')
@@ -107,20 +104,22 @@ export const ListRegionZonesResponse = zod.array(ListRegionZonesResponseItem)
 /**
  * Creates a new storage pool.
  */
-export const CreateStoragePoolParams = zod.object({
+export const CreateRegionStoragePoolParams = zod.object({
   "regionId": zod.string().describe('The ID of the region.')
 })
 
-export const createStoragePoolBodyCephAddressDefault = `localhost`;
-export const createStoragePoolBodyCephPortDefault = 3300;
+export const createRegionStoragePoolBodyCephAddressDefault = `localhost`;
+export const createRegionStoragePoolBodyCephPortDefault = 3300;
+export const createRegionStoragePoolBodyCephPortMax = 65535;
 
-export const CreateStoragePoolBody = zod.object({
-  "id": zod.string().optional().describe('The storage pool ID (auto-generated).'),
+
+
+export const CreateRegionStoragePoolBody = zod.object({
   "name": zod.string().describe('The storage pool name.'),
   "description": zod.string().optional().describe('The storage pool description.'),
   "pool": zod.string().describe('Ceph pool name.'),
-  "ceph_address": zod.string().default(createStoragePoolBodyCephAddressDefault).describe('Ceph Monitor(s) address or FQDN.'),
-  "ceph_port": zod.int().default(createStoragePoolBodyCephPortDefault).describe('Ceph Monitor(s) port (default 3300).'),
+  "ceph_address": zod.string().default(createRegionStoragePoolBodyCephAddressDefault).describe('Ceph Monitor(s) address or FQDN.'),
+  "ceph_port": zod.int().min(1).max(createRegionStoragePoolBodyCephPortMax).default(createRegionStoragePoolBodyCephPortDefault).describe('Ceph Monitor(s) port.'),
   "ceph_secret_uuid": zod.string().optional().describe('The libvirt secret UUID for CephX authentication.'),
   "cost": zod.object({
   "price": zod.number().describe('The unit price information.'),
@@ -129,16 +128,19 @@ export const CreateStoragePoolBody = zod.object({
   "agents": zod.array(zod.string()).describe('a list of existing remote agents managing the storage pool.')
 }).describe('A storage pool.')
 
-export const createStoragePoolResponseCephAddressDefault = `localhost`;
-export const createStoragePoolResponseCephPortDefault = 3300;
+export const createRegionStoragePoolResponseCephAddressDefault = `localhost`;
+export const createRegionStoragePoolResponseCephPortDefault = 3300;
+export const createRegionStoragePoolResponseCephPortMax = 65535;
 
-export const CreateStoragePoolResponse = zod.object({
-  "id": zod.string().optional().describe('The storage pool ID (auto-generated).'),
+
+
+export const CreateRegionStoragePoolResponse = zod.object({
+  "id": zod.string().optional().describe('The storage pool ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The storage pool name.'),
   "description": zod.string().optional().describe('The storage pool description.'),
   "pool": zod.string().describe('Ceph pool name.'),
-  "ceph_address": zod.string().default(createStoragePoolResponseCephAddressDefault).describe('Ceph Monitor(s) address or FQDN.'),
-  "ceph_port": zod.int().default(createStoragePoolResponseCephPortDefault).describe('Ceph Monitor(s) port (default 3300).'),
+  "ceph_address": zod.string().default(createRegionStoragePoolResponseCephAddressDefault).describe('Ceph Monitor(s) address or FQDN.'),
+  "ceph_port": zod.int().min(1).max(createRegionStoragePoolResponseCephPortMax).default(createRegionStoragePoolResponseCephPortDefault).describe('Ceph Monitor(s) port.'),
   "ceph_secret_uuid": zod.string().optional().describe('The libvirt secret UUID for CephX authentication.'),
   "cost": zod.object({
   "price": zod.number().describe('The unit price information.'),
@@ -150,19 +152,18 @@ export const CreateStoragePoolResponse = zod.object({
 /**
  * Creates a new Kiwi (Kowabunga Inner Wan Interface) provides edge-network services..
  */
-export const CreateKiwiParams = zod.object({
+export const CreateRegionKiwiParams = zod.object({
   "regionId": zod.string().describe('The ID of the region.')
 })
 
-export const CreateKiwiBody = zod.object({
-  "id": zod.string().optional().describe('The Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. ID (auto-generated).'),
+export const CreateRegionKiwiBody = zod.object({
   "name": zod.string().describe('The Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. name.'),
   "description": zod.string().optional().describe('The Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. description.'),
   "agents": zod.array(zod.string()).optional().describe('a list of existing remote agents managing the network gateway.')
 }).describe('A Kiwi (Kowabunga Inner Wan Interface) provides edge-network services..')
 
-export const CreateKiwiResponse = zod.object({
-  "id": zod.string().optional().describe('The Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. ID (auto-generated).'),
+export const CreateRegionKiwiResponse = zod.object({
+  "id": zod.string().optional().describe('The Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. name.'),
   "description": zod.string().optional().describe('The Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. description.'),
   "agents": zod.array(zod.string()).optional().describe('a list of existing remote agents managing the network gateway.')
@@ -181,30 +182,35 @@ export const ListRegionKiwisResponse = zod.array(ListRegionKiwisResponseItem)
 /**
  * Creates a new virtual network.
  */
-export const CreateVNetParams = zod.object({
+export const CreateRegionVNetParams = zod.object({
   "regionId": zod.string().describe('The ID of the region.')
 })
 
-export const createVNetBodyPrivateDefault = true;
+export const createRegionVNetBodyVlanMin = 0;
+export const createRegionVNetBodyVlanMax = 4094;
 
-export const CreateVNetBody = zod.object({
-  "id": zod.string().optional().describe('The virtual network ID (auto-generated).'),
+export const createRegionVNetBodyPrivateDefault = true;
+
+export const CreateRegionVNetBody = zod.object({
   "name": zod.string().describe('The virtual network name.'),
   "description": zod.string().optional().describe('The virtual network description.'),
-  "vlan": zod.int().optional().describe('The VLAN identifier (0 if unspecified).'),
+  "vlan": zod.int().min(createRegionVNetBodyVlanMin).max(createRegionVNetBodyVlanMax).optional().describe('The VLAN identifier (0 if unspecified).'),
   "interface": zod.string().describe('The libvirt\'s bridge network interface (brX).'),
-  "private": zod.boolean().default(createVNetBodyPrivateDefault).describe('Is the virtual network adapter connected to private (LAN) or public (WAN) physical network ?.')
+  "private": zod.boolean().default(createRegionVNetBodyPrivateDefault).describe('Whether the virtual network is connected to private (LAN) or public (WAN) physical network. Can only be set at creation time, ignored on updates.')
 }).describe('A virtual network.')
 
-export const createVNetResponsePrivateDefault = true;
+export const createRegionVNetResponseVlanMin = 0;
+export const createRegionVNetResponseVlanMax = 4094;
 
-export const CreateVNetResponse = zod.object({
-  "id": zod.string().optional().describe('The virtual network ID (auto-generated).'),
+export const createRegionVNetResponsePrivateDefault = true;
+
+export const CreateRegionVNetResponse = zod.object({
+  "id": zod.string().optional().describe('The virtual network ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The virtual network name.'),
   "description": zod.string().optional().describe('The virtual network description.'),
-  "vlan": zod.int().optional().describe('The VLAN identifier (0 if unspecified).'),
+  "vlan": zod.int().min(createRegionVNetResponseVlanMin).max(createRegionVNetResponseVlanMax).optional().describe('The VLAN identifier (0 if unspecified).'),
   "interface": zod.string().describe('The libvirt\'s bridge network interface (brX).'),
-  "private": zod.boolean().default(createVNetResponsePrivateDefault).describe('Is the virtual network adapter connected to private (LAN) or public (WAN) physical network ?.')
+  "private": zod.boolean().default(createRegionVNetResponsePrivateDefault).describe('Whether the virtual network is connected to private (LAN) or public (WAN) physical network. Can only be set at creation time, ignored on updates.')
 }).describe('A virtual network.')
 
 /**
@@ -238,55 +244,56 @@ export const ListRegionStoragePoolsResponseItem = zod.string()
 export const ListRegionStoragePoolsResponse = zod.array(ListRegionStoragePoolsResponseItem)
 
 /**
- * Returns the IDs of NFS storage objects.
- */
-export const ListRegionStorageNFSsParams = zod.object({
-  "regionId": zod.string().describe('The ID of the region.')
-})
-
-export const ListRegionStorageNFSsQueryParams = zod.object({
-  "poolId": zod.string().optional().describe('Storage pool ID (optional, region\'s default if unspecified).')
-})
-
-export const ListRegionStorageNFSsResponseItem = zod.string()
-export const ListRegionStorageNFSsResponse = zod.array(ListRegionStorageNFSsResponseItem)
-
-/**
  * Creates a new NFS storage.
  */
-export const CreateStorageNFSParams = zod.object({
+export const CreateRegionStorageNFSParams = zod.object({
   "regionId": zod.string().describe('The ID of the region.')
 })
 
-export const CreateStorageNFSQueryParams = zod.object({
+export const CreateRegionStorageNFSQueryParams = zod.object({
   "poolId": zod.string().optional().describe('Storage pool ID (optional, region\'s default if unspecified).')
 })
 
-export const createStorageNFSBodyFsDefault = `nfs`;
-export const createStorageNFSBodyPortDefault = 54934;
+export const createRegionStorageNFSBodyFsDefault = `nfs`;
+export const createRegionStorageNFSBodyPortDefault = 54934;
+export const createRegionStorageNFSBodyPortMax = 65535;
 
-export const CreateStorageNFSBody = zod.object({
-  "id": zod.string().optional().describe('The NFS storage ID (auto-generated).'),
+
+
+export const CreateRegionStorageNFSBody = zod.object({
   "name": zod.string().describe('The NFS storage name.'),
   "description": zod.string().optional().describe('The NFS storage description.'),
   "endpoint": zod.string().describe('The associated NFS endpoint FQDN.'),
-  "fs": zod.string().default(createStorageNFSBodyFsDefault).describe('The underlying associated Ceph volume name.'),
-  "backends": zod.array(zod.string()).optional().describe('List of NFS Ganesha API server IP addresses.'),
-  "port": zod.int().default(createStorageNFSBodyPortDefault).describe('NFS Ganesha API server port (default 54934).')
+  "fs": zod.string().default(createRegionStorageNFSBodyFsDefault).describe('The underlying associated Ceph volume name.'),
+  "backends": zod.array(zod.string()).describe('List of NFS Ganesha API server IP addresses.'),
+  "port": zod.int().min(1).max(createRegionStorageNFSBodyPortMax).default(createRegionStorageNFSBodyPortDefault).describe('NFS Ganesha API server port.')
 }).describe('A NFS storage.')
 
-export const createStorageNFSResponseFsDefault = `nfs`;
-export const createStorageNFSResponsePortDefault = 54934;
+export const createRegionStorageNFSResponseFsDefault = `nfs`;
+export const createRegionStorageNFSResponsePortDefault = 54934;
+export const createRegionStorageNFSResponsePortMax = 65535;
 
-export const CreateStorageNFSResponse = zod.object({
-  "id": zod.string().optional().describe('The NFS storage ID (auto-generated).'),
+
+
+export const CreateRegionStorageNFSResponse = zod.object({
+  "id": zod.string().optional().describe('The NFS storage ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The NFS storage name.'),
   "description": zod.string().optional().describe('The NFS storage description.'),
   "endpoint": zod.string().describe('The associated NFS endpoint FQDN.'),
-  "fs": zod.string().default(createStorageNFSResponseFsDefault).describe('The underlying associated Ceph volume name.'),
-  "backends": zod.array(zod.string()).optional().describe('List of NFS Ganesha API server IP addresses.'),
-  "port": zod.int().default(createStorageNFSResponsePortDefault).describe('NFS Ganesha API server port (default 54934).')
+  "fs": zod.string().default(createRegionStorageNFSResponseFsDefault).describe('The underlying associated Ceph volume name.'),
+  "backends": zod.array(zod.string()).describe('List of NFS Ganesha API server IP addresses.'),
+  "port": zod.int().min(1).max(createRegionStorageNFSResponsePortMax).default(createRegionStorageNFSResponsePortDefault).describe('NFS Ganesha API server port.')
 }).describe('A NFS storage.')
+
+/**
+ * Returns the IDs of NFS storage objects.
+ */
+export const ListRegionStorageNFSesParams = zod.object({
+  "regionId": zod.string().describe('The ID of the region.')
+})
+
+export const ListRegionStorageNFSesResponseItem = zod.string()
+export const ListRegionStorageNFSesResponse = zod.array(ListRegionStorageNFSesResponseItem)
 
 /**
  * Performs a region setting of default NFS storage.
@@ -306,18 +313,16 @@ export const CreateRegionDnsRecordParams = zod.object({
 })
 
 export const CreateRegionDnsRecordBody = zod.object({
-  "id": zod.string().optional().describe('The DNS record ID (auto-generated).'),
   "name": zod.string().describe('The DNS record name.'),
   "description": zod.string().optional().describe('The DNS record description.'),
-  "domain": zod.string().optional().describe('The DNS record associated domain (inherited from associated project).'),
   "addresses": zod.array(zod.string()).describe('A list of IPv4 addresses to be associated to the record.')
 }).describe('A DNS record.')
 
 export const CreateRegionDnsRecordResponse = zod.object({
-  "id": zod.string().optional().describe('The DNS record ID (auto-generated).'),
+  "id": zod.string().optional().describe('The DNS record ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The DNS record name.'),
   "description": zod.string().optional().describe('The DNS record description.'),
-  "domain": zod.string().optional().describe('The DNS record associated domain (inherited from associated project).'),
+  "domain": zod.string().optional().describe('The DNS record associated domain, inherited from associated project (read-only).'),
   "addresses": zod.array(zod.string()).describe('A list of IPv4 addresses to be associated to the record.')
 }).describe('A DNS record.')
 

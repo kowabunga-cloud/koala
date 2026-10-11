@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import type { KawaiiFirewallEgressPolicy } from './kawaiiFirewallEgressPolicy';
 import type { KawaiiFirewallEgressRule } from './kawaiiFirewallEgressRule';
@@ -17,6 +17,6 @@ export interface KawaiiFirewall {
   ingress?: KawaiiFirewallIngressRule[];
   /** The default public traffic egress policy. */
   egress_policy?: KawaiiFirewallEgressPolicy;
-  /** The Kawaii public firewall list of egress rules. Kawaii default policy is to accept all outgoing traffic, including ICMP. Specified ruleset will be explicitly dropped if egress_policy is set to accept, and explicitly accepted if egress policy is set to drop.. */
+  /** The Kawaii public firewall list of egress rules. Kawaii default policy is to accept all outgoing traffic, including ICMP. Specified ruleset will be explicitly dropped if egress_policy is set to accept, and explicitly accepted if egress policy is set to drop. */
   egress?: KawaiiFirewallEgressRule[];
 }

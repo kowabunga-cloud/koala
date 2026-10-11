@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   HttpResponse,
@@ -20,7 +20,7 @@ import type {
 } from '../../model';
 
 import {
-  getCreateTemplateResponseMock,
+  getCreateStoragePoolTemplateResponseMock,
   getListStoragePoolTemplatesResponseMock,
   getListStoragePoolVolumesResponseMock,
   getListStoragePoolsResponseMock,
@@ -28,7 +28,7 @@ import {
   getUpdateStoragePoolResponseMock
 } from './pool.faker';
 
-export { getListStoragePoolsResponseMock, getReadStoragePoolResponseMock, getUpdateStoragePoolResponseMock, getListStoragePoolVolumesResponseMock, getCreateTemplateResponseMock, getListStoragePoolTemplatesResponseMock } from './pool.faker';
+export { getListStoragePoolsResponseMock, getReadStoragePoolResponseMock, getUpdateStoragePoolResponseMock, getListStoragePoolVolumesResponseMock, getCreateStoragePoolTemplateResponseMock, getListStoragePoolTemplatesResponseMock } from './pool.faker';
 
 
 export const getListStoragePoolsMockHandler = (overrideResponse?: ObjectIds | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ObjectIds> | ObjectIds), options?: RequestHandlerOptions) => {
@@ -89,13 +89,13 @@ export const getListStoragePoolVolumesMockHandler = (overrideResponse?: ObjectId
   }, options)
 }
 
-export const getCreateTemplateMockHandler = (overrideResponse?: Template | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<Template> | Template), options?: RequestHandlerOptions) => {
+export const getCreateStoragePoolTemplateMockHandler = (overrideResponse?: Template | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<Template> | Template), options?: RequestHandlerOptions) => {
   return http.post('/api/v1/pool/:poolId/template', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
 
 
     return HttpResponse.json(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getCreateTemplateResponseMock(),
+    : getCreateStoragePoolTemplateResponseMock(),
       { status: 201
       })
   }, options)
@@ -128,7 +128,7 @@ export const getPoolMock = () => [
   getReadStoragePoolMockHandler(),
   getUpdateStoragePoolMockHandler(),
   getListStoragePoolVolumesMockHandler(),
-  getCreateTemplateMockHandler(),
+  getCreateStoragePoolTemplateMockHandler(),
   getSetStoragePoolDefaultTemplateMockHandler(),
   getListStoragePoolTemplatesMockHandler()
 ]

@@ -3,15 +3,15 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 
 /**
  * A Kowabunga users team.
  */
 export interface Team {
-  /** The Kowabunga users team ID (auto-generated). */
-  id?: string;
+  /** The Kowabunga users team ID (auto-generated) (read-only). */
+  readonly id?: string;
   /** The Kowabunga users team name. */
   name: string;
   /** The Kowabunga users team description. */

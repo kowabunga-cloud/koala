@@ -3,15 +3,15 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 
 /**
  * A NFS storage.
  */
 export interface StorageNFS {
-  /** The NFS storage ID (auto-generated). */
-  id?: string;
+  /** The NFS storage ID (auto-generated) (read-only). */
+  readonly id?: string;
   /** The NFS storage name. */
   name: string;
   /** The NFS storage description. */
@@ -21,7 +21,11 @@ export interface StorageNFS {
   /** The underlying associated Ceph volume name. */
   fs?: string;
   /** List of NFS Ganesha API server IP addresses. */
-  backends?: string[];
-  /** NFS Ganesha API server port (default 54934). */
+  backends: string[];
+  /**
+     * NFS Ganesha API server port.
+     * @minimum 1
+     * @maximum 65535
+     */
   port?: number;
 }

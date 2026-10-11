@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import * as zod from 'zod';
 
@@ -11,8 +11,8 @@ import * as zod from 'zod';
 /**
  * Returns the IDs of NFS storage objects.
  */
-export const ListStorageNFSsResponseItem = zod.string()
-export const ListStorageNFSsResponse = zod.array(ListStorageNFSsResponseItem)
+export const ListStorageNFSesResponseItem = zod.string()
+export const ListStorageNFSesResponse = zod.array(ListStorageNFSesResponseItem)
 
 /**
  * Deletes an existing NFS storage.
@@ -32,15 +32,18 @@ export const ReadStorageNFSParams = zod.object({
 
 export const readStorageNFSResponseFsDefault = `nfs`;
 export const readStorageNFSResponsePortDefault = 54934;
+export const readStorageNFSResponsePortMax = 65535;
+
+
 
 export const ReadStorageNFSResponse = zod.object({
-  "id": zod.string().optional().describe('The NFS storage ID (auto-generated).'),
+  "id": zod.string().optional().describe('The NFS storage ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The NFS storage name.'),
   "description": zod.string().optional().describe('The NFS storage description.'),
   "endpoint": zod.string().describe('The associated NFS endpoint FQDN.'),
   "fs": zod.string().default(readStorageNFSResponseFsDefault).describe('The underlying associated Ceph volume name.'),
-  "backends": zod.array(zod.string()).optional().describe('List of NFS Ganesha API server IP addresses.'),
-  "port": zod.int().default(readStorageNFSResponsePortDefault).describe('NFS Ganesha API server port (default 54934).')
+  "backends": zod.array(zod.string()).describe('List of NFS Ganesha API server IP addresses.'),
+  "port": zod.int().min(1).max(readStorageNFSResponsePortMax).default(readStorageNFSResponsePortDefault).describe('NFS Ganesha API server port.')
 }).describe('A NFS storage.')
 
 /**
@@ -50,30 +53,33 @@ export const UpdateStorageNFSParams = zod.object({
   "nfsId": zod.string().describe('The ID of the NFS storage.')
 })
 
-export const updateStorageNFSBodyFsDefault = `nfs`;
-export const updateStorageNFSBodyPortDefault = 54934;
+export const updateStorageNFSBodyPortMax = 65535;
+
+
 
 export const UpdateStorageNFSBody = zod.object({
-  "id": zod.string().optional().describe('The NFS storage ID (auto-generated).'),
-  "name": zod.string().describe('The NFS storage name.'),
+  "name": zod.string().optional().describe('The NFS storage name.'),
   "description": zod.string().optional().describe('The NFS storage description.'),
-  "endpoint": zod.string().describe('The associated NFS endpoint FQDN.'),
-  "fs": zod.string().default(updateStorageNFSBodyFsDefault).describe('The underlying associated Ceph volume name.'),
+  "endpoint": zod.string().optional().describe('The associated NFS endpoint FQDN.'),
+  "fs": zod.string().optional().describe('The underlying associated Ceph volume name.'),
   "backends": zod.array(zod.string()).optional().describe('List of NFS Ganesha API server IP addresses.'),
-  "port": zod.int().default(updateStorageNFSBodyPortDefault).describe('NFS Ganesha API server port (default 54934).')
-}).describe('A NFS storage.')
+  "port": zod.int().min(1).max(updateStorageNFSBodyPortMax).optional().describe('NFS Ganesha API server port.')
+}).describe('A NFS storage update (unspecified properties are left unchanged).')
 
 export const updateStorageNFSResponseFsDefault = `nfs`;
 export const updateStorageNFSResponsePortDefault = 54934;
+export const updateStorageNFSResponsePortMax = 65535;
+
+
 
 export const UpdateStorageNFSResponse = zod.object({
-  "id": zod.string().optional().describe('The NFS storage ID (auto-generated).'),
+  "id": zod.string().optional().describe('The NFS storage ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The NFS storage name.'),
   "description": zod.string().optional().describe('The NFS storage description.'),
   "endpoint": zod.string().describe('The associated NFS endpoint FQDN.'),
   "fs": zod.string().default(updateStorageNFSResponseFsDefault).describe('The underlying associated Ceph volume name.'),
-  "backends": zod.array(zod.string()).optional().describe('List of NFS Ganesha API server IP addresses.'),
-  "port": zod.int().default(updateStorageNFSResponsePortDefault).describe('NFS Ganesha API server port (default 54934).')
+  "backends": zod.array(zod.string()).describe('List of NFS Ganesha API server IP addresses.'),
+  "port": zod.int().min(1).max(updateStorageNFSResponsePortMax).default(updateStorageNFSResponsePortDefault).describe('NFS Ganesha API server port.')
 }).describe('A NFS storage.')
 
 /**

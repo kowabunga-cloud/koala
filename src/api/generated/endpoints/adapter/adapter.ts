@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   useMutation,
@@ -26,10 +26,12 @@ import type {
 
 import type {
   Adapter,
+  AdapterUpdate,
   BadRequestResponse,
   ConflictResponse,
   ForbiddenResponse,
   InsufficientResourceResponse,
+  InternalServerErrorResponse,
   NotFoundResponse,
   ObjectIds,
   UnauthorizedResponse,
@@ -92,7 +94,7 @@ export const getListAdaptersQueryKey = () => {
     }
 
 
-export const getListAdaptersQueryOptions = <TData = Awaited<ReturnType<typeof listAdapters>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdapters>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListAdaptersQueryOptions = <TData = Awaited<ReturnType<typeof listAdapters>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdapters>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -111,10 +113,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListAdaptersQueryResult = NonNullable<Awaited<ReturnType<typeof listAdapters>>>
-export type ListAdaptersQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+export type ListAdaptersQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>
 
 
-export function useListAdapters<TData = Awaited<ReturnType<typeof listAdapters>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListAdapters<TData = Awaited<ReturnType<typeof listAdapters>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdapters>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listAdapters>>,
@@ -124,7 +126,7 @@ export function useListAdapters<TData = Awaited<ReturnType<typeof listAdapters>>
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListAdapters<TData = Awaited<ReturnType<typeof listAdapters>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListAdapters<TData = Awaited<ReturnType<typeof listAdapters>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdapters>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listAdapters>>,
@@ -134,12 +136,12 @@ export function useListAdapters<TData = Awaited<ReturnType<typeof listAdapters>>
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListAdapters<TData = Awaited<ReturnType<typeof listAdapters>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListAdapters<TData = Awaited<ReturnType<typeof listAdapters>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdapters>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListAdapters<TData = Awaited<ReturnType<typeof listAdapters>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListAdapters<TData = Awaited<ReturnType<typeof listAdapters>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listAdapters>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -184,7 +186,7 @@ export const deleteAdapter = async (adapterId: string, options?: Parameters<type
 
 export const getDeleteAdapterMutationKey = () => ['deleteAdapter'] as const;
 
-export const getDeleteAdapterMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+export const getDeleteAdapterMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAdapter>>, TError,DeleteAdapterMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteAdapter>>, TError,DeleteAdapterMutationVariables, TContext> => {
 
@@ -213,10 +215,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type DeleteAdapterMutationResult = NonNullable<Awaited<ReturnType<typeof deleteAdapter>>>
 
-    export type DeleteAdapterMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>
+    export type DeleteAdapterMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type DeleteAdapterMutationVariables = {adapterId: string}
 
-    export const useDeleteAdapter = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+    export const useDeleteAdapter = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAdapter>>, TError,DeleteAdapterMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteAdapter>>,
@@ -259,7 +261,7 @@ export const getReadAdapterQueryKey = (adapterId: string,) => {
     }
 
 
-export const getReadAdapterQueryOptions = <TData = Awaited<ReturnType<typeof readAdapter>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(adapterId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readAdapter>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getReadAdapterQueryOptions = <TData = Awaited<ReturnType<typeof readAdapter>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(adapterId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readAdapter>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -278,10 +280,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadAdapterQueryResult = NonNullable<Awaited<ReturnType<typeof readAdapter>>>
-export type ReadAdapterQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadAdapterQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadAdapter<TData = Awaited<ReturnType<typeof readAdapter>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadAdapter<TData = Awaited<ReturnType<typeof readAdapter>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  adapterId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readAdapter>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readAdapter>>,
@@ -291,7 +293,7 @@ export function useReadAdapter<TData = Awaited<ReturnType<typeof readAdapter>>, 
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadAdapter<TData = Awaited<ReturnType<typeof readAdapter>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadAdapter<TData = Awaited<ReturnType<typeof readAdapter>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  adapterId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readAdapter>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readAdapter>>,
@@ -301,12 +303,12 @@ export function useReadAdapter<TData = Awaited<ReturnType<typeof readAdapter>>, 
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadAdapter<TData = Awaited<ReturnType<typeof readAdapter>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadAdapter<TData = Awaited<ReturnType<typeof readAdapter>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  adapterId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readAdapter>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadAdapter<TData = Awaited<ReturnType<typeof readAdapter>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadAdapter<TData = Awaited<ReturnType<typeof readAdapter>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  adapterId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readAdapter>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -335,7 +337,7 @@ export const getUpdateAdapterUrl = (adapterId: string,) => {
  * Updates a network adapter configuration.
  */
 export const updateAdapter = async (adapterId: string,
-    adapter: Adapter, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Adapter> => {
+    adapterUpdate: AdapterUpdate, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Adapter> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -356,7 +358,7 @@ return kowabungaFetch<Adapter>(getUpdateAdapterUrl(adapterId),
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(adapter)
+    body: JSON.stringify(adapterUpdate)
   }
 );}
 
@@ -366,7 +368,7 @@ return kowabungaFetch<Adapter>(getUpdateAdapterUrl(adapterId),
 
 export const getUpdateAdapterMutationKey = () => ['updateAdapter'] as const;
 
-export const getUpdateAdapterMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getUpdateAdapterMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAdapter>>, TError,UpdateAdapterMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateAdapter>>, TError,UpdateAdapterMutationVariables, TContext> => {
 
@@ -394,11 +396,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateAdapterMutationResult = NonNullable<Awaited<ReturnType<typeof updateAdapter>>>
-    export type UpdateAdapterMutationBody = BodyType<Adapter>
-    export type UpdateAdapterMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type UpdateAdapterMutationVariables = {adapterId: string;data: BodyType<Adapter>}
+    export type UpdateAdapterMutationBody = BodyType<AdapterUpdate>
+    export type UpdateAdapterMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type UpdateAdapterMutationVariables = {adapterId: string;data: BodyType<AdapterUpdate>}
 
-    export const useUpdateAdapter = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useUpdateAdapter = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateAdapter>>, TError,UpdateAdapterMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateAdapter>>,

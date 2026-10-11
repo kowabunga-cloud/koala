@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import * as zod from 'zod';
 
@@ -33,7 +33,7 @@ export const ReadAdapterParams = zod.object({
 export const readAdapterResponseReservedDefault = false;
 
 export const ReadAdapterResponse = zod.object({
-  "id": zod.string().optional().describe('The network adapter ID (auto-generated).'),
+  "id": zod.string().optional().describe('The network adapter ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The network adapter name.'),
   "description": zod.string().optional().describe('The network adapter description.'),
   "mac": zod.string().optional().describe('The network adapter hardware address (e.g. 00:11:22:33:44:55). Auto-generated if unspecified.'),
@@ -48,21 +48,18 @@ export const UpdateAdapterParams = zod.object({
   "adapterId": zod.string().describe('The ID of the network adapter.')
 })
 
-export const updateAdapterBodyReservedDefault = false;
-
 export const UpdateAdapterBody = zod.object({
-  "id": zod.string().optional().describe('The network adapter ID (auto-generated).'),
-  "name": zod.string().describe('The network adapter name.'),
+  "name": zod.string().optional().describe('The network adapter name.'),
   "description": zod.string().optional().describe('The network adapter description.'),
   "mac": zod.string().optional().describe('The network adapter hardware address (e.g. 00:11:22:33:44:55). Auto-generated if unspecified.'),
   "addresses": zod.array(zod.string()).optional().describe('The network adapter list of associated IPv4 addresses.'),
-  "reserved": zod.boolean().default(updateAdapterBodyReservedDefault).describe('The network adapter is a reserved adapter (e.g. router), where the same hardware address can be reused over several subnets.')
-}).describe('A network adapter.')
+  "reserved": zod.boolean().optional().describe('The network adapter is a reserved adapter (e.g. router), where the same hardware address can be reused over several subnets.')
+}).describe('A network adapter update (unspecified properties are left unchanged).')
 
 export const updateAdapterResponseReservedDefault = false;
 
 export const UpdateAdapterResponse = zod.object({
-  "id": zod.string().optional().describe('The network adapter ID (auto-generated).'),
+  "id": zod.string().optional().describe('The network adapter ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The network adapter name.'),
   "description": zod.string().optional().describe('The network adapter description.'),
   "mac": zod.string().optional().describe('The network adapter hardware address (e.g. 00:11:22:33:44:55). Auto-generated if unspecified.'),

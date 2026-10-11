@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   useMutation,
@@ -29,8 +29,11 @@ import type {
   ConflictResponse,
   ForbiddenResponse,
   InsufficientResourceResponse,
+  InternalServerErrorResponse,
   Kawaii,
   KawaiiIpSec,
+  KawaiiIpSecUpdate,
+  KawaiiUpdate,
   NotFoundResponse,
   ObjectIds,
   UnauthorizedResponse,
@@ -39,6 +42,33 @@ import type {
 
 import { kowabungaFetch } from '../../../client';
 import type { ErrorType , BodyType } from '../../../client';
+
+// https://stackoverflow.com/questions/49579094/typescript-conditional-types-filter-out-readonly-properties-pick-only-requir/49579497#49579497
+type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <
+T,
+>() => T extends Y ? 1 : 2
+? A
+: B;
+
+type WritableKeys<T> = {
+[P in keyof T]-?: IfEquals<
+  { [Q in P]: T[P] },
+  { -readonly [Q in P]: T[P] },
+  P
+>;
+}[keyof T];
+
+type UnionToIntersection<U> =
+  (U extends any ? (k: U)=>void : never) extends ((k: infer I)=>void) ? I : never;
+type DistributeReadOnlyOverUnions<T> = T extends any ? NonReadonly<T> : never;
+
+type Writable<T> = Pick<T, WritableKeys<T>>;
+type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
+  [P in keyof Writable<T>]: T[P] extends object
+    ? NonReadonly<NonNullable<T[P]>>
+    : T[P];
+} : DistributeReadOnlyOverUnions<T>;
+
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -93,7 +123,7 @@ export const getListKawaiisQueryKey = () => {
     }
 
 
-export const getListKawaiisQueryOptions = <TData = Awaited<ReturnType<typeof listKawaiis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKawaiis>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListKawaiisQueryOptions = <TData = Awaited<ReturnType<typeof listKawaiis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKawaiis>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -112,10 +142,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListKawaiisQueryResult = NonNullable<Awaited<ReturnType<typeof listKawaiis>>>
-export type ListKawaiisQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+export type ListKawaiisQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>
 
 
-export function useListKawaiis<TData = Awaited<ReturnType<typeof listKawaiis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListKawaiis<TData = Awaited<ReturnType<typeof listKawaiis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKawaiis>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listKawaiis>>,
@@ -125,7 +155,7 @@ export function useListKawaiis<TData = Awaited<ReturnType<typeof listKawaiis>>, 
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListKawaiis<TData = Awaited<ReturnType<typeof listKawaiis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListKawaiis<TData = Awaited<ReturnType<typeof listKawaiis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKawaiis>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listKawaiis>>,
@@ -135,12 +165,12 @@ export function useListKawaiis<TData = Awaited<ReturnType<typeof listKawaiis>>, 
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListKawaiis<TData = Awaited<ReturnType<typeof listKawaiis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListKawaiis<TData = Awaited<ReturnType<typeof listKawaiis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKawaiis>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListKawaiis<TData = Awaited<ReturnType<typeof listKawaiis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListKawaiis<TData = Awaited<ReturnType<typeof listKawaiis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKawaiis>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -185,7 +215,7 @@ export const deleteKawaii = async (kawaiiId: string, options?: Parameters<typeof
 
 export const getDeleteKawaiiMutationKey = () => ['deleteKawaii'] as const;
 
-export const getDeleteKawaiiMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+export const getDeleteKawaiiMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteKawaii>>, TError,DeleteKawaiiMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteKawaii>>, TError,DeleteKawaiiMutationVariables, TContext> => {
 
@@ -214,10 +244,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type DeleteKawaiiMutationResult = NonNullable<Awaited<ReturnType<typeof deleteKawaii>>>
 
-    export type DeleteKawaiiMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>
+    export type DeleteKawaiiMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type DeleteKawaiiMutationVariables = {kawaiiId: string}
 
-    export const useDeleteKawaii = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+    export const useDeleteKawaii = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteKawaii>>, TError,DeleteKawaiiMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteKawaii>>,
@@ -260,7 +290,7 @@ export const getReadKawaiiQueryKey = (kawaiiId: string,) => {
     }
 
 
-export const getReadKawaiiQueryOptions = <TData = Awaited<ReturnType<typeof readKawaii>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(kawaiiId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKawaii>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getReadKawaiiQueryOptions = <TData = Awaited<ReturnType<typeof readKawaii>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(kawaiiId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKawaii>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -279,10 +309,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadKawaiiQueryResult = NonNullable<Awaited<ReturnType<typeof readKawaii>>>
-export type ReadKawaiiQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadKawaiiQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadKawaii<TData = Awaited<ReturnType<typeof readKawaii>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKawaii<TData = Awaited<ReturnType<typeof readKawaii>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kawaiiId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKawaii>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readKawaii>>,
@@ -292,7 +322,7 @@ export function useReadKawaii<TData = Awaited<ReturnType<typeof readKawaii>>, TE
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadKawaii<TData = Awaited<ReturnType<typeof readKawaii>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKawaii<TData = Awaited<ReturnType<typeof readKawaii>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kawaiiId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKawaii>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readKawaii>>,
@@ -302,12 +332,12 @@ export function useReadKawaii<TData = Awaited<ReturnType<typeof readKawaii>>, TE
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadKawaii<TData = Awaited<ReturnType<typeof readKawaii>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKawaii<TData = Awaited<ReturnType<typeof readKawaii>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kawaiiId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKawaii>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadKawaii<TData = Awaited<ReturnType<typeof readKawaii>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKawaii<TData = Awaited<ReturnType<typeof readKawaii>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kawaiiId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKawaii>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -336,7 +366,7 @@ export const getUpdateKawaiiUrl = (kawaiiId: string,) => {
  * Updates a Kawaii configuration.
  */
 export const updateKawaii = async (kawaiiId: string,
-    kawaii: Kawaii, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Kawaii> => {
+    kawaiiUpdate: KawaiiUpdate, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Kawaii> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -357,7 +387,7 @@ return kowabungaFetch<Kawaii>(getUpdateKawaiiUrl(kawaiiId),
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(kawaii)
+    body: JSON.stringify(kawaiiUpdate)
   }
 );}
 
@@ -367,7 +397,7 @@ return kowabungaFetch<Kawaii>(getUpdateKawaiiUrl(kawaiiId),
 
 export const getUpdateKawaiiMutationKey = () => ['updateKawaii'] as const;
 
-export const getUpdateKawaiiMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getUpdateKawaiiMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKawaii>>, TError,UpdateKawaiiMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateKawaii>>, TError,UpdateKawaiiMutationVariables, TContext> => {
 
@@ -395,11 +425,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateKawaiiMutationResult = NonNullable<Awaited<ReturnType<typeof updateKawaii>>>
-    export type UpdateKawaiiMutationBody = BodyType<Kawaii>
-    export type UpdateKawaiiMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type UpdateKawaiiMutationVariables = {kawaiiId: string;data: BodyType<Kawaii>}
+    export type UpdateKawaiiMutationBody = BodyType<KawaiiUpdate>
+    export type UpdateKawaiiMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type UpdateKawaiiMutationVariables = {kawaiiId: string;data: BodyType<KawaiiUpdate>}
 
-    export const useUpdateKawaii = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useUpdateKawaii = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKawaii>>, TError,UpdateKawaiiMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateKawaii>>,
@@ -442,7 +472,7 @@ export const getListKawaiiIpSecsQueryKey = (kawaiiId: string,) => {
     }
 
 
-export const getListKawaiiIpSecsQueryOptions = <TData = Awaited<ReturnType<typeof listKawaiiIpSecs>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(kawaiiId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKawaiiIpSecs>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListKawaiiIpSecsQueryOptions = <TData = Awaited<ReturnType<typeof listKawaiiIpSecs>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(kawaiiId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKawaiiIpSecs>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -461,10 +491,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListKawaiiIpSecsQueryResult = NonNullable<Awaited<ReturnType<typeof listKawaiiIpSecs>>>
-export type ListKawaiiIpSecsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+export type ListKawaiiIpSecsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>
 
 
-export function useListKawaiiIpSecs<TData = Awaited<ReturnType<typeof listKawaiiIpSecs>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListKawaiiIpSecs<TData = Awaited<ReturnType<typeof listKawaiiIpSecs>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
  kawaiiId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKawaiiIpSecs>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listKawaiiIpSecs>>,
@@ -474,7 +504,7 @@ export function useListKawaiiIpSecs<TData = Awaited<ReturnType<typeof listKawaii
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListKawaiiIpSecs<TData = Awaited<ReturnType<typeof listKawaiiIpSecs>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListKawaiiIpSecs<TData = Awaited<ReturnType<typeof listKawaiiIpSecs>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
  kawaiiId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKawaiiIpSecs>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listKawaiiIpSecs>>,
@@ -484,12 +514,12 @@ export function useListKawaiiIpSecs<TData = Awaited<ReturnType<typeof listKawaii
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListKawaiiIpSecs<TData = Awaited<ReturnType<typeof listKawaiiIpSecs>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListKawaiiIpSecs<TData = Awaited<ReturnType<typeof listKawaiiIpSecs>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
  kawaiiId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKawaiiIpSecs>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListKawaiiIpSecs<TData = Awaited<ReturnType<typeof listKawaiiIpSecs>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListKawaiiIpSecs<TData = Awaited<ReturnType<typeof listKawaiiIpSecs>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
  kawaiiId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKawaiiIpSecs>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -518,7 +548,7 @@ export const getCreateKawaiiIpSecUrl = (kawaiiId: string,) => {
  * Creates a new Kawaii IPsec connection.
  */
 export const createKawaiiIpSec = async (kawaiiId: string,
-    kawaiiIpSec: KawaiiIpSec, options?: Parameters<typeof kowabungaFetch>[1]): Promise<KawaiiIpSec> => {
+    kawaiiIpSec: NonReadonly<KawaiiIpSec>, options?: Parameters<typeof kowabungaFetch>[1]): Promise<KawaiiIpSec> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -549,7 +579,7 @@ return kowabungaFetch<KawaiiIpSec>(getCreateKawaiiIpSecUrl(kawaiiId),
 
 export const getCreateKawaiiIpSecMutationKey = () => ['createKawaiiIpSec'] as const;
 
-export const getCreateKawaiiIpSecMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getCreateKawaiiIpSecMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createKawaiiIpSec>>, TError,CreateKawaiiIpSecMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createKawaiiIpSec>>, TError,CreateKawaiiIpSecMutationVariables, TContext> => {
 
@@ -577,11 +607,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type CreateKawaiiIpSecMutationResult = NonNullable<Awaited<ReturnType<typeof createKawaiiIpSec>>>
-    export type CreateKawaiiIpSecMutationBody = BodyType<KawaiiIpSec>
-    export type CreateKawaiiIpSecMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateKawaiiIpSecMutationVariables = {kawaiiId: string;data: BodyType<KawaiiIpSec>}
+    export type CreateKawaiiIpSecMutationBody = BodyType<NonReadonly<KawaiiIpSec>>
+    export type CreateKawaiiIpSecMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateKawaiiIpSecMutationVariables = {kawaiiId: string;data: BodyType<NonReadonly<KawaiiIpSec>>}
 
-    export const useCreateKawaiiIpSec = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useCreateKawaiiIpSec = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createKawaiiIpSec>>, TError,CreateKawaiiIpSecMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createKawaiiIpSec>>,
@@ -621,7 +651,7 @@ export const deleteKawaiiIpSec = async (kawaiiId: string,
 
 export const getDeleteKawaiiIpSecMutationKey = () => ['deleteKawaiiIpSec'] as const;
 
-export const getDeleteKawaiiIpSecMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+export const getDeleteKawaiiIpSecMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteKawaiiIpSec>>, TError,DeleteKawaiiIpSecMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteKawaiiIpSec>>, TError,DeleteKawaiiIpSecMutationVariables, TContext> => {
 
@@ -650,10 +680,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type DeleteKawaiiIpSecMutationResult = NonNullable<Awaited<ReturnType<typeof deleteKawaiiIpSec>>>
 
-    export type DeleteKawaiiIpSecMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>
+    export type DeleteKawaiiIpSecMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type DeleteKawaiiIpSecMutationVariables = {kawaiiId: string;kawaiiIpSecId: string}
 
-    export const useDeleteKawaiiIpSec = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+    export const useDeleteKawaiiIpSec = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteKawaiiIpSec>>, TError,DeleteKawaiiIpSecMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteKawaiiIpSec>>,
@@ -699,7 +729,7 @@ export const getReadKawaiiIpSecQueryKey = (kawaiiId: string,
     }
 
 
-export const getReadKawaiiIpSecQueryOptions = <TData = Awaited<ReturnType<typeof readKawaiiIpSec>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(kawaiiId: string,
+export const getReadKawaiiIpSecQueryOptions = <TData = Awaited<ReturnType<typeof readKawaiiIpSec>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(kawaiiId: string,
     kawaiiIpSecId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKawaiiIpSec>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
@@ -719,10 +749,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadKawaiiIpSecQueryResult = NonNullable<Awaited<ReturnType<typeof readKawaiiIpSec>>>
-export type ReadKawaiiIpSecQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadKawaiiIpSecQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadKawaiiIpSec<TData = Awaited<ReturnType<typeof readKawaiiIpSec>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKawaiiIpSec<TData = Awaited<ReturnType<typeof readKawaiiIpSec>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kawaiiId: string,
     kawaiiIpSecId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKawaiiIpSec>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
@@ -733,7 +763,7 @@ export function useReadKawaiiIpSec<TData = Awaited<ReturnType<typeof readKawaiiI
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadKawaiiIpSec<TData = Awaited<ReturnType<typeof readKawaiiIpSec>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKawaiiIpSec<TData = Awaited<ReturnType<typeof readKawaiiIpSec>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kawaiiId: string,
     kawaiiIpSecId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKawaiiIpSec>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
@@ -744,13 +774,13 @@ export function useReadKawaiiIpSec<TData = Awaited<ReturnType<typeof readKawaiiI
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadKawaiiIpSec<TData = Awaited<ReturnType<typeof readKawaiiIpSec>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKawaiiIpSec<TData = Awaited<ReturnType<typeof readKawaiiIpSec>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kawaiiId: string,
     kawaiiIpSecId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKawaiiIpSec>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadKawaiiIpSec<TData = Awaited<ReturnType<typeof readKawaiiIpSec>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKawaiiIpSec<TData = Awaited<ReturnType<typeof readKawaiiIpSec>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kawaiiId: string,
     kawaiiIpSecId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKawaiiIpSec>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
@@ -782,7 +812,7 @@ export const getUpdateKawaiiIpSecUrl = (kawaiiId: string,
  */
 export const updateKawaiiIpSec = async (kawaiiId: string,
     kawaiiIpSecId: string,
-    kawaiiIpSec: KawaiiIpSec, options?: Parameters<typeof kowabungaFetch>[1]): Promise<KawaiiIpSec> => {
+    kawaiiIpSecUpdate: KawaiiIpSecUpdate, options?: Parameters<typeof kowabungaFetch>[1]): Promise<KawaiiIpSec> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -803,7 +833,7 @@ return kowabungaFetch<KawaiiIpSec>(getUpdateKawaiiIpSecUrl(kawaiiId,kawaiiIpSecI
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(kawaiiIpSec)
+    body: JSON.stringify(kawaiiIpSecUpdate)
   }
 );}
 
@@ -813,7 +843,7 @@ return kowabungaFetch<KawaiiIpSec>(getUpdateKawaiiIpSecUrl(kawaiiId,kawaiiIpSecI
 
 export const getUpdateKawaiiIpSecMutationKey = () => ['updateKawaiiIpSec'] as const;
 
-export const getUpdateKawaiiIpSecMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getUpdateKawaiiIpSecMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKawaiiIpSec>>, TError,UpdateKawaiiIpSecMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateKawaiiIpSec>>, TError,UpdateKawaiiIpSecMutationVariables, TContext> => {
 
@@ -841,11 +871,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateKawaiiIpSecMutationResult = NonNullable<Awaited<ReturnType<typeof updateKawaiiIpSec>>>
-    export type UpdateKawaiiIpSecMutationBody = BodyType<KawaiiIpSec>
-    export type UpdateKawaiiIpSecMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type UpdateKawaiiIpSecMutationVariables = {kawaiiId: string;kawaiiIpSecId: string;data: BodyType<KawaiiIpSec>}
+    export type UpdateKawaiiIpSecMutationBody = BodyType<KawaiiIpSecUpdate>
+    export type UpdateKawaiiIpSecMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type UpdateKawaiiIpSecMutationVariables = {kawaiiId: string;kawaiiIpSecId: string;data: BodyType<KawaiiIpSecUpdate>}
 
-    export const useUpdateKawaiiIpSec = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useUpdateKawaiiIpSec = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKawaiiIpSec>>, TError,UpdateKawaiiIpSecMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateKawaiiIpSec>>,

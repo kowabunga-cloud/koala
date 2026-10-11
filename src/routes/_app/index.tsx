@@ -10,7 +10,7 @@ import {
   useReadProjectCost,
 } from '@/api/generated/endpoints/project/project'
 import {
-  useListRegionStorageNFSs,
+  useListRegionStorageNFSes,
   useListRegionStoragePools,
   useListRegions,
   useReadRegion,
@@ -41,7 +41,7 @@ function Dashboard() {
   const zones = useListZones()
   const kaktuses = useListZoneKaktuses(z, { query: { enabled: !!zone } })
   const pools = useListRegionStoragePools(r, { query: { enabled: !!region } })
-  const nfs = useListRegionStorageNFSs(r, undefined, { query: { enabled: !!region } })
+  const nfs = useListRegionStorageNFSes(r, { query: { enabled: !!region } })
 
   const records = useListProjectDnsRecords(p, { query: { enabled: !!project } })
   const instances = useListProjectZoneInstances(p, z, { query: { enabled: !!project && !!zone } })

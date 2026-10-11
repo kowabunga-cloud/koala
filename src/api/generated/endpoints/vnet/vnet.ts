@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   useMutation,
@@ -29,16 +29,45 @@ import type {
   ConflictResponse,
   ForbiddenResponse,
   InsufficientResourceResponse,
+  InternalServerErrorResponse,
   NotFoundResponse,
   ObjectIds,
   Subnet,
   UnauthorizedResponse,
   UnprocessableEntityResponse,
-  VNet
+  VNet,
+  VNetUpdate
 } from '../../model';
 
 import { kowabungaFetch } from '../../../client';
 import type { ErrorType , BodyType } from '../../../client';
+
+// https://stackoverflow.com/questions/49579094/typescript-conditional-types-filter-out-readonly-properties-pick-only-requir/49579497#49579497
+type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <
+T,
+>() => T extends Y ? 1 : 2
+? A
+: B;
+
+type WritableKeys<T> = {
+[P in keyof T]-?: IfEquals<
+  { [Q in P]: T[P] },
+  { -readonly [Q in P]: T[P] },
+  P
+>;
+}[keyof T];
+
+type UnionToIntersection<U> =
+  (U extends any ? (k: U)=>void : never) extends ((k: infer I)=>void) ? I : never;
+type DistributeReadOnlyOverUnions<T> = T extends any ? NonReadonly<T> : never;
+
+type Writable<T> = Pick<T, WritableKeys<T>>;
+type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
+  [P in keyof Writable<T>]: T[P] extends object
+    ? NonReadonly<NonNullable<T[P]>>
+    : T[P];
+} : DistributeReadOnlyOverUnions<T>;
+
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -93,7 +122,7 @@ export const getListVNetsQueryKey = () => {
     }
 
 
-export const getListVNetsQueryOptions = <TData = Awaited<ReturnType<typeof listVNets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVNets>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListVNetsQueryOptions = <TData = Awaited<ReturnType<typeof listVNets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVNets>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -112,10 +141,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListVNetsQueryResult = NonNullable<Awaited<ReturnType<typeof listVNets>>>
-export type ListVNetsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+export type ListVNetsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>
 
 
-export function useListVNets<TData = Awaited<ReturnType<typeof listVNets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListVNets<TData = Awaited<ReturnType<typeof listVNets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVNets>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listVNets>>,
@@ -125,7 +154,7 @@ export function useListVNets<TData = Awaited<ReturnType<typeof listVNets>>, TErr
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListVNets<TData = Awaited<ReturnType<typeof listVNets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListVNets<TData = Awaited<ReturnType<typeof listVNets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVNets>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listVNets>>,
@@ -135,12 +164,12 @@ export function useListVNets<TData = Awaited<ReturnType<typeof listVNets>>, TErr
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListVNets<TData = Awaited<ReturnType<typeof listVNets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListVNets<TData = Awaited<ReturnType<typeof listVNets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVNets>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListVNets<TData = Awaited<ReturnType<typeof listVNets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListVNets<TData = Awaited<ReturnType<typeof listVNets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVNets>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -185,7 +214,7 @@ export const deleteVNet = async (vnetId: string, options?: Parameters<typeof kow
 
 export const getDeleteVNetMutationKey = () => ['deleteVNet'] as const;
 
-export const getDeleteVNetMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+export const getDeleteVNetMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteVNet>>, TError,DeleteVNetMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteVNet>>, TError,DeleteVNetMutationVariables, TContext> => {
 
@@ -214,10 +243,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type DeleteVNetMutationResult = NonNullable<Awaited<ReturnType<typeof deleteVNet>>>
 
-    export type DeleteVNetMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>
+    export type DeleteVNetMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type DeleteVNetMutationVariables = {vnetId: string}
 
-    export const useDeleteVNet = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+    export const useDeleteVNet = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteVNet>>, TError,DeleteVNetMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteVNet>>,
@@ -260,7 +289,7 @@ export const getReadVNetQueryKey = (vnetId: string,) => {
     }
 
 
-export const getReadVNetQueryOptions = <TData = Awaited<ReturnType<typeof readVNet>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(vnetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readVNet>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getReadVNetQueryOptions = <TData = Awaited<ReturnType<typeof readVNet>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(vnetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readVNet>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -279,10 +308,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadVNetQueryResult = NonNullable<Awaited<ReturnType<typeof readVNet>>>
-export type ReadVNetQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadVNetQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadVNet<TData = Awaited<ReturnType<typeof readVNet>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadVNet<TData = Awaited<ReturnType<typeof readVNet>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  vnetId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readVNet>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readVNet>>,
@@ -292,7 +321,7 @@ export function useReadVNet<TData = Awaited<ReturnType<typeof readVNet>>, TError
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadVNet<TData = Awaited<ReturnType<typeof readVNet>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadVNet<TData = Awaited<ReturnType<typeof readVNet>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  vnetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readVNet>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readVNet>>,
@@ -302,12 +331,12 @@ export function useReadVNet<TData = Awaited<ReturnType<typeof readVNet>>, TError
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadVNet<TData = Awaited<ReturnType<typeof readVNet>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadVNet<TData = Awaited<ReturnType<typeof readVNet>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  vnetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readVNet>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadVNet<TData = Awaited<ReturnType<typeof readVNet>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadVNet<TData = Awaited<ReturnType<typeof readVNet>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  vnetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readVNet>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -336,7 +365,7 @@ export const getUpdateVNetUrl = (vnetId: string,) => {
  * Updates a virtual network configuration.
  */
 export const updateVNet = async (vnetId: string,
-    vNet: VNet, options?: Parameters<typeof kowabungaFetch>[1]): Promise<VNet> => {
+    vNetUpdate: VNetUpdate, options?: Parameters<typeof kowabungaFetch>[1]): Promise<VNet> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -357,7 +386,7 @@ return kowabungaFetch<VNet>(getUpdateVNetUrl(vnetId),
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(vNet)
+    body: JSON.stringify(vNetUpdate)
   }
 );}
 
@@ -367,7 +396,7 @@ return kowabungaFetch<VNet>(getUpdateVNetUrl(vnetId),
 
 export const getUpdateVNetMutationKey = () => ['updateVNet'] as const;
 
-export const getUpdateVNetMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getUpdateVNetMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateVNet>>, TError,UpdateVNetMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateVNet>>, TError,UpdateVNetMutationVariables, TContext> => {
 
@@ -395,11 +424,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateVNetMutationResult = NonNullable<Awaited<ReturnType<typeof updateVNet>>>
-    export type UpdateVNetMutationBody = BodyType<VNet>
-    export type UpdateVNetMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type UpdateVNetMutationVariables = {vnetId: string;data: BodyType<VNet>}
+    export type UpdateVNetMutationBody = BodyType<VNetUpdate>
+    export type UpdateVNetMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type UpdateVNetMutationVariables = {vnetId: string;data: BodyType<VNetUpdate>}
 
-    export const useUpdateVNet = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useUpdateVNet = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateVNet>>, TError,UpdateVNetMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateVNet>>,
@@ -409,7 +438,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getUpdateVNetMutationOptions(options), queryClient);
     }
-    export const getCreateSubnetUrl = (vnetId: string,) => {
+    export const getCreateVNetSubnetUrl = (vnetId: string,) => {
 
 
 
@@ -420,8 +449,8 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 /**
  * Creates a new network subnet.
  */
-export const createSubnet = async (vnetId: string,
-    subnet: Subnet, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Subnet> => {
+export const createVNetSubnet = async (vnetId: string,
+    subnet: NonReadonly<Subnet>, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Subnet> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -437,7 +466,7 @@ export const createSubnet = async (vnetId: string,
     }
     return headers;
   };
-return kowabungaFetch<Subnet>(getCreateSubnetUrl(vnetId),
+return kowabungaFetch<Subnet>(getCreateVNetSubnetUrl(vnetId),
   {
     ...options,
     method: 'POST',
@@ -450,13 +479,13 @@ return kowabungaFetch<Subnet>(getCreateSubnetUrl(vnetId),
 
 
 
-export const getCreateSubnetMutationKey = () => ['createSubnet'] as const;
+export const getCreateVNetSubnetMutationKey = () => ['createVNetSubnet'] as const;
 
-export const getCreateSubnetMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSubnet>>, TError,CreateSubnetMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createSubnet>>, TError,CreateSubnetMutationVariables, TContext> => {
+export const getCreateVNetSubnetMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createVNetSubnet>>, TError,CreateVNetSubnetMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createVNetSubnet>>, TError,CreateVNetSubnetMutationVariables, TContext> => {
 
-const mutationKey = getCreateSubnetMutationKey();
+const mutationKey = getCreateVNetSubnetMutationKey();
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -466,10 +495,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createSubnet>>, CreateSubnetMutationVariables> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createVNetSubnet>>, CreateVNetSubnetMutationVariables> = (props) => {
           const {vnetId,data} = props ?? {};
 
-          return  createSubnet(vnetId,data,requestOptions)
+          return  createVNetSubnet(vnetId,data,requestOptions)
         }
 
 
@@ -479,20 +508,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type CreateSubnetMutationResult = NonNullable<Awaited<ReturnType<typeof createSubnet>>>
-    export type CreateSubnetMutationBody = BodyType<Subnet>
-    export type CreateSubnetMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateSubnetMutationVariables = {vnetId: string;data: BodyType<Subnet>}
+    export type CreateVNetSubnetMutationResult = NonNullable<Awaited<ReturnType<typeof createVNetSubnet>>>
+    export type CreateVNetSubnetMutationBody = BodyType<NonReadonly<Subnet>>
+    export type CreateVNetSubnetMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateVNetSubnetMutationVariables = {vnetId: string;data: BodyType<NonReadonly<Subnet>>}
 
-    export const useCreateSubnet = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSubnet>>, TError,CreateSubnetMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
+    export const useCreateVNetSubnet = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createVNetSubnet>>, TError,CreateVNetSubnetMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof createSubnet>>,
+        Awaited<ReturnType<typeof createVNetSubnet>>,
         TError,
-        CreateSubnetMutationVariables,
+        CreateVNetSubnetMutationVariables,
         TContext
       > => {
-      return useMutation(getCreateSubnetMutationOptions(options), queryClient);
+      return useMutation(getCreateVNetSubnetMutationOptions(options), queryClient);
     }
     export const getSetVNetDefaultSubnetUrl = (vnetId: string,
     subnetId: string,) => {
@@ -524,7 +553,7 @@ export const setVNetDefaultSubnet = async (vnetId: string,
 
 export const getSetVNetDefaultSubnetMutationKey = () => ['setVNetDefaultSubnet'] as const;
 
-export const getSetVNetDefaultSubnetMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+export const getSetVNetDefaultSubnetMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setVNetDefaultSubnet>>, TError,SetVNetDefaultSubnetMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof setVNetDefaultSubnet>>, TError,SetVNetDefaultSubnetMutationVariables, TContext> => {
 
@@ -553,10 +582,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type SetVNetDefaultSubnetMutationResult = NonNullable<Awaited<ReturnType<typeof setVNetDefaultSubnet>>>
 
-    export type SetVNetDefaultSubnetMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>
+    export type SetVNetDefaultSubnetMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type SetVNetDefaultSubnetMutationVariables = {vnetId: string;subnetId: string}
 
-    export const useSetVNetDefaultSubnet = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+    export const useSetVNetDefaultSubnet = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setVNetDefaultSubnet>>, TError,SetVNetDefaultSubnetMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof setVNetDefaultSubnet>>,
@@ -599,7 +628,7 @@ export const getListVNetSubnetsQueryKey = (vnetId: string,) => {
     }
 
 
-export const getListVNetSubnetsQueryOptions = <TData = Awaited<ReturnType<typeof listVNetSubnets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(vnetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVNetSubnets>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListVNetSubnetsQueryOptions = <TData = Awaited<ReturnType<typeof listVNetSubnets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(vnetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVNetSubnets>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -618,10 +647,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListVNetSubnetsQueryResult = NonNullable<Awaited<ReturnType<typeof listVNetSubnets>>>
-export type ListVNetSubnetsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ListVNetSubnetsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useListVNetSubnets<TData = Awaited<ReturnType<typeof listVNetSubnets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListVNetSubnets<TData = Awaited<ReturnType<typeof listVNetSubnets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  vnetId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVNetSubnets>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listVNetSubnets>>,
@@ -631,7 +660,7 @@ export function useListVNetSubnets<TData = Awaited<ReturnType<typeof listVNetSub
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListVNetSubnets<TData = Awaited<ReturnType<typeof listVNetSubnets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListVNetSubnets<TData = Awaited<ReturnType<typeof listVNetSubnets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  vnetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVNetSubnets>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listVNetSubnets>>,
@@ -641,12 +670,12 @@ export function useListVNetSubnets<TData = Awaited<ReturnType<typeof listVNetSub
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListVNetSubnets<TData = Awaited<ReturnType<typeof listVNetSubnets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListVNetSubnets<TData = Awaited<ReturnType<typeof listVNetSubnets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  vnetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVNetSubnets>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListVNetSubnets<TData = Awaited<ReturnType<typeof listVNetSubnets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListVNetSubnets<TData = Awaited<ReturnType<typeof listVNetSubnets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  vnetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listVNetSubnets>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {

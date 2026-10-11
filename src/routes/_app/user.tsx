@@ -21,7 +21,7 @@ export const Route = createFileRoute('/_app/user')({
   component: AccountPage,
 })
 
-// Only email and notifications are editable by the user; the rest is sent back unchanged.
+// Only email and notifications are editable by the user; updates are partial, the rest is left unchanged.
 const AccountForm = UpdateUserBody.pick({ email: true, notifications: true }).extend({
   email: z.email('Enter a valid email address'),
   notifications: z.boolean(),
@@ -61,7 +61,7 @@ function AccountPage() {
         </CardHeader>
         <form
           noValidate
-          onSubmit={form.handleSubmit((values) => user && update.mutate({ userId: uid, data: { ...user, ...values } }))}
+          onSubmit={form.handleSubmit((values) => update.mutate({ userId: uid, data: values }))}
         >
           <CardContent className="grid gap-4">
             <dl>

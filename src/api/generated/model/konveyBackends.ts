@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 
 /**
@@ -12,6 +12,10 @@
 export interface KonveyBackends {
   /** The Konvey (Kowabunga Network Load-Balancer) endpoint list of load-balanced backend hosts. */
   hosts: string[];
-  /** The Konvey (Kowabunga Network Load-Balancer) endpoint backend service port. */
+  /**
+     * The Konvey (Kowabunga Network Load-Balancer) endpoint backend service port.
+     * @minimum 1
+     * @maximum 65535
+     */
   port: number;
 }

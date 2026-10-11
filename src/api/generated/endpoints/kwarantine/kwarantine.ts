@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   useMutation,
@@ -29,7 +29,9 @@ import type {
   ConflictResponse,
   ForbiddenResponse,
   InsufficientResourceResponse,
+  InternalServerErrorResponse,
   Kwarantine,
+  KwarantineUpdate,
   NotFoundResponse,
   ObjectIds,
   UnauthorizedResponse,
@@ -92,7 +94,7 @@ export const getListKwarantinesQueryKey = () => {
     }
 
 
-export const getListKwarantinesQueryOptions = <TData = Awaited<ReturnType<typeof listKwarantines>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKwarantines>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListKwarantinesQueryOptions = <TData = Awaited<ReturnType<typeof listKwarantines>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKwarantines>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -111,10 +113,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListKwarantinesQueryResult = NonNullable<Awaited<ReturnType<typeof listKwarantines>>>
-export type ListKwarantinesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+export type ListKwarantinesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>
 
 
-export function useListKwarantines<TData = Awaited<ReturnType<typeof listKwarantines>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListKwarantines<TData = Awaited<ReturnType<typeof listKwarantines>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKwarantines>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listKwarantines>>,
@@ -124,7 +126,7 @@ export function useListKwarantines<TData = Awaited<ReturnType<typeof listKwarant
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListKwarantines<TData = Awaited<ReturnType<typeof listKwarantines>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListKwarantines<TData = Awaited<ReturnType<typeof listKwarantines>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKwarantines>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listKwarantines>>,
@@ -134,12 +136,12 @@ export function useListKwarantines<TData = Awaited<ReturnType<typeof listKwarant
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListKwarantines<TData = Awaited<ReturnType<typeof listKwarantines>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListKwarantines<TData = Awaited<ReturnType<typeof listKwarantines>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKwarantines>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListKwarantines<TData = Awaited<ReturnType<typeof listKwarantines>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListKwarantines<TData = Awaited<ReturnType<typeof listKwarantines>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKwarantines>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -184,7 +186,7 @@ export const deleteKwarantine = async (kwarantineId: string, options?: Parameter
 
 export const getDeleteKwarantineMutationKey = () => ['deleteKwarantine'] as const;
 
-export const getDeleteKwarantineMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+export const getDeleteKwarantineMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteKwarantine>>, TError,DeleteKwarantineMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteKwarantine>>, TError,DeleteKwarantineMutationVariables, TContext> => {
 
@@ -213,10 +215,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type DeleteKwarantineMutationResult = NonNullable<Awaited<ReturnType<typeof deleteKwarantine>>>
 
-    export type DeleteKwarantineMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>
+    export type DeleteKwarantineMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type DeleteKwarantineMutationVariables = {kwarantineId: string}
 
-    export const useDeleteKwarantine = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+    export const useDeleteKwarantine = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteKwarantine>>, TError,DeleteKwarantineMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteKwarantine>>,
@@ -259,7 +261,7 @@ export const getReadKwarantineQueryKey = (kwarantineId: string,) => {
     }
 
 
-export const getReadKwarantineQueryOptions = <TData = Awaited<ReturnType<typeof readKwarantine>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(kwarantineId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKwarantine>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getReadKwarantineQueryOptions = <TData = Awaited<ReturnType<typeof readKwarantine>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(kwarantineId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKwarantine>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -278,10 +280,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadKwarantineQueryResult = NonNullable<Awaited<ReturnType<typeof readKwarantine>>>
-export type ReadKwarantineQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadKwarantineQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadKwarantine<TData = Awaited<ReturnType<typeof readKwarantine>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKwarantine<TData = Awaited<ReturnType<typeof readKwarantine>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kwarantineId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKwarantine>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readKwarantine>>,
@@ -291,7 +293,7 @@ export function useReadKwarantine<TData = Awaited<ReturnType<typeof readKwaranti
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadKwarantine<TData = Awaited<ReturnType<typeof readKwarantine>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKwarantine<TData = Awaited<ReturnType<typeof readKwarantine>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kwarantineId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKwarantine>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readKwarantine>>,
@@ -301,12 +303,12 @@ export function useReadKwarantine<TData = Awaited<ReturnType<typeof readKwaranti
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadKwarantine<TData = Awaited<ReturnType<typeof readKwarantine>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKwarantine<TData = Awaited<ReturnType<typeof readKwarantine>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kwarantineId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKwarantine>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadKwarantine<TData = Awaited<ReturnType<typeof readKwarantine>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKwarantine<TData = Awaited<ReturnType<typeof readKwarantine>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kwarantineId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKwarantine>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -335,7 +337,7 @@ export const getUpdateKwarantineUrl = (kwarantineId: string,) => {
  * Updates a Kwarantine configuration.
  */
 export const updateKwarantine = async (kwarantineId: string,
-    kwarantine: Kwarantine, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Kwarantine> => {
+    kwarantineUpdate: KwarantineUpdate, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Kwarantine> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -356,7 +358,7 @@ return kowabungaFetch<Kwarantine>(getUpdateKwarantineUrl(kwarantineId),
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(kwarantine)
+    body: JSON.stringify(kwarantineUpdate)
   }
 );}
 
@@ -366,7 +368,7 @@ return kowabungaFetch<Kwarantine>(getUpdateKwarantineUrl(kwarantineId),
 
 export const getUpdateKwarantineMutationKey = () => ['updateKwarantine'] as const;
 
-export const getUpdateKwarantineMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getUpdateKwarantineMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKwarantine>>, TError,UpdateKwarantineMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateKwarantine>>, TError,UpdateKwarantineMutationVariables, TContext> => {
 
@@ -394,11 +396,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateKwarantineMutationResult = NonNullable<Awaited<ReturnType<typeof updateKwarantine>>>
-    export type UpdateKwarantineMutationBody = BodyType<Kwarantine>
-    export type UpdateKwarantineMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type UpdateKwarantineMutationVariables = {kwarantineId: string;data: BodyType<Kwarantine>}
+    export type UpdateKwarantineMutationBody = BodyType<KwarantineUpdate>
+    export type UpdateKwarantineMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type UpdateKwarantineMutationVariables = {kwarantineId: string;data: BodyType<KwarantineUpdate>}
 
-    export const useUpdateKwarantine = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useUpdateKwarantine = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKwarantine>>, TError,UpdateKwarantineMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateKwarantine>>,
@@ -438,7 +440,7 @@ export const removeKwarantineInstance = async (kwarantineId: string,
 
 export const getRemoveKwarantineInstanceMutationKey = () => ['removeKwarantineInstance'] as const;
 
-export const getRemoveKwarantineInstanceMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+export const getRemoveKwarantineInstanceMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeKwarantineInstance>>, TError,RemoveKwarantineInstanceMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof removeKwarantineInstance>>, TError,RemoveKwarantineInstanceMutationVariables, TContext> => {
 
@@ -467,10 +469,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type RemoveKwarantineInstanceMutationResult = NonNullable<Awaited<ReturnType<typeof removeKwarantineInstance>>>
 
-    export type RemoveKwarantineInstanceMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>
+    export type RemoveKwarantineInstanceMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type RemoveKwarantineInstanceMutationVariables = {kwarantineId: string;instanceId: string}
 
-    export const useRemoveKwarantineInstance = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+    export const useRemoveKwarantineInstance = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeKwarantineInstance>>, TError,RemoveKwarantineInstanceMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof removeKwarantineInstance>>,
@@ -510,7 +512,7 @@ export const addKwarantineInstance = async (kwarantineId: string,
 
 export const getAddKwarantineInstanceMutationKey = () => ['addKwarantineInstance'] as const;
 
-export const getAddKwarantineInstanceMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+export const getAddKwarantineInstanceMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addKwarantineInstance>>, TError,AddKwarantineInstanceMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof addKwarantineInstance>>, TError,AddKwarantineInstanceMutationVariables, TContext> => {
 
@@ -539,10 +541,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type AddKwarantineInstanceMutationResult = NonNullable<Awaited<ReturnType<typeof addKwarantineInstance>>>
 
-    export type AddKwarantineInstanceMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>
+    export type AddKwarantineInstanceMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type AddKwarantineInstanceMutationVariables = {kwarantineId: string;instanceId: string}
 
-    export const useAddKwarantineInstance = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+    export const useAddKwarantineInstance = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addKwarantineInstance>>, TError,AddKwarantineInstanceMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof addKwarantineInstance>>,
@@ -582,7 +584,7 @@ export const removeKwarantineKompute = async (kwarantineId: string,
 
 export const getRemoveKwarantineKomputeMutationKey = () => ['removeKwarantineKompute'] as const;
 
-export const getRemoveKwarantineKomputeMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+export const getRemoveKwarantineKomputeMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeKwarantineKompute>>, TError,RemoveKwarantineKomputeMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof removeKwarantineKompute>>, TError,RemoveKwarantineKomputeMutationVariables, TContext> => {
 
@@ -611,10 +613,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type RemoveKwarantineKomputeMutationResult = NonNullable<Awaited<ReturnType<typeof removeKwarantineKompute>>>
 
-    export type RemoveKwarantineKomputeMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>
+    export type RemoveKwarantineKomputeMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type RemoveKwarantineKomputeMutationVariables = {kwarantineId: string;komputeId: string}
 
-    export const useRemoveKwarantineKompute = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+    export const useRemoveKwarantineKompute = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeKwarantineKompute>>, TError,RemoveKwarantineKomputeMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof removeKwarantineKompute>>,
@@ -654,7 +656,7 @@ export const addKwarantineKompute = async (kwarantineId: string,
 
 export const getAddKwarantineKomputeMutationKey = () => ['addKwarantineKompute'] as const;
 
-export const getAddKwarantineKomputeMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+export const getAddKwarantineKomputeMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addKwarantineKompute>>, TError,AddKwarantineKomputeMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof addKwarantineKompute>>, TError,AddKwarantineKomputeMutationVariables, TContext> => {
 
@@ -683,10 +685,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type AddKwarantineKomputeMutationResult = NonNullable<Awaited<ReturnType<typeof addKwarantineKompute>>>
 
-    export type AddKwarantineKomputeMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>
+    export type AddKwarantineKomputeMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type AddKwarantineKomputeMutationVariables = {kwarantineId: string;komputeId: string}
 
-    export const useAddKwarantineKompute = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+    export const useAddKwarantineKompute = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addKwarantineKompute>>, TError,AddKwarantineKomputeMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof addKwarantineKompute>>,

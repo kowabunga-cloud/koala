@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import type { KonveyBackends } from './konveyBackends';
 import type { KonveyEndpointProtocol } from './konveyEndpointProtocol';
@@ -14,7 +14,11 @@ import type { KonveyEndpointProtocol } from './konveyEndpointProtocol';
 export interface KonveyEndpoint {
   /** The Konvey (Kowabunga Network Load-Balancer) endpoint name. */
   name: string;
-  /** The port to be exposed. */
+  /**
+     * The port to be exposed.
+     * @minimum 1
+     * @maximum 65535
+     */
   port: number;
   /** The transport layer protocol to be exposed. */
   protocol: KonveyEndpointProtocol;

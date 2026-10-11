@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   useMutation,
@@ -37,17 +37,18 @@ import type {
   ForbiddenResponse,
   Instance,
   InsufficientResourceResponse,
+  InternalServerErrorResponse,
   Kawaii,
   Kompute,
   Konvey,
   Kwarantine,
   Kylo,
   ListProjectRegionKylosParams,
-  ListProjectsParams,
   NotFoundResponse,
   ObjectIds,
   Project,
   ProjectResources,
+  ProjectUpdate,
   UnauthorizedResponse,
   UnprocessableEntityResponse,
   Volume
@@ -55,6 +56,33 @@ import type {
 
 import { kowabungaFetch } from '../../../client';
 import type { ErrorType , BodyType } from '../../../client';
+
+// https://stackoverflow.com/questions/49579094/typescript-conditional-types-filter-out-readonly-properties-pick-only-requir/49579497#49579497
+type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <
+T,
+>() => T extends Y ? 1 : 2
+? A
+: B;
+
+type WritableKeys<T> = {
+[P in keyof T]-?: IfEquals<
+  { [Q in P]: T[P] },
+  { -readonly [Q in P]: T[P] },
+  P
+>;
+}[keyof T];
+
+type UnionToIntersection<U> =
+  (U extends any ? (k: U)=>void : never) extends ((k: infer I)=>void) ? I : never;
+type DistributeReadOnlyOverUnions<T> = T extends any ? NonReadonly<T> : never;
+
+type Writable<T> = Pick<T, WritableKeys<T>>;
+type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
+  [P in keyof Writable<T>]: T[P] extends object
+    ? NonReadonly<NonNullable<T[P]>>
+    : T[P];
+} : DistributeReadOnlyOverUnions<T>;
+
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -76,27 +104,20 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export const getListProjectsUrl = (params?: ListProjectsParams,) => {
-  const normalizedParams = new URLSearchParams();
+export const getListProjectsUrl = () => {
 
-  Object.entries(params || {}).forEach(([key, value]) => {
 
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : String(value))
-    }
-  });
 
-  const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/project?${stringifiedParams}` : `/project`
+  return `/project`
 }
 
 /**
  * Returns the IDs of project objects.
  */
-export const listProjects = async (params?: ListProjectsParams, options?: Parameters<typeof kowabungaFetch>[1]): Promise<ObjectIds> => {
+export const listProjects = async ( options?: Parameters<typeof kowabungaFetch>[1]): Promise<ObjectIds> => {
 
-  return kowabungaFetch<ObjectIds>(getListProjectsUrl(params),
+  return kowabungaFetch<ObjectIds>(getListProjectsUrl(),
   {
     ...options,
     method: 'GET'
@@ -109,23 +130,23 @@ export const listProjects = async (params?: ListProjectsParams, options?: Parame
 
 
 
-export const getListProjectsQueryKey = (params?: ListProjectsParams,) => {
+export const getListProjectsQueryKey = () => {
     return [
-    `/project`, ...(params ? [params] : [])
+    `/project`
     ] as const;
     }
 
 
-export const getListProjectsQueryOptions = <TData = Awaited<ReturnType<typeof listProjects>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(params?: ListProjectsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjects>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListProjectsQueryOptions = <TData = Awaited<ReturnType<typeof listProjects>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjects>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListProjectsQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getListProjectsQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listProjects>>> = ({ signal }) => listProjects(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listProjects>>> = ({ signal }) => listProjects({ signal, ...requestOptions });
 
 
 
@@ -135,11 +156,11 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListProjectsQueryResult = NonNullable<Awaited<ReturnType<typeof listProjects>>>
-export type ListProjectsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+export type ListProjectsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>
 
 
-export function useListProjects<TData = Awaited<ReturnType<typeof listProjects>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
- params: undefined |  ListProjectsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjects>>, TError, TData>> & Pick<
+export function useListProjects<TData = Awaited<ReturnType<typeof listProjects>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjects>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listProjects>>,
           TError,
@@ -148,8 +169,8 @@ export function useListProjects<TData = Awaited<ReturnType<typeof listProjects>>
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListProjects<TData = Awaited<ReturnType<typeof listProjects>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
- params?: ListProjectsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjects>>, TError, TData>> & Pick<
+export function useListProjects<TData = Awaited<ReturnType<typeof listProjects>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjects>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listProjects>>,
           TError,
@@ -158,17 +179,17 @@ export function useListProjects<TData = Awaited<ReturnType<typeof listProjects>>
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListProjects<TData = Awaited<ReturnType<typeof listProjects>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
- params?: ListProjectsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjects>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export function useListProjects<TData = Awaited<ReturnType<typeof listProjects>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjects>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListProjects<TData = Awaited<ReturnType<typeof listProjects>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
- params?: ListProjectsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjects>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export function useListProjects<TData = Awaited<ReturnType<typeof listProjects>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjects>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getListProjectsQueryOptions(params,options)
+  const queryOptions = getListProjectsQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -198,7 +219,7 @@ export const getCreateProjectUrl = (params?: CreateProjectParams,) => {
 /**
  * Creates a new project.
  */
-export const createProject = async (project: Project,
+export const createProject = async (project: NonReadonly<Project>,
     params?: CreateProjectParams, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Project> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
@@ -230,7 +251,7 @@ return kowabungaFetch<Project>(getCreateProjectUrl(params),
 
 export const getCreateProjectMutationKey = () => ['createProject'] as const;
 
-export const getCreateProjectMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getCreateProjectMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProject>>, TError,CreateProjectMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createProject>>, TError,CreateProjectMutationVariables, TContext> => {
 
@@ -258,11 +279,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type CreateProjectMutationResult = NonNullable<Awaited<ReturnType<typeof createProject>>>
-    export type CreateProjectMutationBody = BodyType<Project>
-    export type CreateProjectMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateProjectMutationVariables = {data: BodyType<Project>;params?: CreateProjectParams}
+    export type CreateProjectMutationBody = BodyType<NonReadonly<Project>>
+    export type CreateProjectMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateProjectMutationVariables = {data: BodyType<NonReadonly<Project>>;params?: CreateProjectParams}
 
-    export const useCreateProject = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useCreateProject = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProject>>, TError,CreateProjectMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createProject>>,
@@ -300,7 +321,7 @@ export const deleteProject = async (projectId: string, options?: Parameters<type
 
 export const getDeleteProjectMutationKey = () => ['deleteProject'] as const;
 
-export const getDeleteProjectMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+export const getDeleteProjectMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteProject>>, TError,DeleteProjectMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteProject>>, TError,DeleteProjectMutationVariables, TContext> => {
 
@@ -329,10 +350,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type DeleteProjectMutationResult = NonNullable<Awaited<ReturnType<typeof deleteProject>>>
 
-    export type DeleteProjectMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>
+    export type DeleteProjectMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type DeleteProjectMutationVariables = {projectId: string}
 
-    export const useDeleteProject = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+    export const useDeleteProject = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteProject>>, TError,DeleteProjectMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteProject>>,
@@ -375,7 +396,7 @@ export const getReadProjectQueryKey = (projectId: string,) => {
     }
 
 
-export const getReadProjectQueryOptions = <TData = Awaited<ReturnType<typeof readProject>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readProject>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getReadProjectQueryOptions = <TData = Awaited<ReturnType<typeof readProject>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readProject>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -394,10 +415,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadProjectQueryResult = NonNullable<Awaited<ReturnType<typeof readProject>>>
-export type ReadProjectQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadProjectQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadProject<TData = Awaited<ReturnType<typeof readProject>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadProject<TData = Awaited<ReturnType<typeof readProject>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readProject>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readProject>>,
@@ -407,7 +428,7 @@ export function useReadProject<TData = Awaited<ReturnType<typeof readProject>>, 
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadProject<TData = Awaited<ReturnType<typeof readProject>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadProject<TData = Awaited<ReturnType<typeof readProject>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readProject>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readProject>>,
@@ -417,12 +438,12 @@ export function useReadProject<TData = Awaited<ReturnType<typeof readProject>>, 
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadProject<TData = Awaited<ReturnType<typeof readProject>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadProject<TData = Awaited<ReturnType<typeof readProject>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readProject>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadProject<TData = Awaited<ReturnType<typeof readProject>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadProject<TData = Awaited<ReturnType<typeof readProject>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readProject>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -451,7 +472,7 @@ export const getUpdateProjectUrl = (projectId: string,) => {
  * Updates a project configuration.
  */
 export const updateProject = async (projectId: string,
-    project: Project, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Project> => {
+    projectUpdate: ProjectUpdate, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Project> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -472,7 +493,7 @@ return kowabungaFetch<Project>(getUpdateProjectUrl(projectId),
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(project)
+    body: JSON.stringify(projectUpdate)
   }
 );}
 
@@ -482,7 +503,7 @@ return kowabungaFetch<Project>(getUpdateProjectUrl(projectId),
 
 export const getUpdateProjectMutationKey = () => ['updateProject'] as const;
 
-export const getUpdateProjectMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getUpdateProjectMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateProject>>, TError,UpdateProjectMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateProject>>, TError,UpdateProjectMutationVariables, TContext> => {
 
@@ -510,11 +531,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateProjectMutationResult = NonNullable<Awaited<ReturnType<typeof updateProject>>>
-    export type UpdateProjectMutationBody = BodyType<Project>
-    export type UpdateProjectMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type UpdateProjectMutationVariables = {projectId: string;data: BodyType<Project>}
+    export type UpdateProjectMutationBody = BodyType<ProjectUpdate>
+    export type UpdateProjectMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type UpdateProjectMutationVariables = {projectId: string;data: BodyType<ProjectUpdate>}
 
-    export const useUpdateProject = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useUpdateProject = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateProject>>, TError,UpdateProjectMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateProject>>,
@@ -557,7 +578,7 @@ export const getReadProjectCostQueryKey = (projectId: string,) => {
     }
 
 
-export const getReadProjectCostQueryOptions = <TData = Awaited<ReturnType<typeof readProjectCost>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readProjectCost>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getReadProjectCostQueryOptions = <TData = Awaited<ReturnType<typeof readProjectCost>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readProjectCost>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -576,10 +597,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadProjectCostQueryResult = NonNullable<Awaited<ReturnType<typeof readProjectCost>>>
-export type ReadProjectCostQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadProjectCostQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadProjectCost<TData = Awaited<ReturnType<typeof readProjectCost>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadProjectCost<TData = Awaited<ReturnType<typeof readProjectCost>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readProjectCost>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readProjectCost>>,
@@ -589,7 +610,7 @@ export function useReadProjectCost<TData = Awaited<ReturnType<typeof readProject
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadProjectCost<TData = Awaited<ReturnType<typeof readProjectCost>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadProjectCost<TData = Awaited<ReturnType<typeof readProjectCost>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readProjectCost>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readProjectCost>>,
@@ -599,12 +620,12 @@ export function useReadProjectCost<TData = Awaited<ReturnType<typeof readProject
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadProjectCost<TData = Awaited<ReturnType<typeof readProjectCost>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadProjectCost<TData = Awaited<ReturnType<typeof readProjectCost>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readProjectCost>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadProjectCost<TData = Awaited<ReturnType<typeof readProjectCost>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadProjectCost<TData = Awaited<ReturnType<typeof readProjectCost>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readProjectCost>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -654,7 +675,7 @@ export const getReadProjectUsageQueryKey = (projectId: string,) => {
     }
 
 
-export const getReadProjectUsageQueryOptions = <TData = Awaited<ReturnType<typeof readProjectUsage>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readProjectUsage>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getReadProjectUsageQueryOptions = <TData = Awaited<ReturnType<typeof readProjectUsage>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readProjectUsage>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -673,10 +694,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadProjectUsageQueryResult = NonNullable<Awaited<ReturnType<typeof readProjectUsage>>>
-export type ReadProjectUsageQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadProjectUsageQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadProjectUsage<TData = Awaited<ReturnType<typeof readProjectUsage>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadProjectUsage<TData = Awaited<ReturnType<typeof readProjectUsage>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readProjectUsage>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readProjectUsage>>,
@@ -686,7 +707,7 @@ export function useReadProjectUsage<TData = Awaited<ReturnType<typeof readProjec
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadProjectUsage<TData = Awaited<ReturnType<typeof readProjectUsage>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadProjectUsage<TData = Awaited<ReturnType<typeof readProjectUsage>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readProjectUsage>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readProjectUsage>>,
@@ -696,12 +717,12 @@ export function useReadProjectUsage<TData = Awaited<ReturnType<typeof readProjec
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadProjectUsage<TData = Awaited<ReturnType<typeof readProjectUsage>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadProjectUsage<TData = Awaited<ReturnType<typeof readProjectUsage>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readProjectUsage>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadProjectUsage<TData = Awaited<ReturnType<typeof readProjectUsage>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadProjectUsage<TData = Awaited<ReturnType<typeof readProjectUsage>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readProjectUsage>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -730,7 +751,7 @@ export const getCreateProjectKwarantineUrl = (projectId: string,) => {
  * Creates a new Kwarantine.
  */
 export const createProjectKwarantine = async (projectId: string,
-    kwarantine: Kwarantine, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Kwarantine> => {
+    kwarantine: NonReadonly<Kwarantine>, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Kwarantine> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -761,7 +782,7 @@ return kowabungaFetch<Kwarantine>(getCreateProjectKwarantineUrl(projectId),
 
 export const getCreateProjectKwarantineMutationKey = () => ['createProjectKwarantine'] as const;
 
-export const getCreateProjectKwarantineMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getCreateProjectKwarantineMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProjectKwarantine>>, TError,CreateProjectKwarantineMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createProjectKwarantine>>, TError,CreateProjectKwarantineMutationVariables, TContext> => {
 
@@ -789,11 +810,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type CreateProjectKwarantineMutationResult = NonNullable<Awaited<ReturnType<typeof createProjectKwarantine>>>
-    export type CreateProjectKwarantineMutationBody = BodyType<Kwarantine>
-    export type CreateProjectKwarantineMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateProjectKwarantineMutationVariables = {projectId: string;data: BodyType<Kwarantine>}
+    export type CreateProjectKwarantineMutationBody = BodyType<NonReadonly<Kwarantine>>
+    export type CreateProjectKwarantineMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateProjectKwarantineMutationVariables = {projectId: string;data: BodyType<NonReadonly<Kwarantine>>}
 
-    export const useCreateProjectKwarantine = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useCreateProjectKwarantine = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProjectKwarantine>>, TError,CreateProjectKwarantineMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createProjectKwarantine>>,
@@ -836,7 +857,7 @@ export const getListProjectKwarantinesQueryKey = (projectId: string,) => {
     }
 
 
-export const getListProjectKwarantinesQueryOptions = <TData = Awaited<ReturnType<typeof listProjectKwarantines>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectKwarantines>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListProjectKwarantinesQueryOptions = <TData = Awaited<ReturnType<typeof listProjectKwarantines>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectKwarantines>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -855,10 +876,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListProjectKwarantinesQueryResult = NonNullable<Awaited<ReturnType<typeof listProjectKwarantines>>>
-export type ListProjectKwarantinesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ListProjectKwarantinesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useListProjectKwarantines<TData = Awaited<ReturnType<typeof listProjectKwarantines>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectKwarantines<TData = Awaited<ReturnType<typeof listProjectKwarantines>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectKwarantines>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listProjectKwarantines>>,
@@ -868,7 +889,7 @@ export function useListProjectKwarantines<TData = Awaited<ReturnType<typeof list
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListProjectKwarantines<TData = Awaited<ReturnType<typeof listProjectKwarantines>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectKwarantines<TData = Awaited<ReturnType<typeof listProjectKwarantines>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectKwarantines>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listProjectKwarantines>>,
@@ -878,12 +899,12 @@ export function useListProjectKwarantines<TData = Awaited<ReturnType<typeof list
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListProjectKwarantines<TData = Awaited<ReturnType<typeof listProjectKwarantines>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectKwarantines<TData = Awaited<ReturnType<typeof listProjectKwarantines>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectKwarantines>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListProjectKwarantines<TData = Awaited<ReturnType<typeof listProjectKwarantines>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectKwarantines<TData = Awaited<ReturnType<typeof listProjectKwarantines>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectKwarantines>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -912,7 +933,7 @@ export const getCreateProjectDnsRecordUrl = (projectId: string,) => {
  * Creates a new DNS record.
  */
 export const createProjectDnsRecord = async (projectId: string,
-    dnsRecord: DnsRecord, options?: Parameters<typeof kowabungaFetch>[1]): Promise<DnsRecord> => {
+    dnsRecord: NonReadonly<DnsRecord>, options?: Parameters<typeof kowabungaFetch>[1]): Promise<DnsRecord> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -943,7 +964,7 @@ return kowabungaFetch<DnsRecord>(getCreateProjectDnsRecordUrl(projectId),
 
 export const getCreateProjectDnsRecordMutationKey = () => ['createProjectDnsRecord'] as const;
 
-export const getCreateProjectDnsRecordMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getCreateProjectDnsRecordMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProjectDnsRecord>>, TError,CreateProjectDnsRecordMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createProjectDnsRecord>>, TError,CreateProjectDnsRecordMutationVariables, TContext> => {
 
@@ -971,11 +992,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type CreateProjectDnsRecordMutationResult = NonNullable<Awaited<ReturnType<typeof createProjectDnsRecord>>>
-    export type CreateProjectDnsRecordMutationBody = BodyType<DnsRecord>
-    export type CreateProjectDnsRecordMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateProjectDnsRecordMutationVariables = {projectId: string;data: BodyType<DnsRecord>}
+    export type CreateProjectDnsRecordMutationBody = BodyType<NonReadonly<DnsRecord>>
+    export type CreateProjectDnsRecordMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateProjectDnsRecordMutationVariables = {projectId: string;data: BodyType<NonReadonly<DnsRecord>>}
 
-    export const useCreateProjectDnsRecord = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useCreateProjectDnsRecord = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProjectDnsRecord>>, TError,CreateProjectDnsRecordMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createProjectDnsRecord>>,
@@ -1018,7 +1039,7 @@ export const getListProjectDnsRecordsQueryKey = (projectId: string,) => {
     }
 
 
-export const getListProjectDnsRecordsQueryOptions = <TData = Awaited<ReturnType<typeof listProjectDnsRecords>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectDnsRecords>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListProjectDnsRecordsQueryOptions = <TData = Awaited<ReturnType<typeof listProjectDnsRecords>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectDnsRecords>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -1037,10 +1058,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListProjectDnsRecordsQueryResult = NonNullable<Awaited<ReturnType<typeof listProjectDnsRecords>>>
-export type ListProjectDnsRecordsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ListProjectDnsRecordsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useListProjectDnsRecords<TData = Awaited<ReturnType<typeof listProjectDnsRecords>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectDnsRecords<TData = Awaited<ReturnType<typeof listProjectDnsRecords>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectDnsRecords>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listProjectDnsRecords>>,
@@ -1050,7 +1071,7 @@ export function useListProjectDnsRecords<TData = Awaited<ReturnType<typeof listP
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListProjectDnsRecords<TData = Awaited<ReturnType<typeof listProjectDnsRecords>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectDnsRecords<TData = Awaited<ReturnType<typeof listProjectDnsRecords>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectDnsRecords>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listProjectDnsRecords>>,
@@ -1060,12 +1081,12 @@ export function useListProjectDnsRecords<TData = Awaited<ReturnType<typeof listP
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListProjectDnsRecords<TData = Awaited<ReturnType<typeof listProjectDnsRecords>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectDnsRecords<TData = Awaited<ReturnType<typeof listProjectDnsRecords>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectDnsRecords>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListProjectDnsRecords<TData = Awaited<ReturnType<typeof listProjectDnsRecords>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectDnsRecords<TData = Awaited<ReturnType<typeof listProjectDnsRecords>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectDnsRecords>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -1104,7 +1125,7 @@ export const getCreateProjectRegionVolumeUrl = (projectId: string,
  */
 export const createProjectRegionVolume = async (projectId: string,
     regionId: string,
-    volume: Volume,
+    volume: NonReadonly<Volume>,
     params?: CreateProjectRegionVolumeParams, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Volume> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
@@ -1136,7 +1157,7 @@ return kowabungaFetch<Volume>(getCreateProjectRegionVolumeUrl(projectId,regionId
 
 export const getCreateProjectRegionVolumeMutationKey = () => ['createProjectRegionVolume'] as const;
 
-export const getCreateProjectRegionVolumeMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getCreateProjectRegionVolumeMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProjectRegionVolume>>, TError,CreateProjectRegionVolumeMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createProjectRegionVolume>>, TError,CreateProjectRegionVolumeMutationVariables, TContext> => {
 
@@ -1164,11 +1185,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type CreateProjectRegionVolumeMutationResult = NonNullable<Awaited<ReturnType<typeof createProjectRegionVolume>>>
-    export type CreateProjectRegionVolumeMutationBody = BodyType<Volume>
-    export type CreateProjectRegionVolumeMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateProjectRegionVolumeMutationVariables = {projectId: string;regionId: string;data: BodyType<Volume>;params?: CreateProjectRegionVolumeParams}
+    export type CreateProjectRegionVolumeMutationBody = BodyType<NonReadonly<Volume>>
+    export type CreateProjectRegionVolumeMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateProjectRegionVolumeMutationVariables = {projectId: string;regionId: string;data: BodyType<NonReadonly<Volume>>;params?: CreateProjectRegionVolumeParams}
 
-    export const useCreateProjectRegionVolume = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useCreateProjectRegionVolume = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProjectRegionVolume>>, TError,CreateProjectRegionVolumeMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createProjectRegionVolume>>,
@@ -1214,7 +1235,7 @@ export const getListProjectRegionVolumesQueryKey = (projectId: string,
     }
 
 
-export const getListProjectRegionVolumesQueryOptions = <TData = Awaited<ReturnType<typeof listProjectRegionVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(projectId: string,
+export const getListProjectRegionVolumesQueryOptions = <TData = Awaited<ReturnType<typeof listProjectRegionVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(projectId: string,
     regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionVolumes>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
@@ -1234,10 +1255,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListProjectRegionVolumesQueryResult = NonNullable<Awaited<ReturnType<typeof listProjectRegionVolumes>>>
-export type ListProjectRegionVolumesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ListProjectRegionVolumesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useListProjectRegionVolumes<TData = Awaited<ReturnType<typeof listProjectRegionVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectRegionVolumes<TData = Awaited<ReturnType<typeof listProjectRegionVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     regionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionVolumes>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
@@ -1248,7 +1269,7 @@ export function useListProjectRegionVolumes<TData = Awaited<ReturnType<typeof li
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListProjectRegionVolumes<TData = Awaited<ReturnType<typeof listProjectRegionVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectRegionVolumes<TData = Awaited<ReturnType<typeof listProjectRegionVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionVolumes>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
@@ -1259,13 +1280,13 @@ export function useListProjectRegionVolumes<TData = Awaited<ReturnType<typeof li
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListProjectRegionVolumes<TData = Awaited<ReturnType<typeof listProjectRegionVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectRegionVolumes<TData = Awaited<ReturnType<typeof listProjectRegionVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionVolumes>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListProjectRegionVolumes<TData = Awaited<ReturnType<typeof listProjectRegionVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectRegionVolumes<TData = Awaited<ReturnType<typeof listProjectRegionVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionVolumes>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
@@ -1297,7 +1318,7 @@ export const getCreateProjectZoneInstanceUrl = (projectId: string,
  */
 export const createProjectZoneInstance = async (projectId: string,
     zoneId: string,
-    instance: Instance, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Instance> => {
+    instance: NonReadonly<Instance>, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Instance> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -1328,7 +1349,7 @@ return kowabungaFetch<Instance>(getCreateProjectZoneInstanceUrl(projectId,zoneId
 
 export const getCreateProjectZoneInstanceMutationKey = () => ['createProjectZoneInstance'] as const;
 
-export const getCreateProjectZoneInstanceMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getCreateProjectZoneInstanceMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProjectZoneInstance>>, TError,CreateProjectZoneInstanceMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createProjectZoneInstance>>, TError,CreateProjectZoneInstanceMutationVariables, TContext> => {
 
@@ -1356,11 +1377,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type CreateProjectZoneInstanceMutationResult = NonNullable<Awaited<ReturnType<typeof createProjectZoneInstance>>>
-    export type CreateProjectZoneInstanceMutationBody = BodyType<Instance>
-    export type CreateProjectZoneInstanceMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateProjectZoneInstanceMutationVariables = {projectId: string;zoneId: string;data: BodyType<Instance>}
+    export type CreateProjectZoneInstanceMutationBody = BodyType<NonReadonly<Instance>>
+    export type CreateProjectZoneInstanceMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateProjectZoneInstanceMutationVariables = {projectId: string;zoneId: string;data: BodyType<NonReadonly<Instance>>}
 
-    export const useCreateProjectZoneInstance = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useCreateProjectZoneInstance = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProjectZoneInstance>>, TError,CreateProjectZoneInstanceMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createProjectZoneInstance>>,
@@ -1406,7 +1427,7 @@ export const getListProjectZoneInstancesQueryKey = (projectId: string,
     }
 
 
-export const getListProjectZoneInstancesQueryOptions = <TData = Awaited<ReturnType<typeof listProjectZoneInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(projectId: string,
+export const getListProjectZoneInstancesQueryOptions = <TData = Awaited<ReturnType<typeof listProjectZoneInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(projectId: string,
     zoneId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectZoneInstances>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
@@ -1426,10 +1447,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListProjectZoneInstancesQueryResult = NonNullable<Awaited<ReturnType<typeof listProjectZoneInstances>>>
-export type ListProjectZoneInstancesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ListProjectZoneInstancesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useListProjectZoneInstances<TData = Awaited<ReturnType<typeof listProjectZoneInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectZoneInstances<TData = Awaited<ReturnType<typeof listProjectZoneInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     zoneId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectZoneInstances>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
@@ -1440,7 +1461,7 @@ export function useListProjectZoneInstances<TData = Awaited<ReturnType<typeof li
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListProjectZoneInstances<TData = Awaited<ReturnType<typeof listProjectZoneInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectZoneInstances<TData = Awaited<ReturnType<typeof listProjectZoneInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     zoneId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectZoneInstances>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
@@ -1451,13 +1472,13 @@ export function useListProjectZoneInstances<TData = Awaited<ReturnType<typeof li
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListProjectZoneInstances<TData = Awaited<ReturnType<typeof listProjectZoneInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectZoneInstances<TData = Awaited<ReturnType<typeof listProjectZoneInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     zoneId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectZoneInstances>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListProjectZoneInstances<TData = Awaited<ReturnType<typeof listProjectZoneInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectZoneInstances<TData = Awaited<ReturnType<typeof listProjectZoneInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     zoneId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectZoneInstances>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
@@ -1489,7 +1510,7 @@ export const getCreateProjectRegionInstanceUrl = (projectId: string,
  */
 export const createProjectRegionInstance = async (projectId: string,
     regionId: string,
-    instance: Instance, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Instance> => {
+    instance: NonReadonly<Instance>, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Instance> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -1520,7 +1541,7 @@ return kowabungaFetch<Instance>(getCreateProjectRegionInstanceUrl(projectId,regi
 
 export const getCreateProjectRegionInstanceMutationKey = () => ['createProjectRegionInstance'] as const;
 
-export const getCreateProjectRegionInstanceMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getCreateProjectRegionInstanceMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProjectRegionInstance>>, TError,CreateProjectRegionInstanceMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createProjectRegionInstance>>, TError,CreateProjectRegionInstanceMutationVariables, TContext> => {
 
@@ -1548,11 +1569,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type CreateProjectRegionInstanceMutationResult = NonNullable<Awaited<ReturnType<typeof createProjectRegionInstance>>>
-    export type CreateProjectRegionInstanceMutationBody = BodyType<Instance>
-    export type CreateProjectRegionInstanceMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateProjectRegionInstanceMutationVariables = {projectId: string;regionId: string;data: BodyType<Instance>}
+    export type CreateProjectRegionInstanceMutationBody = BodyType<NonReadonly<Instance>>
+    export type CreateProjectRegionInstanceMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateProjectRegionInstanceMutationVariables = {projectId: string;regionId: string;data: BodyType<NonReadonly<Instance>>}
 
-    export const useCreateProjectRegionInstance = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useCreateProjectRegionInstance = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProjectRegionInstance>>, TError,CreateProjectRegionInstanceMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createProjectRegionInstance>>,
@@ -1598,7 +1619,7 @@ export const getListProjectRegionInstancesQueryKey = (projectId: string,
     }
 
 
-export const getListProjectRegionInstancesQueryOptions = <TData = Awaited<ReturnType<typeof listProjectRegionInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(projectId: string,
+export const getListProjectRegionInstancesQueryOptions = <TData = Awaited<ReturnType<typeof listProjectRegionInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(projectId: string,
     regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionInstances>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
@@ -1618,10 +1639,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListProjectRegionInstancesQueryResult = NonNullable<Awaited<ReturnType<typeof listProjectRegionInstances>>>
-export type ListProjectRegionInstancesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ListProjectRegionInstancesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useListProjectRegionInstances<TData = Awaited<ReturnType<typeof listProjectRegionInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectRegionInstances<TData = Awaited<ReturnType<typeof listProjectRegionInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     regionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionInstances>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
@@ -1632,7 +1653,7 @@ export function useListProjectRegionInstances<TData = Awaited<ReturnType<typeof 
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListProjectRegionInstances<TData = Awaited<ReturnType<typeof listProjectRegionInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectRegionInstances<TData = Awaited<ReturnType<typeof listProjectRegionInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionInstances>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
@@ -1643,13 +1664,13 @@ export function useListProjectRegionInstances<TData = Awaited<ReturnType<typeof 
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListProjectRegionInstances<TData = Awaited<ReturnType<typeof listProjectRegionInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectRegionInstances<TData = Awaited<ReturnType<typeof listProjectRegionInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionInstances>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListProjectRegionInstances<TData = Awaited<ReturnType<typeof listProjectRegionInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectRegionInstances<TData = Awaited<ReturnType<typeof listProjectRegionInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionInstances>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
@@ -1689,7 +1710,7 @@ export const getCreateProjectZoneKomputeUrl = (projectId: string,
  */
 export const createProjectZoneKompute = async (projectId: string,
     zoneId: string,
-    kompute: Kompute,
+    kompute: NonReadonly<Kompute>,
     params?: CreateProjectZoneKomputeParams, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Kompute> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
@@ -1721,7 +1742,7 @@ return kowabungaFetch<Kompute>(getCreateProjectZoneKomputeUrl(projectId,zoneId,p
 
 export const getCreateProjectZoneKomputeMutationKey = () => ['createProjectZoneKompute'] as const;
 
-export const getCreateProjectZoneKomputeMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getCreateProjectZoneKomputeMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProjectZoneKompute>>, TError,CreateProjectZoneKomputeMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createProjectZoneKompute>>, TError,CreateProjectZoneKomputeMutationVariables, TContext> => {
 
@@ -1749,11 +1770,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type CreateProjectZoneKomputeMutationResult = NonNullable<Awaited<ReturnType<typeof createProjectZoneKompute>>>
-    export type CreateProjectZoneKomputeMutationBody = BodyType<Kompute>
-    export type CreateProjectZoneKomputeMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateProjectZoneKomputeMutationVariables = {projectId: string;zoneId: string;data: BodyType<Kompute>;params?: CreateProjectZoneKomputeParams}
+    export type CreateProjectZoneKomputeMutationBody = BodyType<NonReadonly<Kompute>>
+    export type CreateProjectZoneKomputeMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateProjectZoneKomputeMutationVariables = {projectId: string;zoneId: string;data: BodyType<NonReadonly<Kompute>>;params?: CreateProjectZoneKomputeParams}
 
-    export const useCreateProjectZoneKompute = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useCreateProjectZoneKompute = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProjectZoneKompute>>, TError,CreateProjectZoneKomputeMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createProjectZoneKompute>>,
@@ -1799,7 +1820,7 @@ export const getListProjectZoneKomputesQueryKey = (projectId: string,
     }
 
 
-export const getListProjectZoneKomputesQueryOptions = <TData = Awaited<ReturnType<typeof listProjectZoneKomputes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(projectId: string,
+export const getListProjectZoneKomputesQueryOptions = <TData = Awaited<ReturnType<typeof listProjectZoneKomputes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(projectId: string,
     zoneId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectZoneKomputes>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
@@ -1819,10 +1840,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListProjectZoneKomputesQueryResult = NonNullable<Awaited<ReturnType<typeof listProjectZoneKomputes>>>
-export type ListProjectZoneKomputesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ListProjectZoneKomputesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useListProjectZoneKomputes<TData = Awaited<ReturnType<typeof listProjectZoneKomputes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectZoneKomputes<TData = Awaited<ReturnType<typeof listProjectZoneKomputes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     zoneId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectZoneKomputes>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
@@ -1833,7 +1854,7 @@ export function useListProjectZoneKomputes<TData = Awaited<ReturnType<typeof lis
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListProjectZoneKomputes<TData = Awaited<ReturnType<typeof listProjectZoneKomputes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectZoneKomputes<TData = Awaited<ReturnType<typeof listProjectZoneKomputes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     zoneId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectZoneKomputes>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
@@ -1844,13 +1865,13 @@ export function useListProjectZoneKomputes<TData = Awaited<ReturnType<typeof lis
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListProjectZoneKomputes<TData = Awaited<ReturnType<typeof listProjectZoneKomputes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectZoneKomputes<TData = Awaited<ReturnType<typeof listProjectZoneKomputes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     zoneId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectZoneKomputes>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListProjectZoneKomputes<TData = Awaited<ReturnType<typeof listProjectZoneKomputes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectZoneKomputes<TData = Awaited<ReturnType<typeof listProjectZoneKomputes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     zoneId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectZoneKomputes>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
@@ -1890,7 +1911,7 @@ export const getCreateProjectRegionKomputeUrl = (projectId: string,
  */
 export const createProjectRegionKompute = async (projectId: string,
     regionId: string,
-    kompute: Kompute,
+    kompute: NonReadonly<Kompute>,
     params?: CreateProjectRegionKomputeParams, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Kompute> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
@@ -1922,7 +1943,7 @@ return kowabungaFetch<Kompute>(getCreateProjectRegionKomputeUrl(projectId,region
 
 export const getCreateProjectRegionKomputeMutationKey = () => ['createProjectRegionKompute'] as const;
 
-export const getCreateProjectRegionKomputeMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getCreateProjectRegionKomputeMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProjectRegionKompute>>, TError,CreateProjectRegionKomputeMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createProjectRegionKompute>>, TError,CreateProjectRegionKomputeMutationVariables, TContext> => {
 
@@ -1950,11 +1971,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type CreateProjectRegionKomputeMutationResult = NonNullable<Awaited<ReturnType<typeof createProjectRegionKompute>>>
-    export type CreateProjectRegionKomputeMutationBody = BodyType<Kompute>
-    export type CreateProjectRegionKomputeMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateProjectRegionKomputeMutationVariables = {projectId: string;regionId: string;data: BodyType<Kompute>;params?: CreateProjectRegionKomputeParams}
+    export type CreateProjectRegionKomputeMutationBody = BodyType<NonReadonly<Kompute>>
+    export type CreateProjectRegionKomputeMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateProjectRegionKomputeMutationVariables = {projectId: string;regionId: string;data: BodyType<NonReadonly<Kompute>>;params?: CreateProjectRegionKomputeParams}
 
-    export const useCreateProjectRegionKompute = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useCreateProjectRegionKompute = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProjectRegionKompute>>, TError,CreateProjectRegionKomputeMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createProjectRegionKompute>>,
@@ -2000,7 +2021,7 @@ export const getListProjectRegionKomputesQueryKey = (projectId: string,
     }
 
 
-export const getListProjectRegionKomputesQueryOptions = <TData = Awaited<ReturnType<typeof listProjectRegionKomputes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(projectId: string,
+export const getListProjectRegionKomputesQueryOptions = <TData = Awaited<ReturnType<typeof listProjectRegionKomputes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(projectId: string,
     regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKomputes>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
@@ -2020,10 +2041,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListProjectRegionKomputesQueryResult = NonNullable<Awaited<ReturnType<typeof listProjectRegionKomputes>>>
-export type ListProjectRegionKomputesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ListProjectRegionKomputesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useListProjectRegionKomputes<TData = Awaited<ReturnType<typeof listProjectRegionKomputes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectRegionKomputes<TData = Awaited<ReturnType<typeof listProjectRegionKomputes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     regionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKomputes>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
@@ -2034,7 +2055,7 @@ export function useListProjectRegionKomputes<TData = Awaited<ReturnType<typeof l
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListProjectRegionKomputes<TData = Awaited<ReturnType<typeof listProjectRegionKomputes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectRegionKomputes<TData = Awaited<ReturnType<typeof listProjectRegionKomputes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKomputes>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
@@ -2045,139 +2066,19 @@ export function useListProjectRegionKomputes<TData = Awaited<ReturnType<typeof l
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListProjectRegionKomputes<TData = Awaited<ReturnType<typeof listProjectRegionKomputes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectRegionKomputes<TData = Awaited<ReturnType<typeof listProjectRegionKomputes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKomputes>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListProjectRegionKomputes<TData = Awaited<ReturnType<typeof listProjectRegionKomputes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectRegionKomputes<TData = Awaited<ReturnType<typeof listProjectRegionKomputes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKomputes>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getListProjectRegionKomputesQueryOptions(projectId,regionId,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-export const getListProjectRegionKylosUrl = (projectId: string,
-    regionId: string,
-    params?: ListProjectRegionKylosParams,) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : String(value))
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0 ? `/project/${projectId}/region/${regionId}/kylo?${stringifiedParams}` : `/project/${projectId}/region/${regionId}/kylo`
-}
-
-/**
- * Returns the IDs of Kylo objects.
- */
-export const listProjectRegionKylos = async (projectId: string,
-    regionId: string,
-    params?: ListProjectRegionKylosParams, options?: Parameters<typeof kowabungaFetch>[1]): Promise<ObjectIds> => {
-
-  return kowabungaFetch<ObjectIds>(getListProjectRegionKylosUrl(projectId,regionId,params),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getListProjectRegionKylosQueryKey = (projectId: string,
-    regionId: string,
-    params?: ListProjectRegionKylosParams,) => {
-    return [
-    `/project/${projectId}/region/${regionId}/kylo`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getListProjectRegionKylosQueryOptions = <TData = Awaited<ReturnType<typeof listProjectRegionKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(projectId: string,
-    regionId: string,
-    params?: ListProjectRegionKylosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKylos>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getListProjectRegionKylosQueryKey(projectId,regionId,params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listProjectRegionKylos>>> = ({ signal }) => listProjectRegionKylos(projectId,regionId,params, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: projectId !== null && projectId !== undefined && regionId !== null && regionId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKylos>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type ListProjectRegionKylosQueryResult = NonNullable<Awaited<ReturnType<typeof listProjectRegionKylos>>>
-export type ListProjectRegionKylosQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
-
-
-export function useListProjectRegionKylos<TData = Awaited<ReturnType<typeof listProjectRegionKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
- projectId: string,
-    regionId: string,
-    params: undefined |  ListProjectRegionKylosParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKylos>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listProjectRegionKylos>>,
-          TError,
-          Awaited<ReturnType<typeof listProjectRegionKylos>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof kowabungaFetch>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListProjectRegionKylos<TData = Awaited<ReturnType<typeof listProjectRegionKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
- projectId: string,
-    regionId: string,
-    params?: ListProjectRegionKylosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKylos>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listProjectRegionKylos>>,
-          TError,
-          Awaited<ReturnType<typeof listProjectRegionKylos>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof kowabungaFetch>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListProjectRegionKylos<TData = Awaited<ReturnType<typeof listProjectRegionKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
- projectId: string,
-    regionId: string,
-    params?: ListProjectRegionKylosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKylos>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useListProjectRegionKylos<TData = Awaited<ReturnType<typeof listProjectRegionKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
- projectId: string,
-    regionId: string,
-    params?: ListProjectRegionKylosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKylos>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getListProjectRegionKylosQueryOptions(projectId,regionId,params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -2211,7 +2112,7 @@ export const getCreateProjectRegionKyloUrl = (projectId: string,
  */
 export const createProjectRegionKylo = async (projectId: string,
     regionId: string,
-    kylo: Kylo,
+    kylo: NonReadonly<Kylo>,
     params?: CreateProjectRegionKyloParams, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Kylo> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
@@ -2243,7 +2144,7 @@ return kowabungaFetch<Kylo>(getCreateProjectRegionKyloUrl(projectId,regionId,par
 
 export const getCreateProjectRegionKyloMutationKey = () => ['createProjectRegionKylo'] as const;
 
-export const getCreateProjectRegionKyloMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getCreateProjectRegionKyloMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProjectRegionKylo>>, TError,CreateProjectRegionKyloMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createProjectRegionKylo>>, TError,CreateProjectRegionKyloMutationVariables, TContext> => {
 
@@ -2271,11 +2172,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type CreateProjectRegionKyloMutationResult = NonNullable<Awaited<ReturnType<typeof createProjectRegionKylo>>>
-    export type CreateProjectRegionKyloMutationBody = BodyType<Kylo>
-    export type CreateProjectRegionKyloMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateProjectRegionKyloMutationVariables = {projectId: string;regionId: string;data: BodyType<Kylo>;params?: CreateProjectRegionKyloParams}
+    export type CreateProjectRegionKyloMutationBody = BodyType<NonReadonly<Kylo>>
+    export type CreateProjectRegionKyloMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateProjectRegionKyloMutationVariables = {projectId: string;regionId: string;data: BodyType<NonReadonly<Kylo>>;params?: CreateProjectRegionKyloParams}
 
-    export const useCreateProjectRegionKylo = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useCreateProjectRegionKylo = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProjectRegionKylo>>, TError,CreateProjectRegionKyloMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createProjectRegionKylo>>,
@@ -2285,7 +2186,127 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getCreateProjectRegionKyloMutationOptions(options), queryClient);
     }
-    export const getCreateProjectRegionKawaiiUrl = (projectId: string,
+    export const getListProjectRegionKylosUrl = (projectId: string,
+    regionId: string,
+    params?: ListProjectRegionKylosParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/project/${projectId}/region/${regionId}/kylos?${stringifiedParams}` : `/project/${projectId}/region/${regionId}/kylos`
+}
+
+/**
+ * Returns the IDs of Kylo objects.
+ */
+export const listProjectRegionKylos = async (projectId: string,
+    regionId: string,
+    params?: ListProjectRegionKylosParams, options?: Parameters<typeof kowabungaFetch>[1]): Promise<ObjectIds> => {
+
+  return kowabungaFetch<ObjectIds>(getListProjectRegionKylosUrl(projectId,regionId,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListProjectRegionKylosQueryKey = (projectId: string,
+    regionId: string,
+    params?: ListProjectRegionKylosParams,) => {
+    return [
+    `/project/${projectId}/region/${regionId}/kylos`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListProjectRegionKylosQueryOptions = <TData = Awaited<ReturnType<typeof listProjectRegionKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(projectId: string,
+    regionId: string,
+    params?: ListProjectRegionKylosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKylos>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListProjectRegionKylosQueryKey(projectId,regionId,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listProjectRegionKylos>>> = ({ signal }) => listProjectRegionKylos(projectId,regionId,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: projectId !== null && projectId !== undefined && regionId !== null && regionId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKylos>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListProjectRegionKylosQueryResult = NonNullable<Awaited<ReturnType<typeof listProjectRegionKylos>>>
+export type ListProjectRegionKylosQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
+
+
+export function useListProjectRegionKylos<TData = Awaited<ReturnType<typeof listProjectRegionKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
+ projectId: string,
+    regionId: string,
+    params: undefined |  ListProjectRegionKylosParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKylos>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listProjectRegionKylos>>,
+          TError,
+          Awaited<ReturnType<typeof listProjectRegionKylos>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof kowabungaFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListProjectRegionKylos<TData = Awaited<ReturnType<typeof listProjectRegionKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
+ projectId: string,
+    regionId: string,
+    params?: ListProjectRegionKylosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKylos>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listProjectRegionKylos>>,
+          TError,
+          Awaited<ReturnType<typeof listProjectRegionKylos>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof kowabungaFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListProjectRegionKylos<TData = Awaited<ReturnType<typeof listProjectRegionKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
+ projectId: string,
+    regionId: string,
+    params?: ListProjectRegionKylosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKylos>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useListProjectRegionKylos<TData = Awaited<ReturnType<typeof listProjectRegionKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
+ projectId: string,
+    regionId: string,
+    params?: ListProjectRegionKylosParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKylos>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListProjectRegionKylosQueryOptions(projectId,regionId,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getCreateProjectRegionKawaiiUrl = (projectId: string,
     regionId: string,) => {
 
 
@@ -2299,7 +2320,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  */
 export const createProjectRegionKawaii = async (projectId: string,
     regionId: string,
-    kawaii: Kawaii, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Kawaii> => {
+    kawaii: NonReadonly<Kawaii>, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Kawaii> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -2330,7 +2351,7 @@ return kowabungaFetch<Kawaii>(getCreateProjectRegionKawaiiUrl(projectId,regionId
 
 export const getCreateProjectRegionKawaiiMutationKey = () => ['createProjectRegionKawaii'] as const;
 
-export const getCreateProjectRegionKawaiiMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getCreateProjectRegionKawaiiMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProjectRegionKawaii>>, TError,CreateProjectRegionKawaiiMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createProjectRegionKawaii>>, TError,CreateProjectRegionKawaiiMutationVariables, TContext> => {
 
@@ -2358,11 +2379,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type CreateProjectRegionKawaiiMutationResult = NonNullable<Awaited<ReturnType<typeof createProjectRegionKawaii>>>
-    export type CreateProjectRegionKawaiiMutationBody = BodyType<Kawaii>
-    export type CreateProjectRegionKawaiiMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateProjectRegionKawaiiMutationVariables = {projectId: string;regionId: string;data: BodyType<Kawaii>}
+    export type CreateProjectRegionKawaiiMutationBody = BodyType<NonReadonly<Kawaii>>
+    export type CreateProjectRegionKawaiiMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateProjectRegionKawaiiMutationVariables = {projectId: string;regionId: string;data: BodyType<NonReadonly<Kawaii>>}
 
-    export const useCreateProjectRegionKawaii = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useCreateProjectRegionKawaii = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProjectRegionKawaii>>, TError,CreateProjectRegionKawaiiMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createProjectRegionKawaii>>,
@@ -2408,7 +2429,7 @@ export const getListProjectRegionKawaiisQueryKey = (projectId: string,
     }
 
 
-export const getListProjectRegionKawaiisQueryOptions = <TData = Awaited<ReturnType<typeof listProjectRegionKawaiis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(projectId: string,
+export const getListProjectRegionKawaiisQueryOptions = <TData = Awaited<ReturnType<typeof listProjectRegionKawaiis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(projectId: string,
     regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKawaiis>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
@@ -2428,10 +2449,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListProjectRegionKawaiisQueryResult = NonNullable<Awaited<ReturnType<typeof listProjectRegionKawaiis>>>
-export type ListProjectRegionKawaiisQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ListProjectRegionKawaiisQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useListProjectRegionKawaiis<TData = Awaited<ReturnType<typeof listProjectRegionKawaiis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectRegionKawaiis<TData = Awaited<ReturnType<typeof listProjectRegionKawaiis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     regionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKawaiis>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
@@ -2442,7 +2463,7 @@ export function useListProjectRegionKawaiis<TData = Awaited<ReturnType<typeof li
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListProjectRegionKawaiis<TData = Awaited<ReturnType<typeof listProjectRegionKawaiis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectRegionKawaiis<TData = Awaited<ReturnType<typeof listProjectRegionKawaiis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKawaiis>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
@@ -2453,13 +2474,13 @@ export function useListProjectRegionKawaiis<TData = Awaited<ReturnType<typeof li
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListProjectRegionKawaiis<TData = Awaited<ReturnType<typeof listProjectRegionKawaiis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectRegionKawaiis<TData = Awaited<ReturnType<typeof listProjectRegionKawaiis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKawaiis>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListProjectRegionKawaiis<TData = Awaited<ReturnType<typeof listProjectRegionKawaiis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectRegionKawaiis<TData = Awaited<ReturnType<typeof listProjectRegionKawaiis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKawaiis>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
@@ -2491,7 +2512,7 @@ export const getCreateProjectZoneKonveyUrl = (projectId: string,
  */
 export const createProjectZoneKonvey = async (projectId: string,
     zoneId: string,
-    konvey: Konvey, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Konvey> => {
+    konvey: NonReadonly<Konvey>, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Konvey> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -2522,7 +2543,7 @@ return kowabungaFetch<Konvey>(getCreateProjectZoneKonveyUrl(projectId,zoneId),
 
 export const getCreateProjectZoneKonveyMutationKey = () => ['createProjectZoneKonvey'] as const;
 
-export const getCreateProjectZoneKonveyMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getCreateProjectZoneKonveyMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProjectZoneKonvey>>, TError,CreateProjectZoneKonveyMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createProjectZoneKonvey>>, TError,CreateProjectZoneKonveyMutationVariables, TContext> => {
 
@@ -2550,11 +2571,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type CreateProjectZoneKonveyMutationResult = NonNullable<Awaited<ReturnType<typeof createProjectZoneKonvey>>>
-    export type CreateProjectZoneKonveyMutationBody = BodyType<Konvey>
-    export type CreateProjectZoneKonveyMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateProjectZoneKonveyMutationVariables = {projectId: string;zoneId: string;data: BodyType<Konvey>}
+    export type CreateProjectZoneKonveyMutationBody = BodyType<NonReadonly<Konvey>>
+    export type CreateProjectZoneKonveyMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateProjectZoneKonveyMutationVariables = {projectId: string;zoneId: string;data: BodyType<NonReadonly<Konvey>>}
 
-    export const useCreateProjectZoneKonvey = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useCreateProjectZoneKonvey = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProjectZoneKonvey>>, TError,CreateProjectZoneKonveyMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createProjectZoneKonvey>>,
@@ -2600,7 +2621,7 @@ export const getListProjectZoneKonveysQueryKey = (projectId: string,
     }
 
 
-export const getListProjectZoneKonveysQueryOptions = <TData = Awaited<ReturnType<typeof listProjectZoneKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(projectId: string,
+export const getListProjectZoneKonveysQueryOptions = <TData = Awaited<ReturnType<typeof listProjectZoneKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(projectId: string,
     zoneId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectZoneKonveys>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
@@ -2620,10 +2641,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListProjectZoneKonveysQueryResult = NonNullable<Awaited<ReturnType<typeof listProjectZoneKonveys>>>
-export type ListProjectZoneKonveysQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ListProjectZoneKonveysQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useListProjectZoneKonveys<TData = Awaited<ReturnType<typeof listProjectZoneKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectZoneKonveys<TData = Awaited<ReturnType<typeof listProjectZoneKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     zoneId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectZoneKonveys>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
@@ -2634,7 +2655,7 @@ export function useListProjectZoneKonveys<TData = Awaited<ReturnType<typeof list
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListProjectZoneKonveys<TData = Awaited<ReturnType<typeof listProjectZoneKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectZoneKonveys<TData = Awaited<ReturnType<typeof listProjectZoneKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     zoneId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectZoneKonveys>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
@@ -2645,13 +2666,13 @@ export function useListProjectZoneKonveys<TData = Awaited<ReturnType<typeof list
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListProjectZoneKonveys<TData = Awaited<ReturnType<typeof listProjectZoneKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectZoneKonveys<TData = Awaited<ReturnType<typeof listProjectZoneKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     zoneId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectZoneKonveys>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListProjectZoneKonveys<TData = Awaited<ReturnType<typeof listProjectZoneKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectZoneKonveys<TData = Awaited<ReturnType<typeof listProjectZoneKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     zoneId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectZoneKonveys>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
@@ -2683,7 +2704,7 @@ export const getCreateProjectRegionKonveyUrl = (projectId: string,
  */
 export const createProjectRegionKonvey = async (projectId: string,
     regionId: string,
-    konvey: Konvey, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Konvey> => {
+    konvey: NonReadonly<Konvey>, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Konvey> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -2714,7 +2735,7 @@ return kowabungaFetch<Konvey>(getCreateProjectRegionKonveyUrl(projectId,regionId
 
 export const getCreateProjectRegionKonveyMutationKey = () => ['createProjectRegionKonvey'] as const;
 
-export const getCreateProjectRegionKonveyMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getCreateProjectRegionKonveyMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProjectRegionKonvey>>, TError,CreateProjectRegionKonveyMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createProjectRegionKonvey>>, TError,CreateProjectRegionKonveyMutationVariables, TContext> => {
 
@@ -2742,11 +2763,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type CreateProjectRegionKonveyMutationResult = NonNullable<Awaited<ReturnType<typeof createProjectRegionKonvey>>>
-    export type CreateProjectRegionKonveyMutationBody = BodyType<Konvey>
-    export type CreateProjectRegionKonveyMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateProjectRegionKonveyMutationVariables = {projectId: string;regionId: string;data: BodyType<Konvey>}
+    export type CreateProjectRegionKonveyMutationBody = BodyType<NonReadonly<Konvey>>
+    export type CreateProjectRegionKonveyMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateProjectRegionKonveyMutationVariables = {projectId: string;regionId: string;data: BodyType<NonReadonly<Konvey>>}
 
-    export const useCreateProjectRegionKonvey = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useCreateProjectRegionKonvey = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createProjectRegionKonvey>>, TError,CreateProjectRegionKonveyMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createProjectRegionKonvey>>,
@@ -2792,7 +2813,7 @@ export const getListProjectRegionKonveysQueryKey = (projectId: string,
     }
 
 
-export const getListProjectRegionKonveysQueryOptions = <TData = Awaited<ReturnType<typeof listProjectRegionKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(projectId: string,
+export const getListProjectRegionKonveysQueryOptions = <TData = Awaited<ReturnType<typeof listProjectRegionKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(projectId: string,
     regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKonveys>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
@@ -2812,10 +2833,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListProjectRegionKonveysQueryResult = NonNullable<Awaited<ReturnType<typeof listProjectRegionKonveys>>>
-export type ListProjectRegionKonveysQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ListProjectRegionKonveysQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useListProjectRegionKonveys<TData = Awaited<ReturnType<typeof listProjectRegionKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectRegionKonveys<TData = Awaited<ReturnType<typeof listProjectRegionKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     regionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKonveys>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
@@ -2826,7 +2847,7 @@ export function useListProjectRegionKonveys<TData = Awaited<ReturnType<typeof li
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListProjectRegionKonveys<TData = Awaited<ReturnType<typeof listProjectRegionKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectRegionKonveys<TData = Awaited<ReturnType<typeof listProjectRegionKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKonveys>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
@@ -2837,13 +2858,13 @@ export function useListProjectRegionKonveys<TData = Awaited<ReturnType<typeof li
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListProjectRegionKonveys<TData = Awaited<ReturnType<typeof listProjectRegionKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectRegionKonveys<TData = Awaited<ReturnType<typeof listProjectRegionKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKonveys>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListProjectRegionKonveys<TData = Awaited<ReturnType<typeof listProjectRegionKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListProjectRegionKonveys<TData = Awaited<ReturnType<typeof listProjectRegionKonveys>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  projectId: string,
     regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listProjectRegionKonveys>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient

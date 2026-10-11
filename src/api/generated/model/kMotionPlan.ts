@@ -3,15 +3,15 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 
 /**
  * A virtual machine instance kMotion plan.
  */
 export interface KMotionPlan {
-  /** The kMotion plan ID (auto-generated). */
-  id?: string;
+  /** The kMotion plan ID (auto-generated) (read-only). */
+  readonly id?: string;
   /** The ID of the virtual machine instance this kMotion plan applies to. */
   instance: string;
   /** The ID of the Kaktus computing node currently hosting the instance. */

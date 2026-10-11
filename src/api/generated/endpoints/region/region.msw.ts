@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   HttpResponse,
@@ -25,16 +25,16 @@ import type {
 } from '../../model';
 
 import {
-  getCreateKiwiResponseMock,
   getCreateRegionDnsRecordResponseMock,
+  getCreateRegionKiwiResponseMock,
   getCreateRegionResponseMock,
-  getCreateStorageNFSResponseMock,
-  getCreateStoragePoolResponseMock,
-  getCreateVNetResponseMock,
-  getCreateZoneResponseMock,
+  getCreateRegionStorageNFSResponseMock,
+  getCreateRegionStoragePoolResponseMock,
+  getCreateRegionVNetResponseMock,
+  getCreateRegionZoneResponseMock,
   getListRegionDnsRecordsResponseMock,
   getListRegionKiwisResponseMock,
-  getListRegionStorageNFSsResponseMock,
+  getListRegionStorageNFSesResponseMock,
   getListRegionStoragePoolsResponseMock,
   getListRegionVNetsResponseMock,
   getListRegionZonesResponseMock,
@@ -43,7 +43,7 @@ import {
   getUpdateRegionResponseMock
 } from './region.faker';
 
-export { getListRegionsResponseMock, getCreateRegionResponseMock, getReadRegionResponseMock, getUpdateRegionResponseMock, getCreateZoneResponseMock, getListRegionZonesResponseMock, getCreateStoragePoolResponseMock, getCreateKiwiResponseMock, getListRegionKiwisResponseMock, getCreateVNetResponseMock, getListRegionVNetsResponseMock, getListRegionStoragePoolsResponseMock, getListRegionStorageNFSsResponseMock, getCreateStorageNFSResponseMock, getCreateRegionDnsRecordResponseMock, getListRegionDnsRecordsResponseMock } from './region.faker';
+export { getListRegionsResponseMock, getCreateRegionResponseMock, getReadRegionResponseMock, getUpdateRegionResponseMock, getCreateRegionZoneResponseMock, getListRegionZonesResponseMock, getCreateRegionStoragePoolResponseMock, getCreateRegionKiwiResponseMock, getListRegionKiwisResponseMock, getCreateRegionVNetResponseMock, getListRegionVNetsResponseMock, getListRegionStoragePoolsResponseMock, getCreateRegionStorageNFSResponseMock, getListRegionStorageNFSesResponseMock, getCreateRegionDnsRecordResponseMock, getListRegionDnsRecordsResponseMock } from './region.faker';
 
 
 export const getListRegionsMockHandler = (overrideResponse?: ObjectIds | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ObjectIds> | ObjectIds), options?: RequestHandlerOptions) => {
@@ -104,13 +104,13 @@ export const getUpdateRegionMockHandler = (overrideResponse?: Region | ((info: P
   }, options)
 }
 
-export const getCreateZoneMockHandler = (overrideResponse?: Zone | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<Zone> | Zone), options?: RequestHandlerOptions) => {
+export const getCreateRegionZoneMockHandler = (overrideResponse?: Zone | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<Zone> | Zone), options?: RequestHandlerOptions) => {
   return http.post('/api/v1/region/:regionId/zone', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
 
 
     return HttpResponse.json(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getCreateZoneResponseMock(),
+    : getCreateRegionZoneResponseMock(),
       { status: 201
       })
   }, options)
@@ -128,25 +128,25 @@ export const getListRegionZonesMockHandler = (overrideResponse?: ObjectIds | ((i
   }, options)
 }
 
-export const getCreateStoragePoolMockHandler = (overrideResponse?: StoragePool | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<StoragePool> | StoragePool), options?: RequestHandlerOptions) => {
+export const getCreateRegionStoragePoolMockHandler = (overrideResponse?: StoragePool | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<StoragePool> | StoragePool), options?: RequestHandlerOptions) => {
   return http.post('/api/v1/region/:regionId/pool', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
 
 
     return HttpResponse.json(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getCreateStoragePoolResponseMock(),
+    : getCreateRegionStoragePoolResponseMock(),
       { status: 201
       })
   }, options)
 }
 
-export const getCreateKiwiMockHandler = (overrideResponse?: Kiwi | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<Kiwi> | Kiwi), options?: RequestHandlerOptions) => {
+export const getCreateRegionKiwiMockHandler = (overrideResponse?: Kiwi | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<Kiwi> | Kiwi), options?: RequestHandlerOptions) => {
   return http.post('/api/v1/region/:regionId/kiwi', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
 
 
     return HttpResponse.json(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getCreateKiwiResponseMock(),
+    : getCreateRegionKiwiResponseMock(),
       { status: 201
       })
   }, options)
@@ -164,13 +164,13 @@ export const getListRegionKiwisMockHandler = (overrideResponse?: ObjectIds | ((i
   }, options)
 }
 
-export const getCreateVNetMockHandler = (overrideResponse?: VNet | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<VNet> | VNet), options?: RequestHandlerOptions) => {
+export const getCreateRegionVNetMockHandler = (overrideResponse?: VNet | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<VNet> | VNet), options?: RequestHandlerOptions) => {
   return http.post('/api/v1/region/:regionId/vnet', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
 
 
     return HttpResponse.json(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getCreateVNetResponseMock(),
+    : getCreateRegionVNetResponseMock(),
       { status: 201
       })
   }, options)
@@ -210,26 +210,26 @@ export const getListRegionStoragePoolsMockHandler = (overrideResponse?: ObjectId
   }, options)
 }
 
-export const getListRegionStorageNFSsMockHandler = (overrideResponse?: ObjectIds | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ObjectIds> | ObjectIds), options?: RequestHandlerOptions) => {
-  return http.get('/api/v1/region/:regionId/nfs', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-
-
-    return HttpResponse.json(overrideResponse !== undefined
-    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getListRegionStorageNFSsResponseMock(),
-      { status: 200
-      })
-  }, options)
-}
-
-export const getCreateStorageNFSMockHandler = (overrideResponse?: StorageNFS | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<StorageNFS> | StorageNFS), options?: RequestHandlerOptions) => {
+export const getCreateRegionStorageNFSMockHandler = (overrideResponse?: StorageNFS | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<StorageNFS> | StorageNFS), options?: RequestHandlerOptions) => {
   return http.post('/api/v1/region/:regionId/nfs', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
 
 
     return HttpResponse.json(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getCreateStorageNFSResponseMock(),
+    : getCreateRegionStorageNFSResponseMock(),
       { status: 201
+      })
+  }, options)
+}
+
+export const getListRegionStorageNFSesMockHandler = (overrideResponse?: ObjectIds | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ObjectIds> | ObjectIds), options?: RequestHandlerOptions) => {
+  return http.get('/api/v1/region/:regionId/nfses', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getListRegionStorageNFSesResponseMock(),
+      { status: 200
       })
   }, options)
 }
@@ -273,17 +273,17 @@ export const getRegionMock = () => [
   getDeleteRegionMockHandler(),
   getReadRegionMockHandler(),
   getUpdateRegionMockHandler(),
-  getCreateZoneMockHandler(),
+  getCreateRegionZoneMockHandler(),
   getListRegionZonesMockHandler(),
-  getCreateStoragePoolMockHandler(),
-  getCreateKiwiMockHandler(),
+  getCreateRegionStoragePoolMockHandler(),
+  getCreateRegionKiwiMockHandler(),
   getListRegionKiwisMockHandler(),
-  getCreateVNetMockHandler(),
+  getCreateRegionVNetMockHandler(),
   getListRegionVNetsMockHandler(),
   getSetRegionDefaultStoragePoolMockHandler(),
   getListRegionStoragePoolsMockHandler(),
-  getListRegionStorageNFSsMockHandler(),
-  getCreateStorageNFSMockHandler(),
+  getCreateRegionStorageNFSMockHandler(),
+  getListRegionStorageNFSesMockHandler(),
   getSetRegionDefaultStorageNFSMockHandler(),
   getCreateRegionDnsRecordMockHandler(),
   getListRegionDnsRecordsMockHandler()

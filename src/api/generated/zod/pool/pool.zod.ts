@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import * as zod from 'zod';
 
@@ -32,14 +32,17 @@ export const ReadStoragePoolParams = zod.object({
 
 export const readStoragePoolResponseCephAddressDefault = `localhost`;
 export const readStoragePoolResponseCephPortDefault = 3300;
+export const readStoragePoolResponseCephPortMax = 65535;
+
+
 
 export const ReadStoragePoolResponse = zod.object({
-  "id": zod.string().optional().describe('The storage pool ID (auto-generated).'),
+  "id": zod.string().optional().describe('The storage pool ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The storage pool name.'),
   "description": zod.string().optional().describe('The storage pool description.'),
   "pool": zod.string().describe('Ceph pool name.'),
   "ceph_address": zod.string().default(readStoragePoolResponseCephAddressDefault).describe('Ceph Monitor(s) address or FQDN.'),
-  "ceph_port": zod.int().default(readStoragePoolResponseCephPortDefault).describe('Ceph Monitor(s) port (default 3300).'),
+  "ceph_port": zod.int().min(1).max(readStoragePoolResponseCephPortMax).default(readStoragePoolResponseCephPortDefault).describe('Ceph Monitor(s) port.'),
   "ceph_secret_uuid": zod.string().optional().describe('The libvirt secret UUID for CephX authentication.'),
   "cost": zod.object({
   "price": zod.number().describe('The unit price information.'),
@@ -55,34 +58,37 @@ export const UpdateStoragePoolParams = zod.object({
   "poolId": zod.string().describe('The ID of the storage pool.')
 })
 
-export const updateStoragePoolBodyCephAddressDefault = `localhost`;
-export const updateStoragePoolBodyCephPortDefault = 3300;
+export const updateStoragePoolBodyCephPortMax = 65535;
+
+
 
 export const UpdateStoragePoolBody = zod.object({
-  "id": zod.string().optional().describe('The storage pool ID (auto-generated).'),
-  "name": zod.string().describe('The storage pool name.'),
+  "name": zod.string().optional().describe('The storage pool name.'),
   "description": zod.string().optional().describe('The storage pool description.'),
-  "pool": zod.string().describe('Ceph pool name.'),
-  "ceph_address": zod.string().default(updateStoragePoolBodyCephAddressDefault).describe('Ceph Monitor(s) address or FQDN.'),
-  "ceph_port": zod.int().default(updateStoragePoolBodyCephPortDefault).describe('Ceph Monitor(s) port (default 3300).'),
+  "pool": zod.string().optional().describe('Ceph pool name.'),
+  "ceph_address": zod.string().optional().describe('Ceph Monitor(s) address or FQDN.'),
+  "ceph_port": zod.int().min(1).max(updateStoragePoolBodyCephPortMax).optional().describe('Ceph Monitor(s) port.'),
   "ceph_secret_uuid": zod.string().optional().describe('The libvirt secret UUID for CephX authentication.'),
   "cost": zod.object({
   "price": zod.number().describe('The unit price information.'),
   "currency": zod.string().describe('The associated currency.')
 }).describe('A resource cost.').optional().describe('Cost associated to the storage pool.'),
-  "agents": zod.array(zod.string()).describe('a list of existing remote agents managing the storage pool.')
-}).describe('A storage pool.')
+  "agents": zod.array(zod.string()).optional().describe('a list of existing remote agents managing the storage pool.')
+}).describe('A storage pool update (unspecified properties are left unchanged).')
 
 export const updateStoragePoolResponseCephAddressDefault = `localhost`;
 export const updateStoragePoolResponseCephPortDefault = 3300;
+export const updateStoragePoolResponseCephPortMax = 65535;
+
+
 
 export const UpdateStoragePoolResponse = zod.object({
-  "id": zod.string().optional().describe('The storage pool ID (auto-generated).'),
+  "id": zod.string().optional().describe('The storage pool ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The storage pool name.'),
   "description": zod.string().optional().describe('The storage pool description.'),
   "pool": zod.string().describe('Ceph pool name.'),
   "ceph_address": zod.string().default(updateStoragePoolResponseCephAddressDefault).describe('Ceph Monitor(s) address or FQDN.'),
-  "ceph_port": zod.int().default(updateStoragePoolResponseCephPortDefault).describe('Ceph Monitor(s) port (default 3300).'),
+  "ceph_port": zod.int().min(1).max(updateStoragePoolResponseCephPortMax).default(updateStoragePoolResponseCephPortDefault).describe('Ceph Monitor(s) port.'),
   "ceph_secret_uuid": zod.string().optional().describe('The libvirt secret UUID for CephX authentication.'),
   "cost": zod.object({
   "price": zod.number().describe('The unit price information.'),
@@ -104,28 +110,27 @@ export const ListStoragePoolVolumesResponse = zod.array(ListStoragePoolVolumesRe
 /**
  * Creates a new image template.
  */
-export const CreateTemplateParams = zod.object({
+export const CreateStoragePoolTemplateParams = zod.object({
   "poolId": zod.string().describe('The ID of the storage pool.')
 })
 
-export const createTemplateBodyOsDefault = `linux`;
+export const createStoragePoolTemplateBodyOsDefault = `linux`;
 
-export const CreateTemplateBody = zod.object({
-  "id": zod.string().optional().describe('The image template ID (auto-generated).'),
+export const CreateStoragePoolTemplateBody = zod.object({
   "name": zod.string().describe('The image template name.'),
   "description": zod.string().optional().describe('The image template description.'),
-  "os": zod.enum(['linux', 'windows']).default(createTemplateBodyOsDefault).describe('Type of operating system if OS kind (useful to determine cloud-init parameters for instance).'),
-  "source": zod.string().describe('HTTP(s) source URL of the KVM-ready OS image.')
+  "os": zod.enum(['linux', 'windows']).default(createStoragePoolTemplateBodyOsDefault).describe('Type of operating system (useful to determine cloud-init parameters for instance). Can only be set at creation time, ignored on updates.'),
+  "source": zod.string().describe('HTTP(s) source URL of the KVM-ready OS image. Can only be set at creation time, ignored on updates.')
 }).describe('A image template.')
 
-export const createTemplateResponseOsDefault = `linux`;
+export const createStoragePoolTemplateResponseOsDefault = `linux`;
 
-export const CreateTemplateResponse = zod.object({
-  "id": zod.string().optional().describe('The image template ID (auto-generated).'),
+export const CreateStoragePoolTemplateResponse = zod.object({
+  "id": zod.string().optional().describe('The image template ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The image template name.'),
   "description": zod.string().optional().describe('The image template description.'),
-  "os": zod.enum(['linux', 'windows']).default(createTemplateResponseOsDefault).describe('Type of operating system if OS kind (useful to determine cloud-init parameters for instance).'),
-  "source": zod.string().describe('HTTP(s) source URL of the KVM-ready OS image.')
+  "os": zod.enum(['linux', 'windows']).default(createStoragePoolTemplateResponseOsDefault).describe('Type of operating system (useful to determine cloud-init parameters for instance). Can only be set at creation time, ignored on updates.'),
+  "source": zod.string().describe('HTTP(s) source URL of the KVM-ready OS image. Can only be set at creation time, ignored on updates.')
 }).describe('A image template.')
 
 /**

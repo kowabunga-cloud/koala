@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   HttpResponse,
@@ -20,14 +20,14 @@ import type {
 } from '../../model';
 
 import {
-  getCreateKaktusResponseMock,
+  getCreateZoneKaktusResponseMock,
   getListZoneKaktusesResponseMock,
   getListZonesResponseMock,
   getReadZoneResponseMock,
   getUpdateZoneResponseMock
 } from './zone.faker';
 
-export { getListZonesResponseMock, getReadZoneResponseMock, getUpdateZoneResponseMock, getCreateKaktusResponseMock, getListZoneKaktusesResponseMock } from './zone.faker';
+export { getListZonesResponseMock, getReadZoneResponseMock, getUpdateZoneResponseMock, getCreateZoneKaktusResponseMock, getListZoneKaktusesResponseMock } from './zone.faker';
 
 
 export const getListZonesMockHandler = (overrideResponse?: ObjectIds | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ObjectIds> | ObjectIds), options?: RequestHandlerOptions) => {
@@ -76,13 +76,13 @@ export const getUpdateZoneMockHandler = (overrideResponse?: Zone | ((info: Param
   }, options)
 }
 
-export const getCreateKaktusMockHandler = (overrideResponse?: Kaktus | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<Kaktus> | Kaktus), options?: RequestHandlerOptions) => {
+export const getCreateZoneKaktusMockHandler = (overrideResponse?: Kaktus | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<Kaktus> | Kaktus), options?: RequestHandlerOptions) => {
   return http.post('/api/v1/zone/:zoneId/kaktus', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
 
 
     return HttpResponse.json(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getCreateKaktusResponseMock(),
+    : getCreateZoneKaktusResponseMock(),
       { status: 201
       })
   }, options)
@@ -104,6 +104,6 @@ export const getZoneMock = () => [
   getDeleteZoneMockHandler(),
   getReadZoneMockHandler(),
   getUpdateZoneMockHandler(),
-  getCreateKaktusMockHandler(),
+  getCreateZoneKaktusMockHandler(),
   getListZoneKaktusesMockHandler()
 ]

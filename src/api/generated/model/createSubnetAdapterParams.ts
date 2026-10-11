@@ -3,11 +3,11 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import type { OptionalQueryAssignIPParameter } from './optionalQueryAssignIPParameter';
 
-export type CreateAdapterParams = {
+export type CreateSubnetAdapterParams = {
 /**
  * Whether Kowabunga should pick and assign an IP address to this adapter.
  */

@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import type { KawaiiVpcForwardRuleProtocol } from './kawaiiVpcForwardRuleProtocol';
 
@@ -11,8 +11,8 @@ import type { KawaiiVpcForwardRuleProtocol } from './kawaiiVpcForwardRuleProtoco
  * A Kawaii VPC firewall forwarding rule.
  */
 export interface KawaiiVpcForwardRule {
-  /** The transport layer protocol to forward public traffic to. */
+  /** The transport layer protocol to forward VPC traffic to. */
   protocol?: KawaiiVpcForwardRuleProtocol;
-  /** The port (or list of ports) to forward public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005). */
+  /** The port (or list of ports) to forward VPC traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005). */
   ports: string;
 }

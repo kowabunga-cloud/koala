@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   faker
@@ -22,7 +22,7 @@ export const getReadZoneResponseMock = (overrideResponse: Partial<Extract<Zone, 
 
 export const getUpdateZoneResponseMock = (overrideResponse: Partial<Extract<Zone, object>> = {}): Zone => ({id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), name: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), ...overrideResponse})
 
-export const getCreateKaktusResponseMock = (overrideResponse: Partial<Extract<Kaktus, object>> = {}): Kaktus => ({id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), name: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), cpu_cost: faker.helpers.arrayElement([{...{price: faker.number.float({fractionDigits: 2}), currency: faker.string.alpha({length: {min: 10, max: 20}})},}, undefined]), memory_cost: faker.helpers.arrayElement([{...{price: faker.number.float({fractionDigits: 2}), currency: faker.string.alpha({length: {min: 10, max: 20}})},}, undefined]), overcommit_cpu_ratio: faker.number.int(), overcommit_memory_ratio: faker.number.int(), agents: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), maintenance: faker.datatype.boolean(), ...overrideResponse})
+export const getCreateZoneKaktusResponseMock = (overrideResponse: Partial<Extract<Kaktus, object>> = {}): Kaktus => ({id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), name: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), cpu_cost: faker.helpers.arrayElement([{...{price: faker.number.float({fractionDigits: 2}), currency: faker.string.alpha({length: {min: 10, max: 20}})},}, undefined]), memory_cost: faker.helpers.arrayElement([{...{price: faker.number.float({fractionDigits: 2}), currency: faker.string.alpha({length: {min: 10, max: 20}})},}, undefined]), overcommit_cpu_ratio: faker.number.int({min: 1}), overcommit_memory_ratio: faker.number.int({min: 1}), agents: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), maintenance: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), ...overrideResponse})
 
 export const getListZoneKaktusesResponseMock = (): ObjectIds => (Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))))
 

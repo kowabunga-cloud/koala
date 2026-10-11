@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import * as zod from 'zod';
 
@@ -31,7 +31,7 @@ export const ReadKiwiParams = zod.object({
 })
 
 export const ReadKiwiResponse = zod.object({
-  "id": zod.string().optional().describe('The Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. name.'),
   "description": zod.string().optional().describe('The Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. description.'),
   "agents": zod.array(zod.string()).optional().describe('a list of existing remote agents managing the network gateway.')
@@ -45,14 +45,13 @@ export const UpdateKiwiParams = zod.object({
 })
 
 export const UpdateKiwiBody = zod.object({
-  "id": zod.string().optional().describe('The Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. ID (auto-generated).'),
-  "name": zod.string().describe('The Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. name.'),
+  "name": zod.string().optional().describe('The Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. name.'),
   "description": zod.string().optional().describe('The Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. description.'),
   "agents": zod.array(zod.string()).optional().describe('a list of existing remote agents managing the network gateway.')
-}).describe('A Kiwi (Kowabunga Inner Wan Interface) provides edge-network services..')
+}).describe('A Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. update (unspecified properties are left unchanged).')
 
 export const UpdateKiwiResponse = zod.object({
-  "id": zod.string().optional().describe('The Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. name.'),
   "description": zod.string().optional().describe('The Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. description.'),
   "agents": zod.array(zod.string()).optional().describe('a list of existing remote agents managing the network gateway.')

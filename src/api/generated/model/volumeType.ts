@@ -3,11 +3,11 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 
 /**
- * The storage volume type.
+ * The storage volume type. Can only be set at creation time, ignored on updates.
  */
 export type VolumeType = typeof VolumeType[keyof typeof VolumeType];
 
@@ -16,4 +16,5 @@ export const VolumeType = {
   os: 'os',
   iso: 'iso',
   raw: 'raw',
+  template: 'template',
 } as const;

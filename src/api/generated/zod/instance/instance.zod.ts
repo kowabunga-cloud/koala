@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import * as zod from 'zod';
 
@@ -30,19 +30,21 @@ export const ReadInstanceParams = zod.object({
   "instanceId": zod.string().describe('The ID of the virtual machine instance.')
 })
 
+
+
 export const readInstanceResponseUefiDefault = true;
 export const readInstanceResponseKmotionEnabledDefault = true;
 
 export const ReadInstanceResponse = zod.object({
-  "id": zod.string().optional().describe('The virtual machine instance ID (auto-generated).'),
+  "id": zod.string().optional().describe('The virtual machine instance ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The virtual machine instance name.'),
   "description": zod.string().optional().describe('The virtual machine instance description.'),
-  "memory": zod.int().describe('The virtual machine instance memory size (in bytes).'),
-  "vcpus": zod.int().describe('The virtual machine instance number of vCPUs.'),
-  "adapters": zod.array(zod.string()).optional().describe('a list of existing network adapters to be connected to the instance.'),
-  "volumes": zod.array(zod.string()).optional().describe('volumes list of existing storage volumes (i.e. disks) to be connected to the instance.'),
-  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at instance creation time, to elect an initial host consistent with the referenced groups policies and register the instance as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices.'),
-  "uefi": zod.boolean().default(readInstanceResponseUefiDefault).describe('enable UEFI secure firmware (vs. legacy BIOS).'),
+  "memory": zod.int().min(1).describe('The virtual machine instance memory size (in bytes).'),
+  "vcpus": zod.int().min(1).describe('The virtual machine instance number of vCPUs.'),
+  "adapters": zod.array(zod.string()).optional().describe('A list of existing network adapters to be connected to the instance.'),
+  "volumes": zod.array(zod.string()).optional().describe('A list of existing storage volumes (i.e. disks) to be connected to the instance.'),
+  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at instance creation time, to elect an initial host consistent with the referenced groups policies and register the instance as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices. Can only be set at creation time, ignored on updates.'),
+  "uefi": zod.boolean().default(readInstanceResponseUefiDefault).describe('Enable UEFI secure firmware (vs. legacy BIOS). Can only be set at creation time, ignored on updates.'),
   "kmotion_enabled": zod.boolean().default(readInstanceResponseKmotionEnabledDefault).describe('Whether kMotion (live/cold host migration) is enabled for the virtual machine instance. When disabled, the instance remains bound to its original hosting node.')
 }).describe('A virtual machine instance.')
 
@@ -53,35 +55,35 @@ export const UpdateInstanceParams = zod.object({
   "instanceId": zod.string().describe('The ID of the virtual machine instance.')
 })
 
-export const updateInstanceBodyUefiDefault = true;
-export const updateInstanceBodyKmotionEnabledDefault = true;
+
+
+
 
 export const UpdateInstanceBody = zod.object({
-  "id": zod.string().optional().describe('The virtual machine instance ID (auto-generated).'),
-  "name": zod.string().describe('The virtual machine instance name.'),
+  "name": zod.string().optional().describe('The virtual machine instance name.'),
   "description": zod.string().optional().describe('The virtual machine instance description.'),
-  "memory": zod.int().describe('The virtual machine instance memory size (in bytes).'),
-  "vcpus": zod.int().describe('The virtual machine instance number of vCPUs.'),
-  "adapters": zod.array(zod.string()).optional().describe('a list of existing network adapters to be connected to the instance.'),
-  "volumes": zod.array(zod.string()).optional().describe('volumes list of existing storage volumes (i.e. disks) to be connected to the instance.'),
-  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at instance creation time, to elect an initial host consistent with the referenced groups policies and register the instance as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices.'),
-  "uefi": zod.boolean().default(updateInstanceBodyUefiDefault).describe('enable UEFI secure firmware (vs. legacy BIOS).'),
-  "kmotion_enabled": zod.boolean().default(updateInstanceBodyKmotionEnabledDefault).describe('Whether kMotion (live/cold host migration) is enabled for the virtual machine instance. When disabled, the instance remains bound to its original hosting node.')
-}).describe('A virtual machine instance.')
+  "memory": zod.int().min(1).optional().describe('The virtual machine instance memory size (in bytes).'),
+  "vcpus": zod.int().min(1).optional().describe('The virtual machine instance number of vCPUs.'),
+  "adapters": zod.array(zod.string()).optional().describe('A list of existing network adapters to be connected to the instance.'),
+  "volumes": zod.array(zod.string()).optional().describe('A list of existing storage volumes (i.e. disks) to be connected to the instance.'),
+  "kmotion_enabled": zod.boolean().optional().describe('Whether kMotion (live/cold host migration) is enabled for the virtual machine instance. When disabled, the instance remains bound to its original hosting node.')
+}).describe('A virtual machine instance update (unspecified properties are left unchanged).')
+
+
 
 export const updateInstanceResponseUefiDefault = true;
 export const updateInstanceResponseKmotionEnabledDefault = true;
 
 export const UpdateInstanceResponse = zod.object({
-  "id": zod.string().optional().describe('The virtual machine instance ID (auto-generated).'),
+  "id": zod.string().optional().describe('The virtual machine instance ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The virtual machine instance name.'),
   "description": zod.string().optional().describe('The virtual machine instance description.'),
-  "memory": zod.int().describe('The virtual machine instance memory size (in bytes).'),
-  "vcpus": zod.int().describe('The virtual machine instance number of vCPUs.'),
-  "adapters": zod.array(zod.string()).optional().describe('a list of existing network adapters to be connected to the instance.'),
-  "volumes": zod.array(zod.string()).optional().describe('volumes list of existing storage volumes (i.e. disks) to be connected to the instance.'),
-  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at instance creation time, to elect an initial host consistent with the referenced groups policies and register the instance as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices.'),
-  "uefi": zod.boolean().default(updateInstanceResponseUefiDefault).describe('enable UEFI secure firmware (vs. legacy BIOS).'),
+  "memory": zod.int().min(1).describe('The virtual machine instance memory size (in bytes).'),
+  "vcpus": zod.int().min(1).describe('The virtual machine instance number of vCPUs.'),
+  "adapters": zod.array(zod.string()).optional().describe('A list of existing network adapters to be connected to the instance.'),
+  "volumes": zod.array(zod.string()).optional().describe('A list of existing storage volumes (i.e. disks) to be connected to the instance.'),
+  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at instance creation time, to elect an initial host consistent with the referenced groups policies and register the instance as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices. Can only be set at creation time, ignored on updates.'),
+  "uefi": zod.boolean().default(updateInstanceResponseUefiDefault).describe('Enable UEFI secure firmware (vs. legacy BIOS). Can only be set at creation time, ignored on updates.'),
   "kmotion_enabled": zod.boolean().default(updateInstanceResponseKmotionEnabledDefault).describe('Whether kMotion (live/cold host migration) is enabled for the virtual machine instance. When disabled, the instance remains bound to its original hosting node.')
 }).describe('A virtual machine instance.')
 
@@ -188,7 +190,7 @@ export const PlanInstanceKMotionBody = zod.object({
 }).describe('A virtual machine instance kMotion plan request.')
 
 export const PlanInstanceKMotionResponse = zod.object({
-  "id": zod.string().optional().describe('The kMotion plan ID (auto-generated).'),
+  "id": zod.string().optional().describe('The kMotion plan ID (auto-generated) (read-only).'),
   "instance": zod.string().describe('The ID of the virtual machine instance this kMotion plan applies to.'),
   "source": zod.string().describe('The ID of the Kaktus computing node currently hosting the instance.'),
   "target": zod.string().describe('The ID of the Kaktus computing node elected to host the instance once the kMotion completes.'),

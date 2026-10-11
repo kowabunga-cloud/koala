@@ -7,7 +7,7 @@ export class ApiError extends Error {
   readonly body: unknown
 
   constructor(status: number, body: unknown) {
-    super(typeof body === 'object' && body && 'message' in body ? String(body.message) : `HTTP ${status}`)
+    super(errorMessage(status, body))
     this.status = status
     this.body = body
   }
@@ -29,6 +29,17 @@ export async function kowabungaFetch<T>(url: string, options: RequestInit = {}):
     throw new ApiError(res.status, body)
   }
   return body as T
+}
+
+// API errors are JSON ApiError bodies ({ status, error, reason }): prefer the
+// detailed reason, then the HTTP status text.
+function errorMessage(status: number, body: unknown): string {
+  if (typeof body === 'object' && body) {
+    if ('reason' in body && body.reason) return String(body.reason)
+    if ('error' in body && body.error) return String(body.error)
+  }
+  if (typeof body === 'string' && body) return body
+  return `HTTP ${status}`
 }
 
 function safeJson(text: string): unknown {

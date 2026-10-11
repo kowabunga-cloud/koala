@@ -3,10 +3,10 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
-import type { KawaiiFirewall } from './kawaiiFirewall';
 import type { KawaiiIpSecDpdTimeoutAction } from './kawaiiIpSecDpdTimeoutAction';
+import type { KawaiiIpSecFirewall } from './kawaiiIpSecFirewall';
 import type { KawaiiIpSecPhase1DhGroupNumber } from './kawaiiIpSecPhase1DhGroupNumber';
 import type { KawaiiIpSecPhase1EncryptionAlgorithm } from './kawaiiIpSecPhase1EncryptionAlgorithm';
 import type { KawaiiIpSecPhase1IntegrityAlgorithm } from './kawaiiIpSecPhase1IntegrityAlgorithm';
@@ -19,44 +19,44 @@ import type { KawaiiIpSecStartAction } from './kawaiiIpSecStartAction';
  * A Kawaii IPsec connection.
  */
 export interface KawaiiIpSec {
-  /** The Kawaii IPsec connection ID (auto-generated). */
-  id?: string;
+  /** The Kawaii IPsec connection ID (auto-generated) (read-only). */
+  readonly id?: string;
   /** The Kawaii IPsec connection name. */
   name: string;
   /** The Kawaii IPsec connection description. */
   description?: string;
-  /** The Kawaii IPsec connection IPSec IP. */
-  ip?: string;
-  /** The Kawaii IPsec connection remote peer VPN Gateway. */
+  /** The Kawaii IPsec connection local IPsec IP address (read-only). */
+  readonly ip?: string;
+  /** The Kawaii IPsec connection remote peer VPN gateway IP address. */
   remote_ip: string;
   /** The Kawaii IPsec connection remote subnet. */
   remote_subnet: string;
-  /** The Kawaii IPsec connection pre-shared key(PSK). */
+  /** The Kawaii IPsec connection pre-shared key (PSK). */
   pre_shared_key: string;
-  /** The Kawaii IPsec connection Dead Peer Detection Action (clear,restart or trap). */
+  /** The Kawaii IPsec connection Dead Peer Detection (DPD) timeout action. */
   dpd_timeout_action?: KawaiiIpSecDpdTimeoutAction;
-  /** The Kawaii IPsec connection Dead Peer Detection Timeout. */
+  /** The Kawaii IPsec connection Dead Peer Detection (DPD) timeout. */
   dpd_timeout?: string;
-  /** The Kawaii IPsec connection start action (none, start, trap). */
+  /** The Kawaii IPsec connection start action. */
   start_action?: KawaiiIpSecStartAction;
-  /** The Kawaii IPsec connection rekey time. Default is 2h. */
+  /** The Kawaii IPsec connection rekey time. */
   rekey_time?: string;
-  /** The Kawaii IPsec connection Lifetime for phase 1 negociation. Default is 1h. */
+  /** The Kawaii IPsec connection lifetime for phase 1 negotiation. */
   phase1_lifetime?: string;
   /** The Kawaii IPsec connection phase 1 Diffie Hellman IANA algorithm. */
   phase1_dh_group_number: KawaiiIpSecPhase1DhGroupNumber;
-  /** The Kawaii IPsec connection phase 1 integrity algorithm.. */
+  /** The Kawaii IPsec connection phase 1 integrity algorithm. */
   phase1_integrity_algorithm: KawaiiIpSecPhase1IntegrityAlgorithm;
-  /** The Kawaii IPsec connection phase 1 encryption algorithm.. */
+  /** The Kawaii IPsec connection phase 1 encryption algorithm. */
   phase1_encryption_algorithm: KawaiiIpSecPhase1EncryptionAlgorithm;
-  /** The Kawaii IPsec connection Lifetime for phase 2 negociation. Default is 1h. */
+  /** The Kawaii IPsec connection lifetime for phase 2 negotiation. */
   phase2_lifetime?: string;
   /** The Kawaii IPsec connection phase 2 Diffie Hellman IANA algorithm. */
   phase2_dh_group_number: KawaiiIpSecPhase2DhGroupNumber;
-  /** The Kawaii IPsec connection phase 2 integrity algorithm.. */
+  /** The Kawaii IPsec connection phase 2 integrity algorithm. */
   phase2_integrity_algorithm: KawaiiIpSecPhase2IntegrityAlgorithm;
-  /** The Kawaii IPsec connection phase 2 encryption algorithm.. */
+  /** The Kawaii IPsec connection phase 2 encryption algorithm. */
   phase2_encryption_algorithm: KawaiiIpSecPhase2EncryptionAlgorithm;
   /** The Kawaii IPsec connection firewall settings on the IPsec interface. */
-  firewall?: KawaiiFirewall;
+  firewall?: KawaiiIpSecFirewall;
 }

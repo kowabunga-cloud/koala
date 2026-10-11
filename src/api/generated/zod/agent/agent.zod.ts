@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import * as zod from 'zod';
 
@@ -18,17 +18,16 @@ export const ListAgentsResponse = zod.array(ListAgentsResponseItem)
  * Creates a new Kowabunga remote agent.
  */
 export const CreateAgentBody = zod.object({
-  "id": zod.string().optional().describe('The Kowabunga remote agent ID (auto-generated).'),
   "name": zod.string().describe('The Kowabunga remote agent name.'),
   "description": zod.string().optional().describe('The Kowabunga remote agent description.'),
-  "type": zod.enum(['Kiwi', 'Kaktus']).describe('The Kowabunga agent type.')
+  "type": zod.enum(['Kaktus', 'Kiwi', 'Kontroller']).describe('The Kowabunga agent type. Can only be set at creation time, ignored on updates.')
 }).describe('A Kowabunga remote agent.')
 
 export const CreateAgentResponse = zod.object({
-  "id": zod.string().optional().describe('The Kowabunga remote agent ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kowabunga remote agent ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kowabunga remote agent name.'),
   "description": zod.string().optional().describe('The Kowabunga remote agent description.'),
-  "type": zod.enum(['Kiwi', 'Kaktus']).describe('The Kowabunga agent type.')
+  "type": zod.enum(['Kaktus', 'Kiwi', 'Kontroller']).describe('The Kowabunga agent type. Can only be set at creation time, ignored on updates.')
 }).describe('A Kowabunga remote agent.')
 
 /**
@@ -48,10 +47,10 @@ export const ReadAgentParams = zod.object({
 })
 
 export const ReadAgentResponse = zod.object({
-  "id": zod.string().optional().describe('The Kowabunga remote agent ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kowabunga remote agent ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kowabunga remote agent name.'),
   "description": zod.string().optional().describe('The Kowabunga remote agent description.'),
-  "type": zod.enum(['Kiwi', 'Kaktus']).describe('The Kowabunga agent type.')
+  "type": zod.enum(['Kaktus', 'Kiwi', 'Kontroller']).describe('The Kowabunga agent type. Can only be set at creation time, ignored on updates.')
 }).describe('A Kowabunga remote agent.')
 
 /**
@@ -62,38 +61,38 @@ export const UpdateAgentParams = zod.object({
 })
 
 export const UpdateAgentBody = zod.object({
-  "id": zod.string().optional().describe('The Kowabunga remote agent ID (auto-generated).'),
-  "name": zod.string().describe('The Kowabunga remote agent name.'),
-  "description": zod.string().optional().describe('The Kowabunga remote agent description.'),
-  "type": zod.enum(['Kiwi', 'Kaktus']).describe('The Kowabunga agent type.')
-}).describe('A Kowabunga remote agent.')
+  "name": zod.string().optional().describe('The Kowabunga remote agent name.'),
+  "description": zod.string().optional().describe('The Kowabunga remote agent description.')
+}).describe('A Kowabunga remote agent update (unspecified properties are left unchanged).')
 
 export const UpdateAgentResponse = zod.object({
-  "id": zod.string().optional().describe('The Kowabunga remote agent ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kowabunga remote agent ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kowabunga remote agent name.'),
   "description": zod.string().optional().describe('The Kowabunga remote agent description.'),
-  "type": zod.enum(['Kiwi', 'Kaktus']).describe('The Kowabunga agent type.')
+  "type": zod.enum(['Kaktus', 'Kiwi', 'Kontroller']).describe('The Kowabunga agent type. Can only be set at creation time, ignored on updates.')
 }).describe('A Kowabunga remote agent.')
 
 /**
- * Performs a Kowabunga remote agent setting of API token (will replace any existing one).
+ * Performs a Kowabunga remote agent setting of API token (will replace any existing one, disconnecting the agent; the generated API key is only sent once, by email, to administrators).
  */
 export const SetAgentApiTokenParams = zod.object({
   "agentId": zod.string().describe('The ID of the Kowabunga remote agent.')
 })
 
+export const setAgentApiTokenQueryExpireDefaultOne = false;
+
 export const SetAgentApiTokenQueryParams = zod.object({
-  "expire": zod.boolean().optional().describe('Whether or not the token should expire.'),
-  "expiration_date": zod.iso.date().optional().describe('Token\'s expiration date (YYYY-MM-DD format).')
+  "expire": zod.boolean().default(setAgentApiTokenQueryExpireDefaultOne).describe('Whether or not the token should expire.'),
+  "expirationDate": zod.iso.date().optional().describe('Token\'s expiration date (YYYY-MM-DD format).')
 })
 
 export const setAgentApiTokenResponseExpireDefault = false;
 
 export const SetAgentApiTokenResponse = zod.object({
-  "id": zod.string().optional().describe('The server-to-server authentication security token ID (auto-generated).'),
+  "id": zod.string().optional().describe('The server-to-server authentication security token ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The server-to-server authentication security token name.'),
   "description": zod.string().optional().describe('The server-to-server authentication security token description.'),
-  "expire": zod.boolean().default(setAgentApiTokenResponseExpireDefault).describe('Does the API token expires at some stage ?.'),
+  "expire": zod.boolean().default(setAgentApiTokenResponseExpireDefault).describe('Whether the API token expires at some stage.'),
   "expiration_date": zod.iso.date().optional().describe('Expiration date of the token (YYYY-MM-DD format).')
 }).describe('A Kowabunga authentication security token consists of an API key granting access to resources.')
 

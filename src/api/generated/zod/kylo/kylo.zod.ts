@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import * as zod from 'zod';
 
@@ -33,7 +33,7 @@ export const ReadKyloParams = zod.object({
 export const readKyloResponseAccessDefault = `RW`;
 
 export const ReadKyloResponse = zod.object({
-  "id": zod.string().optional().describe('The Kylo ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kylo ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kylo name.'),
   "description": zod.string().optional().describe('The Kylo description.'),
   "access": zod.enum(['RO', 'RW']).default(readKyloResponseAccessDefault).describe('The Kylo volume access type.'),
@@ -49,22 +49,17 @@ export const UpdateKyloParams = zod.object({
   "kyloId": zod.string().describe('The ID of the Kylo.')
 })
 
-export const updateKyloBodyAccessDefault = `RW`;
-
 export const UpdateKyloBody = zod.object({
-  "id": zod.string().optional().describe('The Kylo ID (auto-generated).'),
-  "name": zod.string().describe('The Kylo name.'),
+  "name": zod.string().optional().describe('The Kylo name.'),
   "description": zod.string().optional().describe('The Kylo description.'),
-  "access": zod.enum(['RO', 'RW']).default(updateKyloBodyAccessDefault).describe('The Kylo volume access type.'),
-  "protocols": zod.array(zod.union([zod.literal(3),zod.literal(4)])).default([3, 4]).describe('The Kylo NFS protocol versions to be supported.'),
-  "endpoint": zod.string().optional().describe('The Kylo endpoint FQDN (read-only).'),
-  "size": zod.int().optional().describe('The Kylo volume bytes used (read-only).')
-}).describe('A Kylo provides an elastic NFS-like remote storage volume.')
+  "access": zod.enum(['RO', 'RW']).optional().describe('The Kylo volume access type.'),
+  "protocols": zod.array(zod.union([zod.literal(3),zod.literal(4)])).optional().describe('The Kylo NFS protocol versions to be supported.')
+}).describe('A Kylo update (unspecified properties are left unchanged).')
 
 export const updateKyloResponseAccessDefault = `RW`;
 
 export const UpdateKyloResponse = zod.object({
-  "id": zod.string().optional().describe('The Kylo ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kylo ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kylo name.'),
   "description": zod.string().optional().describe('The Kylo description.'),
   "access": zod.enum(['RO', 'RW']).default(updateKyloResponseAccessDefault).describe('The Kylo volume access type.'),

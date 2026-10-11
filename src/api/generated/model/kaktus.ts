@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import type { Cost } from './cost';
 
@@ -11,8 +11,8 @@ import type { Cost } from './cost';
  * A Kaktus (Kowabunga Affordable KVM and Tight Underneath Storage) is an hyper-converged infrastructure (HCI) bare-metal node offering computing and distributed storage capabilites.
  */
 export interface Kaktus {
-  /** The Kaktus computing node ID (auto-generated). */
-  id?: string;
+  /** The Kaktus computing node ID (auto-generated) (read-only). */
+  readonly id?: string;
   /** The Kaktus computing node name. */
   name: string;
   /** The Kaktus computing node description. */
@@ -21,12 +21,18 @@ export interface Kaktus {
   cpu_cost?: Cost;
   /** Cost associated to the Kaktus node's memory resources. */
   memory_cost?: Cost;
-  /** The Kaktus node CPU resource over-commit ratio. Overcommitting CPU resources for VMs means allocating more virtual CPUs (vCPUs) to the virtual machines (VMs) than the physical cores available on the node. This can help optimize the utilization of the node CPU and increase the density of VMs per node. */
+  /**
+     * The Kaktus node CPU resource over-commit ratio. Overcommitting CPU resources for VMs means allocating more virtual CPUs (vCPUs) to the virtual machines (VMs) than the physical cores available on the node. This can help optimize the utilization of the node CPU and increase the density of VMs per node.
+     * @minimum 1
+     */
   overcommit_cpu_ratio?: number;
-  /** The Kaktus node memory resource over-commit ratio. Memory overcommitment is a concept in computing that covers the assignment of more memory to virtual computing devices (or processes) than the physical machine they are hosted, or running on, actually has. */
+  /**
+     * The Kaktus node memory resource over-commit ratio. Memory overcommitment is a concept in computing that covers the assignment of more memory to virtual computing devices (or processes) than the physical machine they are hosted, or running on, actually has.
+     * @minimum 1
+     */
   overcommit_memory_ratio?: number;
   /** a list of existing remote agents managing the Kaktus node. */
   agents: string[];
-  /** Whether the Kaktus node is under maintenance. A node under maintenance keeps running its existing instances but is excluded from scheduling of newly created workloads. */
-  maintenance?: boolean;
+  /** Whether the Kaktus node is under maintenance. A node under maintenance keeps running its existing instances but is excluded from scheduling of newly created workloads. Use the maintenance enable/disable operations to change it (read-only). */
+  readonly maintenance?: boolean;
 }

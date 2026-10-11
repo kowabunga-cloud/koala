@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   useMutation,
@@ -25,10 +25,12 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  ApiToken,
   BadRequestResponse,
   ConflictResponse,
   ForbiddenResponse,
   InsufficientResourceResponse,
+  InternalServerErrorResponse,
   NotFoundResponse,
   ObjectIds,
   Password,
@@ -37,11 +39,39 @@ import type {
   UnprocessableEntityResponse,
   User,
   UserCredentials,
-  UserEmail
+  UserEmail,
+  UserUpdate
 } from '../../model';
 
 import { kowabungaFetch } from '../../../client';
 import type { ErrorType , BodyType } from '../../../client';
+
+// https://stackoverflow.com/questions/49579094/typescript-conditional-types-filter-out-readonly-properties-pick-only-requir/49579497#49579497
+type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <
+T,
+>() => T extends Y ? 1 : 2
+? A
+: B;
+
+type WritableKeys<T> = {
+[P in keyof T]-?: IfEquals<
+  { [Q in P]: T[P] },
+  { -readonly [Q in P]: T[P] },
+  P
+>;
+}[keyof T];
+
+type UnionToIntersection<U> =
+  (U extends any ? (k: U)=>void : never) extends ((k: infer I)=>void) ? I : never;
+type DistributeReadOnlyOverUnions<T> = T extends any ? NonReadonly<T> : never;
+
+type Writable<T> = Pick<T, WritableKeys<T>>;
+type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
+  [P in keyof Writable<T>]: T[P] extends object
+    ? NonReadonly<NonNullable<T[P]>>
+    : T[P];
+} : DistributeReadOnlyOverUnions<T>;
+
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -72,9 +102,9 @@ export const getLoginUrl = () => {
 }
 
 /**
- * Creates a new Kowabunga user login credentials.
+ * Authenticates a Kowabunga user and returns a JWT token for Bearer Authentication.
  */
-export const login = async (userCredentials: UserCredentials, options?: Parameters<typeof kowabungaFetch>[1]): Promise<UserCredentials> => {
+export const login = async (userCredentials: NonReadonly<UserCredentials>, options?: Parameters<typeof kowabungaFetch>[1]): Promise<UserCredentials> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -105,7 +135,7 @@ return kowabungaFetch<UserCredentials>(getLoginUrl(),
 
 export const getLoginMutationKey = () => ['login'] as const;
 
-export const getLoginMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getLoginMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,LoginMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,LoginMutationVariables, TContext> => {
 
@@ -133,11 +163,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type LoginMutationResult = NonNullable<Awaited<ReturnType<typeof login>>>
-    export type LoginMutationBody = BodyType<UserCredentials>
-    export type LoginMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type LoginMutationVariables = {data: BodyType<UserCredentials>}
+    export type LoginMutationBody = BodyType<NonReadonly<UserCredentials>>
+    export type LoginMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | InternalServerErrorResponse>
+    export type LoginMutationVariables = {data: BodyType<NonReadonly<UserCredentials>>}
 
-    export const useLogin = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useLogin = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof login>>, TError,LoginMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof login>>,
@@ -156,7 +186,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 }
 
 /**
- * Creates a new Kowabunga user logout session.
+ * Terminates the Kowabunga user logout session, revoking the JWT token in use.
  */
 export const logout = async ( options?: Parameters<typeof kowabungaFetch>[1]): Promise<void> => {
 
@@ -175,7 +205,7 @@ export const logout = async ( options?: Parameters<typeof kowabungaFetch>[1]): P
 
 export const getLogoutMutationKey = () => ['logout'] as const;
 
-export const getLogoutMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getLogoutMutationOptions = <TError = ErrorType<UnauthorizedResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext> => {
 
@@ -204,10 +234,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type LogoutMutationResult = NonNullable<Awaited<ReturnType<typeof logout>>>
 
-    export type LogoutMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
+    export type LogoutMutationError = ErrorType<UnauthorizedResponse | InternalServerErrorResponse>
 
 
-    export const useLogout = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useLogout = <TError = ErrorType<UnauthorizedResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof logout>>,
@@ -226,7 +256,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 }
 
 /**
- * Updates a Kowabunga userreset of password for the provided email (server-side generated, will replace any existing one) configuration.
+ * Resets the password of the Kowabunga user with the provided email address. A new password is server-side generated, replacing any existing one, and sent by email. For privacy reasons, the response is the same whether the email address is registered or not.
  */
 export const resetPassword = async (userEmail: UserEmail, options?: Parameters<typeof kowabungaFetch>[1]): Promise<void> => {
 
@@ -247,7 +277,7 @@ export const resetPassword = async (userEmail: UserEmail, options?: Parameters<t
 return kowabungaFetch<void>(getResetPasswordUrl(),
   {
     ...options,
-    method: 'PUT',
+    method: 'POST',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
     body: JSON.stringify(userEmail)
   }
@@ -259,7 +289,7 @@ return kowabungaFetch<void>(getResetPasswordUrl(),
 
 export const getResetPasswordMutationKey = () => ['resetPassword'] as const;
 
-export const getResetPasswordMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getResetPasswordMutationOptions = <TError = ErrorType<BadRequestResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetPassword>>, TError,ResetPasswordMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof resetPassword>>, TError,ResetPasswordMutationVariables, TContext> => {
 
@@ -288,10 +318,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type ResetPasswordMutationResult = NonNullable<Awaited<ReturnType<typeof resetPassword>>>
     export type ResetPasswordMutationBody = BodyType<UserEmail>
-    export type ResetPasswordMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
+    export type ResetPasswordMutationError = ErrorType<BadRequestResponse | InternalServerErrorResponse>
     export type ResetPasswordMutationVariables = {data: BodyType<UserEmail>}
 
-    export const useResetPassword = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useResetPassword = <TError = ErrorType<BadRequestResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetPassword>>, TError,ResetPasswordMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof resetPassword>>,
@@ -334,7 +364,7 @@ export const getListUsersQueryKey = () => {
     }
 
 
-export const getListUsersQueryOptions = <TData = Awaited<ReturnType<typeof listUsers>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListUsersQueryOptions = <TData = Awaited<ReturnType<typeof listUsers>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -353,10 +383,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListUsersQueryResult = NonNullable<Awaited<ReturnType<typeof listUsers>>>
-export type ListUsersQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+export type ListUsersQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>
 
 
-export function useListUsers<TData = Awaited<ReturnType<typeof listUsers>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListUsers<TData = Awaited<ReturnType<typeof listUsers>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listUsers>>,
@@ -366,7 +396,7 @@ export function useListUsers<TData = Awaited<ReturnType<typeof listUsers>>, TErr
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListUsers<TData = Awaited<ReturnType<typeof listUsers>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListUsers<TData = Awaited<ReturnType<typeof listUsers>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listUsers>>,
@@ -376,12 +406,12 @@ export function useListUsers<TData = Awaited<ReturnType<typeof listUsers>>, TErr
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListUsers<TData = Awaited<ReturnType<typeof listUsers>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListUsers<TData = Awaited<ReturnType<typeof listUsers>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListUsers<TData = Awaited<ReturnType<typeof listUsers>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListUsers<TData = Awaited<ReturnType<typeof listUsers>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listUsers>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -409,7 +439,7 @@ export const getCreateUserUrl = () => {
 /**
  * Creates a new Kowabunga user.
  */
-export const createUser = async (user: User, options?: Parameters<typeof kowabungaFetch>[1]): Promise<User> => {
+export const createUser = async (user: NonReadonly<User>, options?: Parameters<typeof kowabungaFetch>[1]): Promise<User> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -440,7 +470,7 @@ return kowabungaFetch<User>(getCreateUserUrl(),
 
 export const getCreateUserMutationKey = () => ['createUser'] as const;
 
-export const getCreateUserMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getCreateUserMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createUser>>, TError,CreateUserMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createUser>>, TError,CreateUserMutationVariables, TContext> => {
 
@@ -468,11 +498,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type CreateUserMutationResult = NonNullable<Awaited<ReturnType<typeof createUser>>>
-    export type CreateUserMutationBody = BodyType<User>
-    export type CreateUserMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateUserMutationVariables = {data: BodyType<User>}
+    export type CreateUserMutationBody = BodyType<NonReadonly<User>>
+    export type CreateUserMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateUserMutationVariables = {data: BodyType<NonReadonly<User>>}
 
-    export const useCreateUser = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useCreateUser = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createUser>>, TError,CreateUserMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createUser>>,
@@ -510,7 +540,7 @@ export const deleteUser = async (userId: string, options?: Parameters<typeof kow
 
 export const getDeleteUserMutationKey = () => ['deleteUser'] as const;
 
-export const getDeleteUserMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+export const getDeleteUserMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteUser>>, TError,DeleteUserMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteUser>>, TError,DeleteUserMutationVariables, TContext> => {
 
@@ -539,10 +569,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type DeleteUserMutationResult = NonNullable<Awaited<ReturnType<typeof deleteUser>>>
 
-    export type DeleteUserMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>
+    export type DeleteUserMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type DeleteUserMutationVariables = {userId: string}
 
-    export const useDeleteUser = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+    export const useDeleteUser = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteUser>>, TError,DeleteUserMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteUser>>,
@@ -585,7 +615,7 @@ export const getReadUserQueryKey = (userId: string,) => {
     }
 
 
-export const getReadUserQueryOptions = <TData = Awaited<ReturnType<typeof readUser>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(userId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readUser>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getReadUserQueryOptions = <TData = Awaited<ReturnType<typeof readUser>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(userId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readUser>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -604,10 +634,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadUserQueryResult = NonNullable<Awaited<ReturnType<typeof readUser>>>
-export type ReadUserQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadUserQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadUser<TData = Awaited<ReturnType<typeof readUser>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadUser<TData = Awaited<ReturnType<typeof readUser>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  userId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readUser>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readUser>>,
@@ -617,7 +647,7 @@ export function useReadUser<TData = Awaited<ReturnType<typeof readUser>>, TError
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadUser<TData = Awaited<ReturnType<typeof readUser>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadUser<TData = Awaited<ReturnType<typeof readUser>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  userId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readUser>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readUser>>,
@@ -627,12 +657,12 @@ export function useReadUser<TData = Awaited<ReturnType<typeof readUser>>, TError
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadUser<TData = Awaited<ReturnType<typeof readUser>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadUser<TData = Awaited<ReturnType<typeof readUser>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  userId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readUser>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadUser<TData = Awaited<ReturnType<typeof readUser>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadUser<TData = Awaited<ReturnType<typeof readUser>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  userId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readUser>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -661,7 +691,7 @@ export const getUpdateUserUrl = (userId: string,) => {
  * Updates a Kowabunga user configuration.
  */
 export const updateUser = async (userId: string,
-    user: User, options?: Parameters<typeof kowabungaFetch>[1]): Promise<User> => {
+    userUpdate: UserUpdate, options?: Parameters<typeof kowabungaFetch>[1]): Promise<User> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -682,7 +712,7 @@ return kowabungaFetch<User>(getUpdateUserUrl(userId),
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(user)
+    body: JSON.stringify(userUpdate)
   }
 );}
 
@@ -692,7 +722,7 @@ return kowabungaFetch<User>(getUpdateUserUrl(userId),
 
 export const getUpdateUserMutationKey = () => ['updateUser'] as const;
 
-export const getUpdateUserMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getUpdateUserMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUser>>, TError,UpdateUserMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateUser>>, TError,UpdateUserMutationVariables, TContext> => {
 
@@ -720,11 +750,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateUserMutationResult = NonNullable<Awaited<ReturnType<typeof updateUser>>>
-    export type UpdateUserMutationBody = BodyType<User>
-    export type UpdateUserMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type UpdateUserMutationVariables = {userId: string;data: BodyType<User>}
+    export type UpdateUserMutationBody = BodyType<UserUpdate>
+    export type UpdateUserMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type UpdateUserMutationVariables = {userId: string;data: BodyType<UserUpdate>}
 
-    export const useUpdateUser = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useUpdateUser = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUser>>, TError,UpdateUserMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateUser>>,
@@ -777,7 +807,7 @@ return kowabungaFetch<void>(getSetUserPasswordUrl(userId),
 
 export const getSetUserPasswordMutationKey = () => ['setUserPassword'] as const;
 
-export const getSetUserPasswordMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getSetUserPasswordMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setUserPassword>>, TError,SetUserPasswordMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof setUserPassword>>, TError,SetUserPasswordMutationVariables, TContext> => {
 
@@ -806,10 +836,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type SetUserPasswordMutationResult = NonNullable<Awaited<ReturnType<typeof setUserPassword>>>
     export type SetUserPasswordMutationBody = BodyType<Password>
-    export type SetUserPasswordMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
+    export type SetUserPasswordMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
     export type SetUserPasswordMutationVariables = {userId: string;data: BodyType<Password>}
 
-    export const useSetUserPassword = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useSetUserPassword = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setUserPassword>>, TError,SetUserPasswordMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof setUserPassword>>,
@@ -847,7 +877,7 @@ export const resetUserPassword = async (userId: string, options?: Parameters<typ
 
 export const getResetUserPasswordMutationKey = () => ['resetUserPassword'] as const;
 
-export const getResetUserPasswordMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+export const getResetUserPasswordMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetUserPassword>>, TError,ResetUserPasswordMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof resetUserPassword>>, TError,ResetUserPasswordMutationVariables, TContext> => {
 
@@ -876,10 +906,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type ResetUserPasswordMutationResult = NonNullable<Awaited<ReturnType<typeof resetUserPassword>>>
 
-    export type ResetUserPasswordMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>
+    export type ResetUserPasswordMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type ResetUserPasswordMutationVariables = {userId: string}
 
-    export const useResetUserPassword = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+    export const useResetUserPassword = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resetUserPassword>>, TError,ResetUserPasswordMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof resetUserPassword>>,
@@ -906,12 +936,12 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 }
 
 /**
- * Performs a Kowabunga user setting of API token (will replace any existing one).
+ * Performs a Kowabunga user setting of API token (will replace any existing one; the generated API key is only sent once, by email, to the user).
  */
 export const setUserApiToken = async (userId: string,
-    params?: SetUserApiTokenParams, options?: Parameters<typeof kowabungaFetch>[1]): Promise<void> => {
+    params?: SetUserApiTokenParams, options?: Parameters<typeof kowabungaFetch>[1]): Promise<ApiToken> => {
 
-  return kowabungaFetch<void>(getSetUserApiTokenUrl(userId,params),
+  return kowabungaFetch<ApiToken>(getSetUserApiTokenUrl(userId,params),
   {
     ...options,
     method: 'PATCH'
@@ -926,7 +956,7 @@ export const setUserApiToken = async (userId: string,
 
 export const getSetUserApiTokenMutationKey = () => ['setUserApiToken'] as const;
 
-export const getSetUserApiTokenMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+export const getSetUserApiTokenMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setUserApiToken>>, TError,SetUserApiTokenMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof setUserApiToken>>, TError,SetUserApiTokenMutationVariables, TContext> => {
 
@@ -955,10 +985,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type SetUserApiTokenMutationResult = NonNullable<Awaited<ReturnType<typeof setUserApiToken>>>
 
-    export type SetUserApiTokenMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>
+    export type SetUserApiTokenMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type SetUserApiTokenMutationVariables = {userId: string;params?: SetUserApiTokenParams}
 
-    export const useSetUserApiToken = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+    export const useSetUserApiToken = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setUserApiToken>>, TError,SetUserApiTokenMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof setUserApiToken>>,

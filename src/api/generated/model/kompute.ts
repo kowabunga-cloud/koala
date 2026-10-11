@@ -3,32 +3,44 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 
 /**
  * A Kompute is a wrapper object for bare virtual machines. It consists of an instance, one to several attached volumes and 2 network adapters (a private one, a public one). This is the prefered way for creating virtual machines. IP addresses will be automatically assigned.
  */
 export interface Kompute {
-  /** The Kompute ID (auto-generated). */
-  id?: string;
+  /** The Kompute ID (auto-generated) (read-only). */
+  readonly id?: string;
   /** The Kompute name. */
   name: string;
   /** The Kompute description. */
   description?: string;
-  /** The Kompute memory size (in bytes). */
+  /**
+     * The Kompute memory size (in bytes).
+     * @minimum 1
+     */
   memory: number;
-  /** The Kompute number of vCPUs. */
+  /**
+     * The Kompute number of vCPUs.
+     * @minimum 1
+     */
   vcpus: number;
-  /** The Kompute OS disk size (in bytes). */
+  /**
+     * The Kompute OS disk size (in bytes).
+     * @minimum 1
+     */
   disk: number;
-  /** The Kompute extra data disk size (in bytes). If unspecified, no extra data disk will be assigned. */
+  /**
+     * The Kompute extra data disk size (in bytes). If unspecified, no extra data disk will be assigned.
+     * @minimum 0
+     */
   data_disk?: number;
   /** The Kompute assigned private IPv4 address (read-only). */
-  ip?: string;
-  /** An optional list of existing Kwarantine anti-affinity group IDs. Only considered at Kompute creation time, to elect an initial host consistent with the referenced groups policies and register the Kompute as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices. */
+  readonly ip?: string;
+  /** An optional list of existing Kwarantine anti-affinity group IDs. Only considered at Kompute creation time, to elect an initial host consistent with the referenced groups policies and register the Kompute as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices. Can only be set at creation time, ignored on updates. */
   kwarantines?: string[];
-  /** enable UEFI secure firmware (vs. legacy BIOS). */
+  /** Enable UEFI secure firmware (vs. legacy BIOS). Can only be set at creation time, ignored on updates. */
   uefi?: boolean;
   /** Whether kMotion (live/cold host migration) is enabled for the Kompute. When disabled, the instance remains bound to its original hosting node. */
   kmotion_enabled?: boolean;

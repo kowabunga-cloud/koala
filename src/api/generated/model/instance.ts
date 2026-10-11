@@ -3,30 +3,36 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 
 /**
  * A virtual machine instance.
  */
 export interface Instance {
-  /** The virtual machine instance ID (auto-generated). */
-  id?: string;
+  /** The virtual machine instance ID (auto-generated) (read-only). */
+  readonly id?: string;
   /** The virtual machine instance name. */
   name: string;
   /** The virtual machine instance description. */
   description?: string;
-  /** The virtual machine instance memory size (in bytes). */
+  /**
+     * The virtual machine instance memory size (in bytes).
+     * @minimum 1
+     */
   memory: number;
-  /** The virtual machine instance number of vCPUs. */
+  /**
+     * The virtual machine instance number of vCPUs.
+     * @minimum 1
+     */
   vcpus: number;
-  /** a list of existing network adapters to be connected to the instance. */
+  /** A list of existing network adapters to be connected to the instance. */
   adapters?: string[];
-  /** volumes list of existing storage volumes (i.e. disks) to be connected to the instance. */
+  /** A list of existing storage volumes (i.e. disks) to be connected to the instance. */
   volumes?: string[];
-  /** An optional list of existing Kwarantine anti-affinity group IDs. Only considered at instance creation time, to elect an initial host consistent with the referenced groups policies and register the instance as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices. */
+  /** An optional list of existing Kwarantine anti-affinity group IDs. Only considered at instance creation time, to elect an initial host consistent with the referenced groups policies and register the instance as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices. Can only be set at creation time, ignored on updates. */
   kwarantines?: string[];
-  /** enable UEFI secure firmware (vs. legacy BIOS). */
+  /** Enable UEFI secure firmware (vs. legacy BIOS). Can only be set at creation time, ignored on updates. */
   uefi?: boolean;
   /** Whether kMotion (live/cold host migration) is enabled for the virtual machine instance. When disabled, the instance remains bound to its original hosting node. */
   kmotion_enabled?: boolean;

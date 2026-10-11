@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   useMutation,
@@ -28,18 +28,47 @@ import type {
   Adapter,
   BadRequestResponse,
   ConflictResponse,
-  CreateAdapterParams,
+  CreateSubnetAdapterParams,
   ForbiddenResponse,
   InsufficientResourceResponse,
+  InternalServerErrorResponse,
   NotFoundResponse,
   ObjectIds,
   Subnet,
+  SubnetUpdate,
   UnauthorizedResponse,
   UnprocessableEntityResponse
 } from '../../model';
 
 import { kowabungaFetch } from '../../../client';
 import type { ErrorType , BodyType } from '../../../client';
+
+// https://stackoverflow.com/questions/49579094/typescript-conditional-types-filter-out-readonly-properties-pick-only-requir/49579497#49579497
+type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <
+T,
+>() => T extends Y ? 1 : 2
+? A
+: B;
+
+type WritableKeys<T> = {
+[P in keyof T]-?: IfEquals<
+  { [Q in P]: T[P] },
+  { -readonly [Q in P]: T[P] },
+  P
+>;
+}[keyof T];
+
+type UnionToIntersection<U> =
+  (U extends any ? (k: U)=>void : never) extends ((k: infer I)=>void) ? I : never;
+type DistributeReadOnlyOverUnions<T> = T extends any ? NonReadonly<T> : never;
+
+type Writable<T> = Pick<T, WritableKeys<T>>;
+type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
+  [P in keyof Writable<T>]: T[P] extends object
+    ? NonReadonly<NonNullable<T[P]>>
+    : T[P];
+} : DistributeReadOnlyOverUnions<T>;
+
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -94,7 +123,7 @@ export const getListSubnetsQueryKey = () => {
     }
 
 
-export const getListSubnetsQueryOptions = <TData = Awaited<ReturnType<typeof listSubnets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSubnets>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListSubnetsQueryOptions = <TData = Awaited<ReturnType<typeof listSubnets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSubnets>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -113,10 +142,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListSubnetsQueryResult = NonNullable<Awaited<ReturnType<typeof listSubnets>>>
-export type ListSubnetsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+export type ListSubnetsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>
 
 
-export function useListSubnets<TData = Awaited<ReturnType<typeof listSubnets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListSubnets<TData = Awaited<ReturnType<typeof listSubnets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSubnets>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listSubnets>>,
@@ -126,7 +155,7 @@ export function useListSubnets<TData = Awaited<ReturnType<typeof listSubnets>>, 
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListSubnets<TData = Awaited<ReturnType<typeof listSubnets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListSubnets<TData = Awaited<ReturnType<typeof listSubnets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSubnets>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listSubnets>>,
@@ -136,12 +165,12 @@ export function useListSubnets<TData = Awaited<ReturnType<typeof listSubnets>>, 
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListSubnets<TData = Awaited<ReturnType<typeof listSubnets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListSubnets<TData = Awaited<ReturnType<typeof listSubnets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSubnets>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListSubnets<TData = Awaited<ReturnType<typeof listSubnets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListSubnets<TData = Awaited<ReturnType<typeof listSubnets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSubnets>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -186,7 +215,7 @@ export const deleteSubnet = async (subnetId: string, options?: Parameters<typeof
 
 export const getDeleteSubnetMutationKey = () => ['deleteSubnet'] as const;
 
-export const getDeleteSubnetMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+export const getDeleteSubnetMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSubnet>>, TError,DeleteSubnetMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteSubnet>>, TError,DeleteSubnetMutationVariables, TContext> => {
 
@@ -215,10 +244,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type DeleteSubnetMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSubnet>>>
 
-    export type DeleteSubnetMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>
+    export type DeleteSubnetMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type DeleteSubnetMutationVariables = {subnetId: string}
 
-    export const useDeleteSubnet = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+    export const useDeleteSubnet = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSubnet>>, TError,DeleteSubnetMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteSubnet>>,
@@ -261,7 +290,7 @@ export const getReadSubnetQueryKey = (subnetId: string,) => {
     }
 
 
-export const getReadSubnetQueryOptions = <TData = Awaited<ReturnType<typeof readSubnet>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(subnetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readSubnet>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getReadSubnetQueryOptions = <TData = Awaited<ReturnType<typeof readSubnet>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(subnetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readSubnet>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -280,10 +309,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadSubnetQueryResult = NonNullable<Awaited<ReturnType<typeof readSubnet>>>
-export type ReadSubnetQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadSubnetQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadSubnet<TData = Awaited<ReturnType<typeof readSubnet>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadSubnet<TData = Awaited<ReturnType<typeof readSubnet>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  subnetId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readSubnet>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readSubnet>>,
@@ -293,7 +322,7 @@ export function useReadSubnet<TData = Awaited<ReturnType<typeof readSubnet>>, TE
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadSubnet<TData = Awaited<ReturnType<typeof readSubnet>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadSubnet<TData = Awaited<ReturnType<typeof readSubnet>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  subnetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readSubnet>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readSubnet>>,
@@ -303,12 +332,12 @@ export function useReadSubnet<TData = Awaited<ReturnType<typeof readSubnet>>, TE
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadSubnet<TData = Awaited<ReturnType<typeof readSubnet>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadSubnet<TData = Awaited<ReturnType<typeof readSubnet>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  subnetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readSubnet>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadSubnet<TData = Awaited<ReturnType<typeof readSubnet>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadSubnet<TData = Awaited<ReturnType<typeof readSubnet>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  subnetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readSubnet>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -337,7 +366,7 @@ export const getUpdateSubnetUrl = (subnetId: string,) => {
  * Updates a network subnet configuration.
  */
 export const updateSubnet = async (subnetId: string,
-    subnet: Subnet, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Subnet> => {
+    subnetUpdate: SubnetUpdate, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Subnet> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -358,7 +387,7 @@ return kowabungaFetch<Subnet>(getUpdateSubnetUrl(subnetId),
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(subnet)
+    body: JSON.stringify(subnetUpdate)
   }
 );}
 
@@ -368,7 +397,7 @@ return kowabungaFetch<Subnet>(getUpdateSubnetUrl(subnetId),
 
 export const getUpdateSubnetMutationKey = () => ['updateSubnet'] as const;
 
-export const getUpdateSubnetMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getUpdateSubnetMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateSubnet>>, TError,UpdateSubnetMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateSubnet>>, TError,UpdateSubnetMutationVariables, TContext> => {
 
@@ -396,11 +425,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateSubnetMutationResult = NonNullable<Awaited<ReturnType<typeof updateSubnet>>>
-    export type UpdateSubnetMutationBody = BodyType<Subnet>
-    export type UpdateSubnetMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type UpdateSubnetMutationVariables = {subnetId: string;data: BodyType<Subnet>}
+    export type UpdateSubnetMutationBody = BodyType<SubnetUpdate>
+    export type UpdateSubnetMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type UpdateSubnetMutationVariables = {subnetId: string;data: BodyType<SubnetUpdate>}
 
-    export const useUpdateSubnet = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useUpdateSubnet = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateSubnet>>, TError,UpdateSubnetMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateSubnet>>,
@@ -410,8 +439,8 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getUpdateSubnetMutationOptions(options), queryClient);
     }
-    export const getCreateAdapterUrl = (subnetId: string,
-    params?: CreateAdapterParams,) => {
+    export const getCreateSubnetAdapterUrl = (subnetId: string,
+    params?: CreateSubnetAdapterParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -429,9 +458,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 /**
  * Creates a new network adapter.
  */
-export const createAdapter = async (subnetId: string,
-    adapter: Adapter,
-    params?: CreateAdapterParams, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Adapter> => {
+export const createSubnetAdapter = async (subnetId: string,
+    adapter: NonReadonly<Adapter>,
+    params?: CreateSubnetAdapterParams, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Adapter> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -447,7 +476,7 @@ export const createAdapter = async (subnetId: string,
     }
     return headers;
   };
-return kowabungaFetch<Adapter>(getCreateAdapterUrl(subnetId,params),
+return kowabungaFetch<Adapter>(getCreateSubnetAdapterUrl(subnetId,params),
   {
     ...options,
     method: 'POST',
@@ -460,13 +489,13 @@ return kowabungaFetch<Adapter>(getCreateAdapterUrl(subnetId,params),
 
 
 
-export const getCreateAdapterMutationKey = () => ['createAdapter'] as const;
+export const getCreateSubnetAdapterMutationKey = () => ['createSubnetAdapter'] as const;
 
-export const getCreateAdapterMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAdapter>>, TError,CreateAdapterMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createAdapter>>, TError,CreateAdapterMutationVariables, TContext> => {
+export const getCreateSubnetAdapterMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSubnetAdapter>>, TError,CreateSubnetAdapterMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createSubnetAdapter>>, TError,CreateSubnetAdapterMutationVariables, TContext> => {
 
-const mutationKey = getCreateAdapterMutationKey();
+const mutationKey = getCreateSubnetAdapterMutationKey();
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -476,10 +505,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createAdapter>>, CreateAdapterMutationVariables> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createSubnetAdapter>>, CreateSubnetAdapterMutationVariables> = (props) => {
           const {subnetId,data,params} = props ?? {};
 
-          return  createAdapter(subnetId,data,params,requestOptions)
+          return  createSubnetAdapter(subnetId,data,params,requestOptions)
         }
 
 
@@ -489,20 +518,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type CreateAdapterMutationResult = NonNullable<Awaited<ReturnType<typeof createAdapter>>>
-    export type CreateAdapterMutationBody = BodyType<Adapter>
-    export type CreateAdapterMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateAdapterMutationVariables = {subnetId: string;data: BodyType<Adapter>;params?: CreateAdapterParams}
+    export type CreateSubnetAdapterMutationResult = NonNullable<Awaited<ReturnType<typeof createSubnetAdapter>>>
+    export type CreateSubnetAdapterMutationBody = BodyType<NonReadonly<Adapter>>
+    export type CreateSubnetAdapterMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateSubnetAdapterMutationVariables = {subnetId: string;data: BodyType<NonReadonly<Adapter>>;params?: CreateSubnetAdapterParams}
 
-    export const useCreateAdapter = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createAdapter>>, TError,CreateAdapterMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
+    export const useCreateSubnetAdapter = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSubnetAdapter>>, TError,CreateSubnetAdapterMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof createAdapter>>,
+        Awaited<ReturnType<typeof createSubnetAdapter>>,
         TError,
-        CreateAdapterMutationVariables,
+        CreateSubnetAdapterMutationVariables,
         TContext
       > => {
-      return useMutation(getCreateAdapterMutationOptions(options), queryClient);
+      return useMutation(getCreateSubnetAdapterMutationOptions(options), queryClient);
     }
     export const getListSubnetAdaptersUrl = (subnetId: string,) => {
 
@@ -537,7 +566,7 @@ export const getListSubnetAdaptersQueryKey = (subnetId: string,) => {
     }
 
 
-export const getListSubnetAdaptersQueryOptions = <TData = Awaited<ReturnType<typeof listSubnetAdapters>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(subnetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSubnetAdapters>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListSubnetAdaptersQueryOptions = <TData = Awaited<ReturnType<typeof listSubnetAdapters>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(subnetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSubnetAdapters>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -556,10 +585,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListSubnetAdaptersQueryResult = NonNullable<Awaited<ReturnType<typeof listSubnetAdapters>>>
-export type ListSubnetAdaptersQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ListSubnetAdaptersQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useListSubnetAdapters<TData = Awaited<ReturnType<typeof listSubnetAdapters>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListSubnetAdapters<TData = Awaited<ReturnType<typeof listSubnetAdapters>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  subnetId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSubnetAdapters>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listSubnetAdapters>>,
@@ -569,7 +598,7 @@ export function useListSubnetAdapters<TData = Awaited<ReturnType<typeof listSubn
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListSubnetAdapters<TData = Awaited<ReturnType<typeof listSubnetAdapters>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListSubnetAdapters<TData = Awaited<ReturnType<typeof listSubnetAdapters>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  subnetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSubnetAdapters>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listSubnetAdapters>>,
@@ -579,12 +608,12 @@ export function useListSubnetAdapters<TData = Awaited<ReturnType<typeof listSubn
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListSubnetAdapters<TData = Awaited<ReturnType<typeof listSubnetAdapters>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListSubnetAdapters<TData = Awaited<ReturnType<typeof listSubnetAdapters>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  subnetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSubnetAdapters>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListSubnetAdapters<TData = Awaited<ReturnType<typeof listSubnetAdapters>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListSubnetAdapters<TData = Awaited<ReturnType<typeof listSubnetAdapters>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  subnetId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSubnetAdapters>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {

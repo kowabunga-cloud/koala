@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import type { Metadata } from './metadata';
 import type { ProjectResources } from './projectResources';
@@ -13,13 +13,13 @@ import type { RegionSubnet } from './regionSubnet';
  * A Kowabunga project corresponds to a single tenant, isolated set of resources.
  */
 export interface Project {
-  /** The project ID (auto-generated). */
-  id?: string;
+  /** The project ID (auto-generated) (read-only). */
+  readonly id?: string;
   /** The project name. */
   name: string;
   /** The project description. */
   description?: string;
-  /** Internal domain name (e.g. myproject.acme.com). */
+  /** Internal domain name (e.g. myproject.acme.com). Can only be set at creation time, ignored on updates. */
   domain?: string;
   /** Default root password, set at cloud-init instance bootstrap phase. Will be randomly auto-generated at each instance creation if unspecified. */
   root_password?: string;
@@ -34,9 +34,9 @@ export interface Project {
   /** The global project resource quotas (0 for unlimited). */
   quotas?: ProjectResources;
   /** The assigned project VPC private subnets IDs (read-only). */
-  private_subnets?: RegionSubnet[];
-  /** The list of VRRP IDs used by -as-a-service resources within the project virtual network (read-only). Should your application use VRRP for service redundancy, you should use different IDs to prevent issues.. */
-  reserved_vrrp_ids?: number[];
+  readonly private_subnets?: readonly RegionSubnet[];
+  /** The list of VRRP IDs used by -as-a-service resources within the project virtual network. Should your application use VRRP for service redundancy, you should use different IDs to prevent issues (read-only). */
+  readonly reserved_vrrp_ids?: readonly number[];
   /** A list of user teams allowed to administrate the project (i.e. capable of managing internal resources). */
   teams: string[];
   /** A list of Kowabunga regions the project is managing resources from. */

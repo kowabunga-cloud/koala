@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import * as zod from 'zod';
 
@@ -31,21 +31,26 @@ export const ReadKonveyParams = zod.object({
 })
 
 export const readKonveyResponseFailoverDefault = true;
+export const readKonveyResponseEndpointsItemPortMax = 65535;
+
 export const readKonveyResponseEndpointsItemProtocolDefault = `tcp`;
+export const readKonveyResponseEndpointsItemBackendsOnePortMax = 65535;
+
+
 
 export const ReadKonveyResponse = zod.object({
-  "id": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) ID (auto-generated).'),
-  "name": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) name.'),
+  "id": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) ID (auto-generated) (read-only).'),
+  "name": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) name, prefixed with konvey- (project name if unspecified).'),
   "description": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) description.'),
   "vip": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) assigned private virtual IP address (read-only).'),
-  "failover": zod.boolean().default(readKonveyResponseFailoverDefault).describe('Whether Konvey (Kowabunga Network Load-Balancer) must be deployed in a highly-available replicated state to support service failover.'),
+  "failover": zod.boolean().default(readKonveyResponseFailoverDefault).describe('Whether Konvey (Kowabunga Network Load-Balancer) must be deployed in a highly-available replicated state to support service failover. Can only be set at creation time, ignored on updates.'),
   "endpoints": zod.array(zod.object({
   "name": zod.string().describe('The Konvey (Kowabunga Network Load-Balancer) endpoint name.'),
-  "port": zod.int().describe('The port to be exposed.'),
+  "port": zod.int().min(1).max(readKonveyResponseEndpointsItemPortMax).describe('The port to be exposed.'),
   "protocol": zod.enum(['tcp', 'udp']).default(readKonveyResponseEndpointsItemProtocolDefault).describe('The transport layer protocol to be exposed.'),
   "backends": zod.object({
   "hosts": zod.array(zod.string()).describe('The Konvey (Kowabunga Network Load-Balancer) endpoint list of load-balanced backend hosts.'),
-  "port": zod.int().describe('The Konvey (Kowabunga Network Load-Balancer) endpoint backend service port.')
+  "port": zod.int().min(1).max(readKonveyResponseEndpointsItemBackendsOnePortMax).describe('The Konvey (Kowabunga Network Load-Balancer) endpoint backend service port.')
 }).describe('A Konvey Backends settings.').describe('The Konvey (Kowabunga Network Load-Balancer) list of load-balanced backends.')
 }).describe('A Konvey Endpoint Service settings.')).describe('The Konvey (Kowabunga Network Load-Balancer) list of load-balanced endpoints.')
 }).describe('A Kowabunga Konvey is a layer-4 network load-balancer used to distribute service requests to associated backend instances.')
@@ -57,42 +62,48 @@ export const UpdateKonveyParams = zod.object({
   "konveyId": zod.string().describe('The ID of the Konvey (Kowabunga Network Load-Balancer).')
 })
 
-export const updateKonveyBodyFailoverDefault = true;
+export const updateKonveyBodyEndpointsItemPortMax = 65535;
+
 export const updateKonveyBodyEndpointsItemProtocolDefault = `tcp`;
+export const updateKonveyBodyEndpointsItemBackendsOnePortMax = 65535;
+
+
 
 export const UpdateKonveyBody = zod.object({
-  "id": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) ID (auto-generated).'),
-  "name": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) name.'),
+  "name": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) name, prefixed with konvey- (project name if unspecified).'),
   "description": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) description.'),
-  "vip": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) assigned private virtual IP address (read-only).'),
-  "failover": zod.boolean().default(updateKonveyBodyFailoverDefault).describe('Whether Konvey (Kowabunga Network Load-Balancer) must be deployed in a highly-available replicated state to support service failover.'),
   "endpoints": zod.array(zod.object({
   "name": zod.string().describe('The Konvey (Kowabunga Network Load-Balancer) endpoint name.'),
-  "port": zod.int().describe('The port to be exposed.'),
+  "port": zod.int().min(1).max(updateKonveyBodyEndpointsItemPortMax).describe('The port to be exposed.'),
   "protocol": zod.enum(['tcp', 'udp']).default(updateKonveyBodyEndpointsItemProtocolDefault).describe('The transport layer protocol to be exposed.'),
   "backends": zod.object({
   "hosts": zod.array(zod.string()).describe('The Konvey (Kowabunga Network Load-Balancer) endpoint list of load-balanced backend hosts.'),
-  "port": zod.int().describe('The Konvey (Kowabunga Network Load-Balancer) endpoint backend service port.')
+  "port": zod.int().min(1).max(updateKonveyBodyEndpointsItemBackendsOnePortMax).describe('The Konvey (Kowabunga Network Load-Balancer) endpoint backend service port.')
 }).describe('A Konvey Backends settings.').describe('The Konvey (Kowabunga Network Load-Balancer) list of load-balanced backends.')
-}).describe('A Konvey Endpoint Service settings.')).describe('The Konvey (Kowabunga Network Load-Balancer) list of load-balanced endpoints.')
-}).describe('A Kowabunga Konvey is a layer-4 network load-balancer used to distribute service requests to associated backend instances.')
+}).describe('A Konvey Endpoint Service settings.')).optional().describe('The Konvey (Kowabunga Network Load-Balancer) list of load-balanced endpoints.')
+}).describe('A Konvey (Kowabunga Network Load-Balancer) update (unspecified properties are left unchanged).')
 
 export const updateKonveyResponseFailoverDefault = true;
+export const updateKonveyResponseEndpointsItemPortMax = 65535;
+
 export const updateKonveyResponseEndpointsItemProtocolDefault = `tcp`;
+export const updateKonveyResponseEndpointsItemBackendsOnePortMax = 65535;
+
+
 
 export const UpdateKonveyResponse = zod.object({
-  "id": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) ID (auto-generated).'),
-  "name": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) name.'),
+  "id": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) ID (auto-generated) (read-only).'),
+  "name": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) name, prefixed with konvey- (project name if unspecified).'),
   "description": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) description.'),
   "vip": zod.string().optional().describe('The Konvey (Kowabunga Network Load-Balancer) assigned private virtual IP address (read-only).'),
-  "failover": zod.boolean().default(updateKonveyResponseFailoverDefault).describe('Whether Konvey (Kowabunga Network Load-Balancer) must be deployed in a highly-available replicated state to support service failover.'),
+  "failover": zod.boolean().default(updateKonveyResponseFailoverDefault).describe('Whether Konvey (Kowabunga Network Load-Balancer) must be deployed in a highly-available replicated state to support service failover. Can only be set at creation time, ignored on updates.'),
   "endpoints": zod.array(zod.object({
   "name": zod.string().describe('The Konvey (Kowabunga Network Load-Balancer) endpoint name.'),
-  "port": zod.int().describe('The port to be exposed.'),
+  "port": zod.int().min(1).max(updateKonveyResponseEndpointsItemPortMax).describe('The port to be exposed.'),
   "protocol": zod.enum(['tcp', 'udp']).default(updateKonveyResponseEndpointsItemProtocolDefault).describe('The transport layer protocol to be exposed.'),
   "backends": zod.object({
   "hosts": zod.array(zod.string()).describe('The Konvey (Kowabunga Network Load-Balancer) endpoint list of load-balanced backend hosts.'),
-  "port": zod.int().describe('The Konvey (Kowabunga Network Load-Balancer) endpoint backend service port.')
+  "port": zod.int().min(1).max(updateKonveyResponseEndpointsItemBackendsOnePortMax).describe('The Konvey (Kowabunga Network Load-Balancer) endpoint backend service port.')
 }).describe('A Konvey Backends settings.').describe('The Konvey (Kowabunga Network Load-Balancer) list of load-balanced backends.')
 }).describe('A Konvey Endpoint Service settings.')).describe('The Konvey (Kowabunga Network Load-Balancer) list of load-balanced endpoints.')
 }).describe('A Kowabunga Konvey is a layer-4 network load-balancer used to distribute service requests to associated backend instances.')

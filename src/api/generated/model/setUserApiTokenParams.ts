@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import type { OptionalQueryExpirationDateParameter } from './optionalQueryExpirationDateParameter';
 import type { OptionalQueryExpireParameter } from './optionalQueryExpireParameter';
@@ -16,5 +16,5 @@ expire?: OptionalQueryExpireParameter;
 /**
  * Token's expiration date (YYYY-MM-DD format).
  */
-expiration_date?: OptionalQueryExpirationDateParameter;
+expirationDate?: OptionalQueryExpirationDateParameter;
 };

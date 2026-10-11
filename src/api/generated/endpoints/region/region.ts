@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   useMutation,
@@ -27,15 +27,16 @@ import type {
 import type {
   BadRequestResponse,
   ConflictResponse,
-  CreateStorageNFSParams,
+  CreateRegionStorageNFSParams,
   DnsRecord,
   ForbiddenResponse,
   InsufficientResourceResponse,
+  InternalServerErrorResponse,
   Kiwi,
-  ListRegionStorageNFSsParams,
   NotFoundResponse,
   ObjectIds,
   Region,
+  RegionUpdate,
   StorageNFS,
   StoragePool,
   UnauthorizedResponse,
@@ -46,6 +47,33 @@ import type {
 
 import { kowabungaFetch } from '../../../client';
 import type { ErrorType , BodyType } from '../../../client';
+
+// https://stackoverflow.com/questions/49579094/typescript-conditional-types-filter-out-readonly-properties-pick-only-requir/49579497#49579497
+type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <
+T,
+>() => T extends Y ? 1 : 2
+? A
+: B;
+
+type WritableKeys<T> = {
+[P in keyof T]-?: IfEquals<
+  { [Q in P]: T[P] },
+  { -readonly [Q in P]: T[P] },
+  P
+>;
+}[keyof T];
+
+type UnionToIntersection<U> =
+  (U extends any ? (k: U)=>void : never) extends ((k: infer I)=>void) ? I : never;
+type DistributeReadOnlyOverUnions<T> = T extends any ? NonReadonly<T> : never;
+
+type Writable<T> = Pick<T, WritableKeys<T>>;
+type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
+  [P in keyof Writable<T>]: T[P] extends object
+    ? NonReadonly<NonNullable<T[P]>>
+    : T[P];
+} : DistributeReadOnlyOverUnions<T>;
+
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -100,7 +128,7 @@ export const getListRegionsQueryKey = () => {
     }
 
 
-export const getListRegionsQueryOptions = <TData = Awaited<ReturnType<typeof listRegions>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegions>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListRegionsQueryOptions = <TData = Awaited<ReturnType<typeof listRegions>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegions>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -119,10 +147,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListRegionsQueryResult = NonNullable<Awaited<ReturnType<typeof listRegions>>>
-export type ListRegionsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+export type ListRegionsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>
 
 
-export function useListRegions<TData = Awaited<ReturnType<typeof listRegions>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListRegions<TData = Awaited<ReturnType<typeof listRegions>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegions>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listRegions>>,
@@ -132,7 +160,7 @@ export function useListRegions<TData = Awaited<ReturnType<typeof listRegions>>, 
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListRegions<TData = Awaited<ReturnType<typeof listRegions>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListRegions<TData = Awaited<ReturnType<typeof listRegions>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegions>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listRegions>>,
@@ -142,12 +170,12 @@ export function useListRegions<TData = Awaited<ReturnType<typeof listRegions>>, 
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListRegions<TData = Awaited<ReturnType<typeof listRegions>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListRegions<TData = Awaited<ReturnType<typeof listRegions>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegions>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListRegions<TData = Awaited<ReturnType<typeof listRegions>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListRegions<TData = Awaited<ReturnType<typeof listRegions>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegions>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -175,7 +203,7 @@ export const getCreateRegionUrl = () => {
 /**
  * Creates a new region.
  */
-export const createRegion = async (region: Region, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Region> => {
+export const createRegion = async (region: NonReadonly<Region>, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Region> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -206,7 +234,7 @@ return kowabungaFetch<Region>(getCreateRegionUrl(),
 
 export const getCreateRegionMutationKey = () => ['createRegion'] as const;
 
-export const getCreateRegionMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getCreateRegionMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRegion>>, TError,CreateRegionMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createRegion>>, TError,CreateRegionMutationVariables, TContext> => {
 
@@ -234,11 +262,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type CreateRegionMutationResult = NonNullable<Awaited<ReturnType<typeof createRegion>>>
-    export type CreateRegionMutationBody = BodyType<Region>
-    export type CreateRegionMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateRegionMutationVariables = {data: BodyType<Region>}
+    export type CreateRegionMutationBody = BodyType<NonReadonly<Region>>
+    export type CreateRegionMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateRegionMutationVariables = {data: BodyType<NonReadonly<Region>>}
 
-    export const useCreateRegion = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useCreateRegion = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRegion>>, TError,CreateRegionMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createRegion>>,
@@ -276,7 +304,7 @@ export const deleteRegion = async (regionId: string, options?: Parameters<typeof
 
 export const getDeleteRegionMutationKey = () => ['deleteRegion'] as const;
 
-export const getDeleteRegionMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+export const getDeleteRegionMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteRegion>>, TError,DeleteRegionMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteRegion>>, TError,DeleteRegionMutationVariables, TContext> => {
 
@@ -305,10 +333,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type DeleteRegionMutationResult = NonNullable<Awaited<ReturnType<typeof deleteRegion>>>
 
-    export type DeleteRegionMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>
+    export type DeleteRegionMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type DeleteRegionMutationVariables = {regionId: string}
 
-    export const useDeleteRegion = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+    export const useDeleteRegion = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteRegion>>, TError,DeleteRegionMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteRegion>>,
@@ -351,7 +379,7 @@ export const getReadRegionQueryKey = (regionId: string,) => {
     }
 
 
-export const getReadRegionQueryOptions = <TData = Awaited<ReturnType<typeof readRegion>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readRegion>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getReadRegionQueryOptions = <TData = Awaited<ReturnType<typeof readRegion>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readRegion>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -370,10 +398,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadRegionQueryResult = NonNullable<Awaited<ReturnType<typeof readRegion>>>
-export type ReadRegionQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadRegionQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadRegion<TData = Awaited<ReturnType<typeof readRegion>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadRegion<TData = Awaited<ReturnType<typeof readRegion>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  regionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readRegion>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readRegion>>,
@@ -383,7 +411,7 @@ export function useReadRegion<TData = Awaited<ReturnType<typeof readRegion>>, TE
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadRegion<TData = Awaited<ReturnType<typeof readRegion>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadRegion<TData = Awaited<ReturnType<typeof readRegion>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readRegion>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readRegion>>,
@@ -393,12 +421,12 @@ export function useReadRegion<TData = Awaited<ReturnType<typeof readRegion>>, TE
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadRegion<TData = Awaited<ReturnType<typeof readRegion>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadRegion<TData = Awaited<ReturnType<typeof readRegion>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readRegion>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadRegion<TData = Awaited<ReturnType<typeof readRegion>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadRegion<TData = Awaited<ReturnType<typeof readRegion>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readRegion>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -427,7 +455,7 @@ export const getUpdateRegionUrl = (regionId: string,) => {
  * Updates a region configuration.
  */
 export const updateRegion = async (regionId: string,
-    region: Region, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Region> => {
+    regionUpdate: RegionUpdate, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Region> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -448,7 +476,7 @@ return kowabungaFetch<Region>(getUpdateRegionUrl(regionId),
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(region)
+    body: JSON.stringify(regionUpdate)
   }
 );}
 
@@ -458,7 +486,7 @@ return kowabungaFetch<Region>(getUpdateRegionUrl(regionId),
 
 export const getUpdateRegionMutationKey = () => ['updateRegion'] as const;
 
-export const getUpdateRegionMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getUpdateRegionMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRegion>>, TError,UpdateRegionMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateRegion>>, TError,UpdateRegionMutationVariables, TContext> => {
 
@@ -486,11 +514,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateRegionMutationResult = NonNullable<Awaited<ReturnType<typeof updateRegion>>>
-    export type UpdateRegionMutationBody = BodyType<Region>
-    export type UpdateRegionMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type UpdateRegionMutationVariables = {regionId: string;data: BodyType<Region>}
+    export type UpdateRegionMutationBody = BodyType<RegionUpdate>
+    export type UpdateRegionMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type UpdateRegionMutationVariables = {regionId: string;data: BodyType<RegionUpdate>}
 
-    export const useUpdateRegion = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useUpdateRegion = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateRegion>>, TError,UpdateRegionMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateRegion>>,
@@ -500,7 +528,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getUpdateRegionMutationOptions(options), queryClient);
     }
-    export const getCreateZoneUrl = (regionId: string,) => {
+    export const getCreateRegionZoneUrl = (regionId: string,) => {
 
 
 
@@ -511,8 +539,8 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 /**
  * Creates a new availability zone.
  */
-export const createZone = async (regionId: string,
-    zone: Zone, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Zone> => {
+export const createRegionZone = async (regionId: string,
+    zone: NonReadonly<Zone>, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Zone> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -528,7 +556,7 @@ export const createZone = async (regionId: string,
     }
     return headers;
   };
-return kowabungaFetch<Zone>(getCreateZoneUrl(regionId),
+return kowabungaFetch<Zone>(getCreateRegionZoneUrl(regionId),
   {
     ...options,
     method: 'POST',
@@ -541,13 +569,13 @@ return kowabungaFetch<Zone>(getCreateZoneUrl(regionId),
 
 
 
-export const getCreateZoneMutationKey = () => ['createZone'] as const;
+export const getCreateRegionZoneMutationKey = () => ['createRegionZone'] as const;
 
-export const getCreateZoneMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createZone>>, TError,CreateZoneMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createZone>>, TError,CreateZoneMutationVariables, TContext> => {
+export const getCreateRegionZoneMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRegionZone>>, TError,CreateRegionZoneMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createRegionZone>>, TError,CreateRegionZoneMutationVariables, TContext> => {
 
-const mutationKey = getCreateZoneMutationKey();
+const mutationKey = getCreateRegionZoneMutationKey();
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -557,10 +585,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createZone>>, CreateZoneMutationVariables> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createRegionZone>>, CreateRegionZoneMutationVariables> = (props) => {
           const {regionId,data} = props ?? {};
 
-          return  createZone(regionId,data,requestOptions)
+          return  createRegionZone(regionId,data,requestOptions)
         }
 
 
@@ -570,20 +598,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type CreateZoneMutationResult = NonNullable<Awaited<ReturnType<typeof createZone>>>
-    export type CreateZoneMutationBody = BodyType<Zone>
-    export type CreateZoneMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateZoneMutationVariables = {regionId: string;data: BodyType<Zone>}
+    export type CreateRegionZoneMutationResult = NonNullable<Awaited<ReturnType<typeof createRegionZone>>>
+    export type CreateRegionZoneMutationBody = BodyType<NonReadonly<Zone>>
+    export type CreateRegionZoneMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateRegionZoneMutationVariables = {regionId: string;data: BodyType<NonReadonly<Zone>>}
 
-    export const useCreateZone = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createZone>>, TError,CreateZoneMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
+    export const useCreateRegionZone = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRegionZone>>, TError,CreateRegionZoneMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof createZone>>,
+        Awaited<ReturnType<typeof createRegionZone>>,
         TError,
-        CreateZoneMutationVariables,
+        CreateRegionZoneMutationVariables,
         TContext
       > => {
-      return useMutation(getCreateZoneMutationOptions(options), queryClient);
+      return useMutation(getCreateRegionZoneMutationOptions(options), queryClient);
     }
     export const getListRegionZonesUrl = (regionId: string,) => {
 
@@ -618,7 +646,7 @@ export const getListRegionZonesQueryKey = (regionId: string,) => {
     }
 
 
-export const getListRegionZonesQueryOptions = <TData = Awaited<ReturnType<typeof listRegionZones>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionZones>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListRegionZonesQueryOptions = <TData = Awaited<ReturnType<typeof listRegionZones>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionZones>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -637,10 +665,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListRegionZonesQueryResult = NonNullable<Awaited<ReturnType<typeof listRegionZones>>>
-export type ListRegionZonesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ListRegionZonesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useListRegionZones<TData = Awaited<ReturnType<typeof listRegionZones>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListRegionZones<TData = Awaited<ReturnType<typeof listRegionZones>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  regionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionZones>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listRegionZones>>,
@@ -650,7 +678,7 @@ export function useListRegionZones<TData = Awaited<ReturnType<typeof listRegionZ
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListRegionZones<TData = Awaited<ReturnType<typeof listRegionZones>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListRegionZones<TData = Awaited<ReturnType<typeof listRegionZones>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionZones>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listRegionZones>>,
@@ -660,12 +688,12 @@ export function useListRegionZones<TData = Awaited<ReturnType<typeof listRegionZ
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListRegionZones<TData = Awaited<ReturnType<typeof listRegionZones>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListRegionZones<TData = Awaited<ReturnType<typeof listRegionZones>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionZones>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListRegionZones<TData = Awaited<ReturnType<typeof listRegionZones>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListRegionZones<TData = Awaited<ReturnType<typeof listRegionZones>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionZones>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -682,7 +710,7 @@ export function useListRegionZones<TData = Awaited<ReturnType<typeof listRegionZ
 
 
 
-export const getCreateStoragePoolUrl = (regionId: string,) => {
+export const getCreateRegionStoragePoolUrl = (regionId: string,) => {
 
 
 
@@ -693,8 +721,8 @@ export const getCreateStoragePoolUrl = (regionId: string,) => {
 /**
  * Creates a new storage pool.
  */
-export const createStoragePool = async (regionId: string,
-    storagePool: StoragePool, options?: Parameters<typeof kowabungaFetch>[1]): Promise<StoragePool> => {
+export const createRegionStoragePool = async (regionId: string,
+    storagePool: NonReadonly<StoragePool>, options?: Parameters<typeof kowabungaFetch>[1]): Promise<StoragePool> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -710,7 +738,7 @@ export const createStoragePool = async (regionId: string,
     }
     return headers;
   };
-return kowabungaFetch<StoragePool>(getCreateStoragePoolUrl(regionId),
+return kowabungaFetch<StoragePool>(getCreateRegionStoragePoolUrl(regionId),
   {
     ...options,
     method: 'POST',
@@ -723,13 +751,13 @@ return kowabungaFetch<StoragePool>(getCreateStoragePoolUrl(regionId),
 
 
 
-export const getCreateStoragePoolMutationKey = () => ['createStoragePool'] as const;
+export const getCreateRegionStoragePoolMutationKey = () => ['createRegionStoragePool'] as const;
 
-export const getCreateStoragePoolMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStoragePool>>, TError,CreateStoragePoolMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createStoragePool>>, TError,CreateStoragePoolMutationVariables, TContext> => {
+export const getCreateRegionStoragePoolMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRegionStoragePool>>, TError,CreateRegionStoragePoolMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createRegionStoragePool>>, TError,CreateRegionStoragePoolMutationVariables, TContext> => {
 
-const mutationKey = getCreateStoragePoolMutationKey();
+const mutationKey = getCreateRegionStoragePoolMutationKey();
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -739,10 +767,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createStoragePool>>, CreateStoragePoolMutationVariables> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createRegionStoragePool>>, CreateRegionStoragePoolMutationVariables> = (props) => {
           const {regionId,data} = props ?? {};
 
-          return  createStoragePool(regionId,data,requestOptions)
+          return  createRegionStoragePool(regionId,data,requestOptions)
         }
 
 
@@ -752,22 +780,22 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type CreateStoragePoolMutationResult = NonNullable<Awaited<ReturnType<typeof createStoragePool>>>
-    export type CreateStoragePoolMutationBody = BodyType<StoragePool>
-    export type CreateStoragePoolMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateStoragePoolMutationVariables = {regionId: string;data: BodyType<StoragePool>}
+    export type CreateRegionStoragePoolMutationResult = NonNullable<Awaited<ReturnType<typeof createRegionStoragePool>>>
+    export type CreateRegionStoragePoolMutationBody = BodyType<NonReadonly<StoragePool>>
+    export type CreateRegionStoragePoolMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateRegionStoragePoolMutationVariables = {regionId: string;data: BodyType<NonReadonly<StoragePool>>}
 
-    export const useCreateStoragePool = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStoragePool>>, TError,CreateStoragePoolMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
+    export const useCreateRegionStoragePool = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRegionStoragePool>>, TError,CreateRegionStoragePoolMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof createStoragePool>>,
+        Awaited<ReturnType<typeof createRegionStoragePool>>,
         TError,
-        CreateStoragePoolMutationVariables,
+        CreateRegionStoragePoolMutationVariables,
         TContext
       > => {
-      return useMutation(getCreateStoragePoolMutationOptions(options), queryClient);
+      return useMutation(getCreateRegionStoragePoolMutationOptions(options), queryClient);
     }
-    export const getCreateKiwiUrl = (regionId: string,) => {
+    export const getCreateRegionKiwiUrl = (regionId: string,) => {
 
 
 
@@ -778,8 +806,8 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 /**
  * Creates a new Kiwi (Kowabunga Inner Wan Interface) provides edge-network services..
  */
-export const createKiwi = async (regionId: string,
-    kiwi: Kiwi, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Kiwi> => {
+export const createRegionKiwi = async (regionId: string,
+    kiwi: NonReadonly<Kiwi>, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Kiwi> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -795,7 +823,7 @@ export const createKiwi = async (regionId: string,
     }
     return headers;
   };
-return kowabungaFetch<Kiwi>(getCreateKiwiUrl(regionId),
+return kowabungaFetch<Kiwi>(getCreateRegionKiwiUrl(regionId),
   {
     ...options,
     method: 'POST',
@@ -808,13 +836,13 @@ return kowabungaFetch<Kiwi>(getCreateKiwiUrl(regionId),
 
 
 
-export const getCreateKiwiMutationKey = () => ['createKiwi'] as const;
+export const getCreateRegionKiwiMutationKey = () => ['createRegionKiwi'] as const;
 
-export const getCreateKiwiMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createKiwi>>, TError,CreateKiwiMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createKiwi>>, TError,CreateKiwiMutationVariables, TContext> => {
+export const getCreateRegionKiwiMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRegionKiwi>>, TError,CreateRegionKiwiMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createRegionKiwi>>, TError,CreateRegionKiwiMutationVariables, TContext> => {
 
-const mutationKey = getCreateKiwiMutationKey();
+const mutationKey = getCreateRegionKiwiMutationKey();
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -824,10 +852,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createKiwi>>, CreateKiwiMutationVariables> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createRegionKiwi>>, CreateRegionKiwiMutationVariables> = (props) => {
           const {regionId,data} = props ?? {};
 
-          return  createKiwi(regionId,data,requestOptions)
+          return  createRegionKiwi(regionId,data,requestOptions)
         }
 
 
@@ -837,20 +865,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type CreateKiwiMutationResult = NonNullable<Awaited<ReturnType<typeof createKiwi>>>
-    export type CreateKiwiMutationBody = BodyType<Kiwi>
-    export type CreateKiwiMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateKiwiMutationVariables = {regionId: string;data: BodyType<Kiwi>}
+    export type CreateRegionKiwiMutationResult = NonNullable<Awaited<ReturnType<typeof createRegionKiwi>>>
+    export type CreateRegionKiwiMutationBody = BodyType<NonReadonly<Kiwi>>
+    export type CreateRegionKiwiMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateRegionKiwiMutationVariables = {regionId: string;data: BodyType<NonReadonly<Kiwi>>}
 
-    export const useCreateKiwi = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createKiwi>>, TError,CreateKiwiMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
+    export const useCreateRegionKiwi = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRegionKiwi>>, TError,CreateRegionKiwiMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof createKiwi>>,
+        Awaited<ReturnType<typeof createRegionKiwi>>,
         TError,
-        CreateKiwiMutationVariables,
+        CreateRegionKiwiMutationVariables,
         TContext
       > => {
-      return useMutation(getCreateKiwiMutationOptions(options), queryClient);
+      return useMutation(getCreateRegionKiwiMutationOptions(options), queryClient);
     }
     export const getListRegionKiwisUrl = (regionId: string,) => {
 
@@ -885,7 +913,7 @@ export const getListRegionKiwisQueryKey = (regionId: string,) => {
     }
 
 
-export const getListRegionKiwisQueryOptions = <TData = Awaited<ReturnType<typeof listRegionKiwis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionKiwis>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListRegionKiwisQueryOptions = <TData = Awaited<ReturnType<typeof listRegionKiwis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionKiwis>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -904,10 +932,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListRegionKiwisQueryResult = NonNullable<Awaited<ReturnType<typeof listRegionKiwis>>>
-export type ListRegionKiwisQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ListRegionKiwisQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useListRegionKiwis<TData = Awaited<ReturnType<typeof listRegionKiwis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListRegionKiwis<TData = Awaited<ReturnType<typeof listRegionKiwis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  regionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionKiwis>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listRegionKiwis>>,
@@ -917,7 +945,7 @@ export function useListRegionKiwis<TData = Awaited<ReturnType<typeof listRegionK
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListRegionKiwis<TData = Awaited<ReturnType<typeof listRegionKiwis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListRegionKiwis<TData = Awaited<ReturnType<typeof listRegionKiwis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionKiwis>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listRegionKiwis>>,
@@ -927,12 +955,12 @@ export function useListRegionKiwis<TData = Awaited<ReturnType<typeof listRegionK
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListRegionKiwis<TData = Awaited<ReturnType<typeof listRegionKiwis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListRegionKiwis<TData = Awaited<ReturnType<typeof listRegionKiwis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionKiwis>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListRegionKiwis<TData = Awaited<ReturnType<typeof listRegionKiwis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListRegionKiwis<TData = Awaited<ReturnType<typeof listRegionKiwis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionKiwis>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -949,7 +977,7 @@ export function useListRegionKiwis<TData = Awaited<ReturnType<typeof listRegionK
 
 
 
-export const getCreateVNetUrl = (regionId: string,) => {
+export const getCreateRegionVNetUrl = (regionId: string,) => {
 
 
 
@@ -960,8 +988,8 @@ export const getCreateVNetUrl = (regionId: string,) => {
 /**
  * Creates a new virtual network.
  */
-export const createVNet = async (regionId: string,
-    vNet: VNet, options?: Parameters<typeof kowabungaFetch>[1]): Promise<VNet> => {
+export const createRegionVNet = async (regionId: string,
+    vNet: NonReadonly<VNet>, options?: Parameters<typeof kowabungaFetch>[1]): Promise<VNet> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -977,7 +1005,7 @@ export const createVNet = async (regionId: string,
     }
     return headers;
   };
-return kowabungaFetch<VNet>(getCreateVNetUrl(regionId),
+return kowabungaFetch<VNet>(getCreateRegionVNetUrl(regionId),
   {
     ...options,
     method: 'POST',
@@ -990,13 +1018,13 @@ return kowabungaFetch<VNet>(getCreateVNetUrl(regionId),
 
 
 
-export const getCreateVNetMutationKey = () => ['createVNet'] as const;
+export const getCreateRegionVNetMutationKey = () => ['createRegionVNet'] as const;
 
-export const getCreateVNetMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createVNet>>, TError,CreateVNetMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createVNet>>, TError,CreateVNetMutationVariables, TContext> => {
+export const getCreateRegionVNetMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRegionVNet>>, TError,CreateRegionVNetMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createRegionVNet>>, TError,CreateRegionVNetMutationVariables, TContext> => {
 
-const mutationKey = getCreateVNetMutationKey();
+const mutationKey = getCreateRegionVNetMutationKey();
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -1006,10 +1034,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createVNet>>, CreateVNetMutationVariables> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createRegionVNet>>, CreateRegionVNetMutationVariables> = (props) => {
           const {regionId,data} = props ?? {};
 
-          return  createVNet(regionId,data,requestOptions)
+          return  createRegionVNet(regionId,data,requestOptions)
         }
 
 
@@ -1019,20 +1047,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type CreateVNetMutationResult = NonNullable<Awaited<ReturnType<typeof createVNet>>>
-    export type CreateVNetMutationBody = BodyType<VNet>
-    export type CreateVNetMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateVNetMutationVariables = {regionId: string;data: BodyType<VNet>}
+    export type CreateRegionVNetMutationResult = NonNullable<Awaited<ReturnType<typeof createRegionVNet>>>
+    export type CreateRegionVNetMutationBody = BodyType<NonReadonly<VNet>>
+    export type CreateRegionVNetMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateRegionVNetMutationVariables = {regionId: string;data: BodyType<NonReadonly<VNet>>}
 
-    export const useCreateVNet = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createVNet>>, TError,CreateVNetMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
+    export const useCreateRegionVNet = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRegionVNet>>, TError,CreateRegionVNetMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof createVNet>>,
+        Awaited<ReturnType<typeof createRegionVNet>>,
         TError,
-        CreateVNetMutationVariables,
+        CreateRegionVNetMutationVariables,
         TContext
       > => {
-      return useMutation(getCreateVNetMutationOptions(options), queryClient);
+      return useMutation(getCreateRegionVNetMutationOptions(options), queryClient);
     }
     export const getListRegionVNetsUrl = (regionId: string,) => {
 
@@ -1067,7 +1095,7 @@ export const getListRegionVNetsQueryKey = (regionId: string,) => {
     }
 
 
-export const getListRegionVNetsQueryOptions = <TData = Awaited<ReturnType<typeof listRegionVNets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionVNets>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListRegionVNetsQueryOptions = <TData = Awaited<ReturnType<typeof listRegionVNets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionVNets>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -1086,10 +1114,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListRegionVNetsQueryResult = NonNullable<Awaited<ReturnType<typeof listRegionVNets>>>
-export type ListRegionVNetsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ListRegionVNetsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useListRegionVNets<TData = Awaited<ReturnType<typeof listRegionVNets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListRegionVNets<TData = Awaited<ReturnType<typeof listRegionVNets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  regionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionVNets>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listRegionVNets>>,
@@ -1099,7 +1127,7 @@ export function useListRegionVNets<TData = Awaited<ReturnType<typeof listRegionV
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListRegionVNets<TData = Awaited<ReturnType<typeof listRegionVNets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListRegionVNets<TData = Awaited<ReturnType<typeof listRegionVNets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionVNets>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listRegionVNets>>,
@@ -1109,12 +1137,12 @@ export function useListRegionVNets<TData = Awaited<ReturnType<typeof listRegionV
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListRegionVNets<TData = Awaited<ReturnType<typeof listRegionVNets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListRegionVNets<TData = Awaited<ReturnType<typeof listRegionVNets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionVNets>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListRegionVNets<TData = Awaited<ReturnType<typeof listRegionVNets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListRegionVNets<TData = Awaited<ReturnType<typeof listRegionVNets>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionVNets>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -1161,7 +1189,7 @@ export const setRegionDefaultStoragePool = async (regionId: string,
 
 export const getSetRegionDefaultStoragePoolMutationKey = () => ['setRegionDefaultStoragePool'] as const;
 
-export const getSetRegionDefaultStoragePoolMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+export const getSetRegionDefaultStoragePoolMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setRegionDefaultStoragePool>>, TError,SetRegionDefaultStoragePoolMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof setRegionDefaultStoragePool>>, TError,SetRegionDefaultStoragePoolMutationVariables, TContext> => {
 
@@ -1190,10 +1218,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type SetRegionDefaultStoragePoolMutationResult = NonNullable<Awaited<ReturnType<typeof setRegionDefaultStoragePool>>>
 
-    export type SetRegionDefaultStoragePoolMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>
+    export type SetRegionDefaultStoragePoolMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type SetRegionDefaultStoragePoolMutationVariables = {regionId: string;poolId: string}
 
-    export const useSetRegionDefaultStoragePool = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+    export const useSetRegionDefaultStoragePool = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setRegionDefaultStoragePool>>, TError,SetRegionDefaultStoragePoolMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof setRegionDefaultStoragePool>>,
@@ -1236,7 +1264,7 @@ export const getListRegionStoragePoolsQueryKey = (regionId: string,) => {
     }
 
 
-export const getListRegionStoragePoolsQueryOptions = <TData = Awaited<ReturnType<typeof listRegionStoragePools>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionStoragePools>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListRegionStoragePoolsQueryOptions = <TData = Awaited<ReturnType<typeof listRegionStoragePools>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionStoragePools>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -1255,10 +1283,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListRegionStoragePoolsQueryResult = NonNullable<Awaited<ReturnType<typeof listRegionStoragePools>>>
-export type ListRegionStoragePoolsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ListRegionStoragePoolsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useListRegionStoragePools<TData = Awaited<ReturnType<typeof listRegionStoragePools>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListRegionStoragePools<TData = Awaited<ReturnType<typeof listRegionStoragePools>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  regionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionStoragePools>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listRegionStoragePools>>,
@@ -1268,7 +1296,7 @@ export function useListRegionStoragePools<TData = Awaited<ReturnType<typeof list
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListRegionStoragePools<TData = Awaited<ReturnType<typeof listRegionStoragePools>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListRegionStoragePools<TData = Awaited<ReturnType<typeof listRegionStoragePools>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionStoragePools>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listRegionStoragePools>>,
@@ -1278,12 +1306,12 @@ export function useListRegionStoragePools<TData = Awaited<ReturnType<typeof list
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListRegionStoragePools<TData = Awaited<ReturnType<typeof listRegionStoragePools>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListRegionStoragePools<TData = Awaited<ReturnType<typeof listRegionStoragePools>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionStoragePools>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListRegionStoragePools<TData = Awaited<ReturnType<typeof listRegionStoragePools>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListRegionStoragePools<TData = Awaited<ReturnType<typeof listRegionStoragePools>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionStoragePools>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -1300,120 +1328,8 @@ export function useListRegionStoragePools<TData = Awaited<ReturnType<typeof list
 
 
 
-export const getListRegionStorageNFSsUrl = (regionId: string,
-    params?: ListRegionStorageNFSsParams,) => {
-  const normalizedParams = new URLSearchParams();
-
-  Object.entries(params || {}).forEach(([key, value]) => {
-
-    if (value !== undefined) {
-      normalizedParams.append(key, value === null ? 'null' : String(value))
-    }
-  });
-
-  const stringifiedParams = normalizedParams.toString();
-
-  return stringifiedParams.length > 0 ? `/region/${regionId}/nfs?${stringifiedParams}` : `/region/${regionId}/nfs`
-}
-
-/**
- * Returns the IDs of NFS storage objects.
- */
-export const listRegionStorageNFSs = async (regionId: string,
-    params?: ListRegionStorageNFSsParams, options?: Parameters<typeof kowabungaFetch>[1]): Promise<ObjectIds> => {
-
-  return kowabungaFetch<ObjectIds>(getListRegionStorageNFSsUrl(regionId,params),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-);}
-
-
-
-
-
-export const getListRegionStorageNFSsQueryKey = (regionId: string,
-    params?: ListRegionStorageNFSsParams,) => {
-    return [
-    `/region/${regionId}/nfs`, ...(params ? [params] : [])
-    ] as const;
-    }
-
-
-export const getListRegionStorageNFSsQueryOptions = <TData = Awaited<ReturnType<typeof listRegionStorageNFSs>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(regionId: string,
-    params?: ListRegionStorageNFSsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionStorageNFSs>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getListRegionStorageNFSsQueryKey(regionId,params);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listRegionStorageNFSs>>> = ({ signal }) => listRegionStorageNFSs(regionId,params, { signal, ...requestOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: regionId !== null && regionId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listRegionStorageNFSs>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type ListRegionStorageNFSsQueryResult = NonNullable<Awaited<ReturnType<typeof listRegionStorageNFSs>>>
-export type ListRegionStorageNFSsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
-
-
-export function useListRegionStorageNFSs<TData = Awaited<ReturnType<typeof listRegionStorageNFSs>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
- regionId: string,
-    params: undefined |  ListRegionStorageNFSsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionStorageNFSs>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listRegionStorageNFSs>>,
-          TError,
-          Awaited<ReturnType<typeof listRegionStorageNFSs>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof kowabungaFetch>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListRegionStorageNFSs<TData = Awaited<ReturnType<typeof listRegionStorageNFSs>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
- regionId: string,
-    params?: ListRegionStorageNFSsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionStorageNFSs>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listRegionStorageNFSs>>,
-          TError,
-          Awaited<ReturnType<typeof listRegionStorageNFSs>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof kowabungaFetch>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListRegionStorageNFSs<TData = Awaited<ReturnType<typeof listRegionStorageNFSs>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
- regionId: string,
-    params?: ListRegionStorageNFSsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionStorageNFSs>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-
-export function useListRegionStorageNFSs<TData = Awaited<ReturnType<typeof listRegionStorageNFSs>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
- regionId: string,
-    params?: ListRegionStorageNFSsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionStorageNFSs>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getListRegionStorageNFSsQueryOptions(regionId,params,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return withQueryKey(query, queryOptions.queryKey);
-}
-
-
-
-
-
-
-export const getCreateStorageNFSUrl = (regionId: string,
-    params?: CreateStorageNFSParams,) => {
+export const getCreateRegionStorageNFSUrl = (regionId: string,
+    params?: CreateRegionStorageNFSParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -1431,9 +1347,9 @@ export const getCreateStorageNFSUrl = (regionId: string,
 /**
  * Creates a new NFS storage.
  */
-export const createStorageNFS = async (regionId: string,
-    storageNFS: StorageNFS,
-    params?: CreateStorageNFSParams, options?: Parameters<typeof kowabungaFetch>[1]): Promise<StorageNFS> => {
+export const createRegionStorageNFS = async (regionId: string,
+    storageNFS: NonReadonly<StorageNFS>,
+    params?: CreateRegionStorageNFSParams, options?: Parameters<typeof kowabungaFetch>[1]): Promise<StorageNFS> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -1449,7 +1365,7 @@ export const createStorageNFS = async (regionId: string,
     }
     return headers;
   };
-return kowabungaFetch<StorageNFS>(getCreateStorageNFSUrl(regionId,params),
+return kowabungaFetch<StorageNFS>(getCreateRegionStorageNFSUrl(regionId,params),
   {
     ...options,
     method: 'POST',
@@ -1462,13 +1378,13 @@ return kowabungaFetch<StorageNFS>(getCreateStorageNFSUrl(regionId,params),
 
 
 
-export const getCreateStorageNFSMutationKey = () => ['createStorageNFS'] as const;
+export const getCreateRegionStorageNFSMutationKey = () => ['createRegionStorageNFS'] as const;
 
-export const getCreateStorageNFSMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStorageNFS>>, TError,CreateStorageNFSMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createStorageNFS>>, TError,CreateStorageNFSMutationVariables, TContext> => {
+export const getCreateRegionStorageNFSMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRegionStorageNFS>>, TError,CreateRegionStorageNFSMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createRegionStorageNFS>>, TError,CreateRegionStorageNFSMutationVariables, TContext> => {
 
-const mutationKey = getCreateStorageNFSMutationKey();
+const mutationKey = getCreateRegionStorageNFSMutationKey();
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -1478,10 +1394,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createStorageNFS>>, CreateStorageNFSMutationVariables> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createRegionStorageNFS>>, CreateRegionStorageNFSMutationVariables> = (props) => {
           const {regionId,data,params} = props ?? {};
 
-          return  createStorageNFS(regionId,data,params,requestOptions)
+          return  createRegionStorageNFS(regionId,data,params,requestOptions)
         }
 
 
@@ -1491,22 +1407,119 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type CreateStorageNFSMutationResult = NonNullable<Awaited<ReturnType<typeof createStorageNFS>>>
-    export type CreateStorageNFSMutationBody = BodyType<StorageNFS>
-    export type CreateStorageNFSMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateStorageNFSMutationVariables = {regionId: string;data: BodyType<StorageNFS>;params?: CreateStorageNFSParams}
+    export type CreateRegionStorageNFSMutationResult = NonNullable<Awaited<ReturnType<typeof createRegionStorageNFS>>>
+    export type CreateRegionStorageNFSMutationBody = BodyType<NonReadonly<StorageNFS>>
+    export type CreateRegionStorageNFSMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateRegionStorageNFSMutationVariables = {regionId: string;data: BodyType<NonReadonly<StorageNFS>>;params?: CreateRegionStorageNFSParams}
 
-    export const useCreateStorageNFS = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStorageNFS>>, TError,CreateStorageNFSMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
+    export const useCreateRegionStorageNFS = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRegionStorageNFS>>, TError,CreateRegionStorageNFSMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof createStorageNFS>>,
+        Awaited<ReturnType<typeof createRegionStorageNFS>>,
         TError,
-        CreateStorageNFSMutationVariables,
+        CreateRegionStorageNFSMutationVariables,
         TContext
       > => {
-      return useMutation(getCreateStorageNFSMutationOptions(options), queryClient);
+      return useMutation(getCreateRegionStorageNFSMutationOptions(options), queryClient);
     }
-    export const getSetRegionDefaultStorageNFSUrl = (regionId: string,
+    export const getListRegionStorageNFSesUrl = (regionId: string,) => {
+
+
+
+
+  return `/region/${regionId}/nfses`
+}
+
+/**
+ * Returns the IDs of NFS storage objects.
+ */
+export const listRegionStorageNFSes = async (regionId: string, options?: Parameters<typeof kowabungaFetch>[1]): Promise<ObjectIds> => {
+
+  return kowabungaFetch<ObjectIds>(getListRegionStorageNFSesUrl(regionId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListRegionStorageNFSesQueryKey = (regionId: string,) => {
+    return [
+    `/region/${regionId}/nfses`
+    ] as const;
+    }
+
+
+export const getListRegionStorageNFSesQueryOptions = <TData = Awaited<ReturnType<typeof listRegionStorageNFSes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionStorageNFSes>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListRegionStorageNFSesQueryKey(regionId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listRegionStorageNFSes>>> = ({ signal }) => listRegionStorageNFSes(regionId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: regionId !== null && regionId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listRegionStorageNFSes>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListRegionStorageNFSesQueryResult = NonNullable<Awaited<ReturnType<typeof listRegionStorageNFSes>>>
+export type ListRegionStorageNFSesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
+
+
+export function useListRegionStorageNFSes<TData = Awaited<ReturnType<typeof listRegionStorageNFSes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
+ regionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionStorageNFSes>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listRegionStorageNFSes>>,
+          TError,
+          Awaited<ReturnType<typeof listRegionStorageNFSes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof kowabungaFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListRegionStorageNFSes<TData = Awaited<ReturnType<typeof listRegionStorageNFSes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
+ regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionStorageNFSes>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listRegionStorageNFSes>>,
+          TError,
+          Awaited<ReturnType<typeof listRegionStorageNFSes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof kowabungaFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListRegionStorageNFSes<TData = Awaited<ReturnType<typeof listRegionStorageNFSes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
+ regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionStorageNFSes>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useListRegionStorageNFSes<TData = Awaited<ReturnType<typeof listRegionStorageNFSes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
+ regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionStorageNFSes>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListRegionStorageNFSesQueryOptions(regionId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+export const getSetRegionDefaultStorageNFSUrl = (regionId: string,
     nfsId: string,) => {
 
 
@@ -1536,7 +1549,7 @@ export const setRegionDefaultStorageNFS = async (regionId: string,
 
 export const getSetRegionDefaultStorageNFSMutationKey = () => ['setRegionDefaultStorageNFS'] as const;
 
-export const getSetRegionDefaultStorageNFSMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+export const getSetRegionDefaultStorageNFSMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setRegionDefaultStorageNFS>>, TError,SetRegionDefaultStorageNFSMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof setRegionDefaultStorageNFS>>, TError,SetRegionDefaultStorageNFSMutationVariables, TContext> => {
 
@@ -1565,10 +1578,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type SetRegionDefaultStorageNFSMutationResult = NonNullable<Awaited<ReturnType<typeof setRegionDefaultStorageNFS>>>
 
-    export type SetRegionDefaultStorageNFSMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>
+    export type SetRegionDefaultStorageNFSMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type SetRegionDefaultStorageNFSMutationVariables = {regionId: string;nfsId: string}
 
-    export const useSetRegionDefaultStorageNFS = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+    export const useSetRegionDefaultStorageNFS = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setRegionDefaultStorageNFS>>, TError,SetRegionDefaultStorageNFSMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof setRegionDefaultStorageNFS>>,
@@ -1590,7 +1603,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
  * Creates a new DNS record.
  */
 export const createRegionDnsRecord = async (regionId: string,
-    dnsRecord: DnsRecord, options?: Parameters<typeof kowabungaFetch>[1]): Promise<DnsRecord> => {
+    dnsRecord: NonReadonly<DnsRecord>, options?: Parameters<typeof kowabungaFetch>[1]): Promise<DnsRecord> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -1621,7 +1634,7 @@ return kowabungaFetch<DnsRecord>(getCreateRegionDnsRecordUrl(regionId),
 
 export const getCreateRegionDnsRecordMutationKey = () => ['createRegionDnsRecord'] as const;
 
-export const getCreateRegionDnsRecordMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getCreateRegionDnsRecordMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRegionDnsRecord>>, TError,CreateRegionDnsRecordMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createRegionDnsRecord>>, TError,CreateRegionDnsRecordMutationVariables, TContext> => {
 
@@ -1649,11 +1662,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type CreateRegionDnsRecordMutationResult = NonNullable<Awaited<ReturnType<typeof createRegionDnsRecord>>>
-    export type CreateRegionDnsRecordMutationBody = BodyType<DnsRecord>
-    export type CreateRegionDnsRecordMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateRegionDnsRecordMutationVariables = {regionId: string;data: BodyType<DnsRecord>}
+    export type CreateRegionDnsRecordMutationBody = BodyType<NonReadonly<DnsRecord>>
+    export type CreateRegionDnsRecordMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateRegionDnsRecordMutationVariables = {regionId: string;data: BodyType<NonReadonly<DnsRecord>>}
 
-    export const useCreateRegionDnsRecord = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useCreateRegionDnsRecord = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createRegionDnsRecord>>, TError,CreateRegionDnsRecordMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createRegionDnsRecord>>,
@@ -1696,7 +1709,7 @@ export const getListRegionDnsRecordsQueryKey = (regionId: string,) => {
     }
 
 
-export const getListRegionDnsRecordsQueryOptions = <TData = Awaited<ReturnType<typeof listRegionDnsRecords>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionDnsRecords>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListRegionDnsRecordsQueryOptions = <TData = Awaited<ReturnType<typeof listRegionDnsRecords>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionDnsRecords>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -1715,10 +1728,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListRegionDnsRecordsQueryResult = NonNullable<Awaited<ReturnType<typeof listRegionDnsRecords>>>
-export type ListRegionDnsRecordsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ListRegionDnsRecordsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useListRegionDnsRecords<TData = Awaited<ReturnType<typeof listRegionDnsRecords>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListRegionDnsRecords<TData = Awaited<ReturnType<typeof listRegionDnsRecords>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  regionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionDnsRecords>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listRegionDnsRecords>>,
@@ -1728,7 +1741,7 @@ export function useListRegionDnsRecords<TData = Awaited<ReturnType<typeof listRe
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListRegionDnsRecords<TData = Awaited<ReturnType<typeof listRegionDnsRecords>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListRegionDnsRecords<TData = Awaited<ReturnType<typeof listRegionDnsRecords>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionDnsRecords>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listRegionDnsRecords>>,
@@ -1738,12 +1751,12 @@ export function useListRegionDnsRecords<TData = Awaited<ReturnType<typeof listRe
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListRegionDnsRecords<TData = Awaited<ReturnType<typeof listRegionDnsRecords>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListRegionDnsRecords<TData = Awaited<ReturnType<typeof listRegionDnsRecords>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionDnsRecords>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListRegionDnsRecords<TData = Awaited<ReturnType<typeof listRegionDnsRecords>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListRegionDnsRecords<TData = Awaited<ReturnType<typeof listRegionDnsRecords>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  regionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listRegionDnsRecords>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {

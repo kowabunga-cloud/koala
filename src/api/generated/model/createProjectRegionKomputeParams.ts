@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import type { OptionalQueryKomputePublicParameter } from './optionalQueryKomputePublicParameter';
 import type { OptionalQueryPoolIDParameter } from './optionalQueryPoolIDParameter';
@@ -19,7 +19,7 @@ poolId?: OptionalQueryPoolIDParameter;
  */
 templateId?: OptionalQueryTemplateIDParameter;
 /**
- * Should Kompute be exposed over public Internet ? (a public IPv4 address will then be auto-assigned, default to false).
+ * Whether the Kompute should be exposed over public Internet (a public IPv4 address will then be auto-assigned).
  */
 public?: OptionalQueryKomputePublicParameter;
 };

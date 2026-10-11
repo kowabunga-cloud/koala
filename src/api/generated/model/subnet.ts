@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import type { IpRange } from './ipRange';
 import type { SubnetApplication } from './subnetApplication';
@@ -12,19 +12,19 @@ import type { SubnetApplication } from './subnetApplication';
  * A network subnet.
  */
 export interface Subnet {
-  /** The network subnet ID (auto-generated). */
-  id?: string;
+  /** The network subnet ID (auto-generated) (read-only). */
+  readonly id?: string;
   /** The network subnet name. */
   name: string;
   /** The network subnet description. */
   description?: string;
-  /** The network subnet CIDR (e.g. 192.168.0.0/24). */
+  /** The network subnet CIDR (e.g. 192.168.0.0/24). Can only be set at creation time, ignored on updates. */
   cidr: string;
   /** The network subnet router/gateway IP address (e.g. 192.168.0.254). */
   gateway: string;
   /** The network subnet DNS server IP address (gateway value if unspecified). */
   dns?: string;
-  /** The list of extra routes to be access through designated gateway (format is 10.0.0.0/8). */
+  /** The list of extra routes to be accessed through designated gateway (format is 10.0.0.0/8). */
   extra_routes?: string[];
   /** The network subnet reserved IPv4 ranges (i.e. no IP address can be assigned from there). */
   reserved?: IpRange[];

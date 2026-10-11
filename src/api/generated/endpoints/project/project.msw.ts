@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   HttpResponse,
@@ -59,7 +59,7 @@ import {
   getUpdateProjectResponseMock
 } from './project.faker';
 
-export { getListProjectsResponseMock, getCreateProjectResponseMock, getReadProjectResponseMock, getUpdateProjectResponseMock, getReadProjectCostResponseMock, getReadProjectUsageResponseMock, getCreateProjectKwarantineResponseMock, getListProjectKwarantinesResponseMock, getCreateProjectDnsRecordResponseMock, getListProjectDnsRecordsResponseMock, getCreateProjectRegionVolumeResponseMock, getListProjectRegionVolumesResponseMock, getCreateProjectZoneInstanceResponseMock, getListProjectZoneInstancesResponseMock, getCreateProjectRegionInstanceResponseMock, getListProjectRegionInstancesResponseMock, getCreateProjectZoneKomputeResponseMock, getListProjectZoneKomputesResponseMock, getCreateProjectRegionKomputeResponseMock, getListProjectRegionKomputesResponseMock, getListProjectRegionKylosResponseMock, getCreateProjectRegionKyloResponseMock, getCreateProjectRegionKawaiiResponseMock, getListProjectRegionKawaiisResponseMock, getCreateProjectZoneKonveyResponseMock, getListProjectZoneKonveysResponseMock, getCreateProjectRegionKonveyResponseMock, getListProjectRegionKonveysResponseMock } from './project.faker';
+export { getListProjectsResponseMock, getCreateProjectResponseMock, getReadProjectResponseMock, getUpdateProjectResponseMock, getReadProjectCostResponseMock, getReadProjectUsageResponseMock, getCreateProjectKwarantineResponseMock, getListProjectKwarantinesResponseMock, getCreateProjectDnsRecordResponseMock, getListProjectDnsRecordsResponseMock, getCreateProjectRegionVolumeResponseMock, getListProjectRegionVolumesResponseMock, getCreateProjectZoneInstanceResponseMock, getListProjectZoneInstancesResponseMock, getCreateProjectRegionInstanceResponseMock, getListProjectRegionInstancesResponseMock, getCreateProjectZoneKomputeResponseMock, getListProjectZoneKomputesResponseMock, getCreateProjectRegionKomputeResponseMock, getListProjectRegionKomputesResponseMock, getCreateProjectRegionKyloResponseMock, getListProjectRegionKylosResponseMock, getCreateProjectRegionKawaiiResponseMock, getListProjectRegionKawaiisResponseMock, getCreateProjectZoneKonveyResponseMock, getListProjectZoneKonveysResponseMock, getCreateProjectRegionKonveyResponseMock, getListProjectRegionKonveysResponseMock } from './project.faker';
 
 
 export const getListProjectsMockHandler = (overrideResponse?: ObjectIds | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ObjectIds> | ObjectIds), options?: RequestHandlerOptions) => {
@@ -312,18 +312,6 @@ export const getListProjectRegionKomputesMockHandler = (overrideResponse?: Objec
   }, options)
 }
 
-export const getListProjectRegionKylosMockHandler = (overrideResponse?: ObjectIds | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ObjectIds> | ObjectIds), options?: RequestHandlerOptions) => {
-  return http.get('/api/v1/project/:projectId/region/:regionId/kylo', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-
-
-    return HttpResponse.json(overrideResponse !== undefined
-    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getListProjectRegionKylosResponseMock(),
-      { status: 200
-      })
-  }, options)
-}
-
 export const getCreateProjectRegionKyloMockHandler = (overrideResponse?: Kylo | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<Kylo> | Kylo), options?: RequestHandlerOptions) => {
   return http.post('/api/v1/project/:projectId/region/:regionId/kylo', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
 
@@ -332,6 +320,18 @@ export const getCreateProjectRegionKyloMockHandler = (overrideResponse?: Kylo | 
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
     : getCreateProjectRegionKyloResponseMock(),
       { status: 201
+      })
+  }, options)
+}
+
+export const getListProjectRegionKylosMockHandler = (overrideResponse?: ObjectIds | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ObjectIds> | ObjectIds), options?: RequestHandlerOptions) => {
+  return http.get('/api/v1/project/:projectId/region/:regionId/kylos', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getListProjectRegionKylosResponseMock(),
+      { status: 200
       })
   }, options)
 }
@@ -429,8 +429,8 @@ export const getProjectMock = () => [
   getListProjectZoneKomputesMockHandler(),
   getCreateProjectRegionKomputeMockHandler(),
   getListProjectRegionKomputesMockHandler(),
-  getListProjectRegionKylosMockHandler(),
   getCreateProjectRegionKyloMockHandler(),
+  getListProjectRegionKylosMockHandler(),
   getCreateProjectRegionKawaiiMockHandler(),
   getListProjectRegionKawaiisMockHandler(),
   getCreateProjectZoneKonveyMockHandler(),

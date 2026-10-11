@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   faker
@@ -17,7 +17,7 @@ import type {
 
 export const getListVolumesResponseMock = (): ObjectIds => (Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))))
 
-export const getReadVolumeResponseMock = (overrideResponse: Partial<Extract<Volume, object>> = {}): Volume => ({id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), name: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), type: faker.helpers.arrayElement(['os','iso','raw'] as const), size: faker.number.int(), ...overrideResponse})
+export const getReadVolumeResponseMock = (overrideResponse: Partial<Extract<Volume, object>> = {}): Volume => ({id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), name: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), type: faker.helpers.arrayElement(['os','iso','raw','template'] as const), size: faker.number.int({min: 0}), ...overrideResponse})
 
-export const getUpdateVolumeResponseMock = (overrideResponse: Partial<Extract<Volume, object>> = {}): Volume => ({id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), name: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), type: faker.helpers.arrayElement(['os','iso','raw'] as const), size: faker.number.int(), ...overrideResponse})
+export const getUpdateVolumeResponseMock = (overrideResponse: Partial<Extract<Volume, object>> = {}): Volume => ({id: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), name: faker.string.alpha({length: {min: 10, max: 20}}), description: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), type: faker.helpers.arrayElement(['os','iso','raw','template'] as const), size: faker.number.int({min: 0}), ...overrideResponse})
 

@@ -3,23 +3,27 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 
 /**
  * A virtual network.
  */
 export interface VNet {
-  /** The virtual network ID (auto-generated). */
-  id?: string;
+  /** The virtual network ID (auto-generated) (read-only). */
+  readonly id?: string;
   /** The virtual network name. */
   name: string;
   /** The virtual network description. */
   description?: string;
-  /** The VLAN identifier (0 if unspecified). */
+  /**
+     * The VLAN identifier (0 if unspecified).
+     * @minimum 0
+     * @maximum 4094
+     */
   vlan?: number;
   /** The libvirt's bridge network interface (brX). */
   interface: string;
-  /** Is the virtual network adapter connected to private (LAN) or public (WAN) physical network ?. */
+  /** Whether the virtual network is connected to private (LAN) or public (WAN) physical network. Can only be set at creation time, ignored on updates. */
   private?: boolean;
 }

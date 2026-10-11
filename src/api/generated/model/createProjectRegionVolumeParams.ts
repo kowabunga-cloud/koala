@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import type { OptionalQueryPoolIDParameter } from './optionalQueryPoolIDParameter';
 import type { OptionalQueryTemplateIDParameter } from './optionalQueryTemplateIDParameter';

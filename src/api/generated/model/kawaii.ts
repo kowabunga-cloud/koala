@@ -3,11 +3,10 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import type { KawaiiDNatRule } from './kawaiiDNatRule';
 import type { KawaiiFirewall } from './kawaiiFirewall';
-import type { KawaiiIpSec } from './kawaiiIpSec';
 import type { KawaiiNetIp } from './kawaiiNetIp';
 import type { KawaiiVpcPeering } from './kawaiiVpcPeering';
 
@@ -15,20 +14,18 @@ import type { KawaiiVpcPeering } from './kawaiiVpcPeering';
  * A Kawaii (Kowabunga Adapative WAn Intelligent Interface) is a network gateway used for your Internet inbound and outbound traffic.
  */
 export interface Kawaii {
-  /** The Kawaii ID (auto-generated). */
-  id?: string;
-  /** The Kawaii name. */
+  /** The Kawaii ID (auto-generated) (read-only). */
+  readonly id?: string;
+  /** The Kawaii name, auto-generated from the project name. */
   name?: string;
   /** The Kawaii description. */
   description?: string;
   /** The Kawaii list of assigned virtual IPs per-zone addresses (read-only). */
-  netip?: KawaiiNetIp;
-  /** The Kawaii firewall settings from/to public Internet). */
+  readonly netip?: KawaiiNetIp;
+  /** The Kawaii firewall settings from/to public Internet. */
   firewall?: KawaiiFirewall;
   /** The Kawaii list of NAT forwarding entries. Kawaii will forward public Internet traffic from all public virtual IPs to requested private subnet IP addresses. */
   dnat?: KawaiiDNatRule[];
-  /** The Kawaii list of Kowabunga private VPC subnet peering entries. */
+  /** The Kawaii list of Kowabunga private VPC subnet peering entries. Can only be set at creation time, ignored on updates. */
   vpc_peerings?: KawaiiVpcPeering[];
-  /** The Kawaii list of Kowabunga IPsec connections. */
-  ipsec_connections?: KawaiiIpSec[];
 }

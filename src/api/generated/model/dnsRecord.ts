@@ -3,21 +3,21 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 
 /**
  * A DNS record.
  */
 export interface DnsRecord {
-  /** The DNS record ID (auto-generated). */
-  id?: string;
+  /** The DNS record ID (auto-generated) (read-only). */
+  readonly id?: string;
   /** The DNS record name. */
   name: string;
   /** The DNS record description. */
   description?: string;
-  /** The DNS record associated domain (inherited from associated project). */
-  domain?: string;
+  /** The DNS record associated domain, inherited from associated project (read-only). */
+  readonly domain?: string;
   /** A list of IPv4 addresses to be associated to the record. */
   addresses: string[];
 }

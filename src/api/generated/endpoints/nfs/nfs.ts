@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   useMutation,
@@ -29,9 +29,11 @@ import type {
   ConflictResponse,
   ForbiddenResponse,
   InsufficientResourceResponse,
+  InternalServerErrorResponse,
   NotFoundResponse,
   ObjectIds,
   StorageNFS,
+  StorageNFSUpdate,
   UnauthorizedResponse,
   UnprocessableEntityResponse
 } from '../../model';
@@ -59,7 +61,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export const getListStorageNFSsUrl = () => {
+export const getListStorageNFSesUrl = () => {
 
 
 
@@ -70,9 +72,9 @@ export const getListStorageNFSsUrl = () => {
 /**
  * Returns the IDs of NFS storage objects.
  */
-export const listStorageNFSs = async ( options?: Parameters<typeof kowabungaFetch>[1]): Promise<ObjectIds> => {
+export const listStorageNFSes = async ( options?: Parameters<typeof kowabungaFetch>[1]): Promise<ObjectIds> => {
 
-  return kowabungaFetch<ObjectIds>(getListStorageNFSsUrl(),
+  return kowabungaFetch<ObjectIds>(getListStorageNFSesUrl(),
   {
     ...options,
     method: 'GET'
@@ -85,66 +87,66 @@ export const listStorageNFSs = async ( options?: Parameters<typeof kowabungaFetc
 
 
 
-export const getListStorageNFSsQueryKey = () => {
+export const getListStorageNFSesQueryKey = () => {
     return [
     `/nfs`
     ] as const;
     }
 
 
-export const getListStorageNFSsQueryOptions = <TData = Awaited<ReturnType<typeof listStorageNFSs>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStorageNFSs>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListStorageNFSesQueryOptions = <TData = Awaited<ReturnType<typeof listStorageNFSes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStorageNFSes>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListStorageNFSsQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getListStorageNFSesQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listStorageNFSs>>> = ({ signal }) => listStorageNFSs({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listStorageNFSes>>> = ({ signal }) => listStorageNFSes({ signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listStorageNFSs>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listStorageNFSes>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type ListStorageNFSsQueryResult = NonNullable<Awaited<ReturnType<typeof listStorageNFSs>>>
-export type ListStorageNFSsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+export type ListStorageNFSesQueryResult = NonNullable<Awaited<ReturnType<typeof listStorageNFSes>>>
+export type ListStorageNFSesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>
 
 
-export function useListStorageNFSs<TData = Awaited<ReturnType<typeof listStorageNFSs>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStorageNFSs>>, TError, TData>> & Pick<
+export function useListStorageNFSes<TData = Awaited<ReturnType<typeof listStorageNFSes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStorageNFSes>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listStorageNFSs>>,
+          Awaited<ReturnType<typeof listStorageNFSes>>,
           TError,
-          Awaited<ReturnType<typeof listStorageNFSs>>
+          Awaited<ReturnType<typeof listStorageNFSes>>
         > , 'initialData'
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListStorageNFSs<TData = Awaited<ReturnType<typeof listStorageNFSs>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStorageNFSs>>, TError, TData>> & Pick<
+export function useListStorageNFSes<TData = Awaited<ReturnType<typeof listStorageNFSes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStorageNFSes>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listStorageNFSs>>,
+          Awaited<ReturnType<typeof listStorageNFSes>>,
           TError,
-          Awaited<ReturnType<typeof listStorageNFSs>>
+          Awaited<ReturnType<typeof listStorageNFSes>>
         > , 'initialData'
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListStorageNFSs<TData = Awaited<ReturnType<typeof listStorageNFSs>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStorageNFSs>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export function useListStorageNFSes<TData = Awaited<ReturnType<typeof listStorageNFSes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStorageNFSes>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListStorageNFSs<TData = Awaited<ReturnType<typeof listStorageNFSs>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStorageNFSs>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export function useListStorageNFSes<TData = Awaited<ReturnType<typeof listStorageNFSes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStorageNFSes>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getListStorageNFSsQueryOptions(options)
+  const queryOptions = getListStorageNFSesQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -184,7 +186,7 @@ export const deleteStorageNFS = async (nfsId: string, options?: Parameters<typeo
 
 export const getDeleteStorageNFSMutationKey = () => ['deleteStorageNFS'] as const;
 
-export const getDeleteStorageNFSMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+export const getDeleteStorageNFSMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteStorageNFS>>, TError,DeleteStorageNFSMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteStorageNFS>>, TError,DeleteStorageNFSMutationVariables, TContext> => {
 
@@ -213,10 +215,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type DeleteStorageNFSMutationResult = NonNullable<Awaited<ReturnType<typeof deleteStorageNFS>>>
 
-    export type DeleteStorageNFSMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>
+    export type DeleteStorageNFSMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type DeleteStorageNFSMutationVariables = {nfsId: string}
 
-    export const useDeleteStorageNFS = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+    export const useDeleteStorageNFS = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteStorageNFS>>, TError,DeleteStorageNFSMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteStorageNFS>>,
@@ -259,7 +261,7 @@ export const getReadStorageNFSQueryKey = (nfsId: string,) => {
     }
 
 
-export const getReadStorageNFSQueryOptions = <TData = Awaited<ReturnType<typeof readStorageNFS>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(nfsId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readStorageNFS>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getReadStorageNFSQueryOptions = <TData = Awaited<ReturnType<typeof readStorageNFS>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(nfsId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readStorageNFS>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -278,10 +280,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadStorageNFSQueryResult = NonNullable<Awaited<ReturnType<typeof readStorageNFS>>>
-export type ReadStorageNFSQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadStorageNFSQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadStorageNFS<TData = Awaited<ReturnType<typeof readStorageNFS>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadStorageNFS<TData = Awaited<ReturnType<typeof readStorageNFS>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  nfsId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readStorageNFS>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readStorageNFS>>,
@@ -291,7 +293,7 @@ export function useReadStorageNFS<TData = Awaited<ReturnType<typeof readStorageN
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadStorageNFS<TData = Awaited<ReturnType<typeof readStorageNFS>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadStorageNFS<TData = Awaited<ReturnType<typeof readStorageNFS>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  nfsId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readStorageNFS>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readStorageNFS>>,
@@ -301,12 +303,12 @@ export function useReadStorageNFS<TData = Awaited<ReturnType<typeof readStorageN
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadStorageNFS<TData = Awaited<ReturnType<typeof readStorageNFS>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadStorageNFS<TData = Awaited<ReturnType<typeof readStorageNFS>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  nfsId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readStorageNFS>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadStorageNFS<TData = Awaited<ReturnType<typeof readStorageNFS>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadStorageNFS<TData = Awaited<ReturnType<typeof readStorageNFS>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  nfsId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readStorageNFS>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -335,7 +337,7 @@ export const getUpdateStorageNFSUrl = (nfsId: string,) => {
  * Updates a NFS storage configuration.
  */
 export const updateStorageNFS = async (nfsId: string,
-    storageNFS: StorageNFS, options?: Parameters<typeof kowabungaFetch>[1]): Promise<StorageNFS> => {
+    storageNFSUpdate: StorageNFSUpdate, options?: Parameters<typeof kowabungaFetch>[1]): Promise<StorageNFS> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -356,7 +358,7 @@ return kowabungaFetch<StorageNFS>(getUpdateStorageNFSUrl(nfsId),
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(storageNFS)
+    body: JSON.stringify(storageNFSUpdate)
   }
 );}
 
@@ -366,7 +368,7 @@ return kowabungaFetch<StorageNFS>(getUpdateStorageNFSUrl(nfsId),
 
 export const getUpdateStorageNFSMutationKey = () => ['updateStorageNFS'] as const;
 
-export const getUpdateStorageNFSMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getUpdateStorageNFSMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateStorageNFS>>, TError,UpdateStorageNFSMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateStorageNFS>>, TError,UpdateStorageNFSMutationVariables, TContext> => {
 
@@ -394,11 +396,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateStorageNFSMutationResult = NonNullable<Awaited<ReturnType<typeof updateStorageNFS>>>
-    export type UpdateStorageNFSMutationBody = BodyType<StorageNFS>
-    export type UpdateStorageNFSMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type UpdateStorageNFSMutationVariables = {nfsId: string;data: BodyType<StorageNFS>}
+    export type UpdateStorageNFSMutationBody = BodyType<StorageNFSUpdate>
+    export type UpdateStorageNFSMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type UpdateStorageNFSMutationVariables = {nfsId: string;data: BodyType<StorageNFSUpdate>}
 
-    export const useUpdateStorageNFS = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useUpdateStorageNFS = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateStorageNFS>>, TError,UpdateStorageNFSMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateStorageNFS>>,
@@ -413,7 +415,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-  return `/nfs/${nfsId}/kylo`
+  return `/nfs/${nfsId}/kylos`
 }
 
 /**
@@ -436,12 +438,12 @@ export const listStorageNFSKylos = async (nfsId: string, options?: Parameters<ty
 
 export const getListStorageNFSKylosQueryKey = (nfsId: string,) => {
     return [
-    `/nfs/${nfsId}/kylo`
+    `/nfs/${nfsId}/kylos`
     ] as const;
     }
 
 
-export const getListStorageNFSKylosQueryOptions = <TData = Awaited<ReturnType<typeof listStorageNFSKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(nfsId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStorageNFSKylos>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListStorageNFSKylosQueryOptions = <TData = Awaited<ReturnType<typeof listStorageNFSKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(nfsId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStorageNFSKylos>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -460,10 +462,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListStorageNFSKylosQueryResult = NonNullable<Awaited<ReturnType<typeof listStorageNFSKylos>>>
-export type ListStorageNFSKylosQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ListStorageNFSKylosQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useListStorageNFSKylos<TData = Awaited<ReturnType<typeof listStorageNFSKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListStorageNFSKylos<TData = Awaited<ReturnType<typeof listStorageNFSKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  nfsId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStorageNFSKylos>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listStorageNFSKylos>>,
@@ -473,7 +475,7 @@ export function useListStorageNFSKylos<TData = Awaited<ReturnType<typeof listSto
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListStorageNFSKylos<TData = Awaited<ReturnType<typeof listStorageNFSKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListStorageNFSKylos<TData = Awaited<ReturnType<typeof listStorageNFSKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  nfsId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStorageNFSKylos>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listStorageNFSKylos>>,
@@ -483,12 +485,12 @@ export function useListStorageNFSKylos<TData = Awaited<ReturnType<typeof listSto
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListStorageNFSKylos<TData = Awaited<ReturnType<typeof listStorageNFSKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListStorageNFSKylos<TData = Awaited<ReturnType<typeof listStorageNFSKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  nfsId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStorageNFSKylos>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListStorageNFSKylos<TData = Awaited<ReturnType<typeof listStorageNFSKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListStorageNFSKylos<TData = Awaited<ReturnType<typeof listStorageNFSKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  nfsId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStorageNFSKylos>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {

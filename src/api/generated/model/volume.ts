@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import type { VolumeType } from './volumeType';
 
@@ -11,14 +11,17 @@ import type { VolumeType } from './volumeType';
  * A storage volume.
  */
 export interface Volume {
-  /** The storage volume ID (auto-generated). */
-  id?: string;
+  /** The storage volume ID (auto-generated) (read-only). */
+  readonly id?: string;
   /** The storage volume name. */
   name: string;
   /** The storage volume description. */
   description?: string;
-  /** The storage volume type. */
+  /** The storage volume type. Can only be set at creation time, ignored on updates. */
   type: VolumeType;
-  /** The storage volume size (in bytes). */
+  /**
+     * The storage volume size (in bytes), can only be increased.
+     * @minimum 0
+     */
   size: number;
 }

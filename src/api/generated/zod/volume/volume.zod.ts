@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import * as zod from 'zod';
 
@@ -30,12 +30,16 @@ export const ReadVolumeParams = zod.object({
   "volumeId": zod.string().describe('The ID of the storage volume.')
 })
 
+export const readVolumeResponseSizeMin = 0;
+
+
+
 export const ReadVolumeResponse = zod.object({
-  "id": zod.string().optional().describe('The storage volume ID (auto-generated).'),
+  "id": zod.string().optional().describe('The storage volume ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The storage volume name.'),
   "description": zod.string().optional().describe('The storage volume description.'),
-  "type": zod.enum(['os', 'iso', 'raw']).describe('The storage volume type.'),
-  "size": zod.int().describe('The storage volume size (in bytes).')
+  "type": zod.enum(['os', 'iso', 'raw', 'template']).describe('The storage volume type. Can only be set at creation time, ignored on updates.'),
+  "size": zod.int().min(readVolumeResponseSizeMin).describe('The storage volume size (in bytes), can only be increased.')
 }).describe('A storage volume.')
 
 /**
@@ -45,19 +49,25 @@ export const UpdateVolumeParams = zod.object({
   "volumeId": zod.string().describe('The ID of the storage volume.')
 })
 
+export const updateVolumeBodySizeMin = 0;
+
+
+
 export const UpdateVolumeBody = zod.object({
-  "id": zod.string().optional().describe('The storage volume ID (auto-generated).'),
-  "name": zod.string().describe('The storage volume name.'),
+  "name": zod.string().optional().describe('The storage volume name.'),
   "description": zod.string().optional().describe('The storage volume description.'),
-  "type": zod.enum(['os', 'iso', 'raw']).describe('The storage volume type.'),
-  "size": zod.int().describe('The storage volume size (in bytes).')
-}).describe('A storage volume.')
+  "size": zod.int().min(updateVolumeBodySizeMin).optional().describe('The storage volume size (in bytes), can only be increased.')
+}).describe('A storage volume update (unspecified properties are left unchanged).')
+
+export const updateVolumeResponseSizeMin = 0;
+
+
 
 export const UpdateVolumeResponse = zod.object({
-  "id": zod.string().optional().describe('The storage volume ID (auto-generated).'),
+  "id": zod.string().optional().describe('The storage volume ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The storage volume name.'),
   "description": zod.string().optional().describe('The storage volume description.'),
-  "type": zod.enum(['os', 'iso', 'raw']).describe('The storage volume type.'),
-  "size": zod.int().describe('The storage volume size (in bytes).')
+  "type": zod.enum(['os', 'iso', 'raw', 'template']).describe('The storage volume type. Can only be set at creation time, ignored on updates.'),
+  "size": zod.int().min(updateVolumeResponseSizeMin).describe('The storage volume size (in bytes), can only be increased.')
 }).describe('A storage volume.')
 

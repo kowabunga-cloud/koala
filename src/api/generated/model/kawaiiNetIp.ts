@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import type { KawaiiNetIpZone } from './kawaiiNetIpZone';
 
@@ -12,9 +12,9 @@ import type { KawaiiNetIpZone } from './kawaiiNetIpZone';
  */
 export interface KawaiiNetIp {
   /** The Kawaii global public gateways virtual IP addresses (read-only). */
-  public: string[];
+  readonly public: readonly string[];
   /** The Kawaii global private gateways virtual IP addresses (read-only). */
-  private: string[];
-  /** The Kawaii per-zone list of Kowabunga virtual IP addresses. */
-  zones: KawaiiNetIpZone[];
+  readonly private: readonly string[];
+  /** The Kawaii per-zone list of Kowabunga virtual IP addresses (read-only). */
+  readonly zones: readonly KawaiiNetIpZone[];
 }

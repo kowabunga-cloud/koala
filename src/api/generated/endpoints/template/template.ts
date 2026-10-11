@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   useMutation,
@@ -29,9 +29,11 @@ import type {
   ConflictResponse,
   ForbiddenResponse,
   InsufficientResourceResponse,
+  InternalServerErrorResponse,
   NotFoundResponse,
   ObjectIds,
   Template,
+  TemplateUpdate,
   UnauthorizedResponse,
   UnprocessableEntityResponse
 } from '../../model';
@@ -92,7 +94,7 @@ export const getListTemplatesQueryKey = () => {
     }
 
 
-export const getListTemplatesQueryOptions = <TData = Awaited<ReturnType<typeof listTemplates>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTemplates>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListTemplatesQueryOptions = <TData = Awaited<ReturnType<typeof listTemplates>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTemplates>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -111,10 +113,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListTemplatesQueryResult = NonNullable<Awaited<ReturnType<typeof listTemplates>>>
-export type ListTemplatesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+export type ListTemplatesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>
 
 
-export function useListTemplates<TData = Awaited<ReturnType<typeof listTemplates>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListTemplates<TData = Awaited<ReturnType<typeof listTemplates>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTemplates>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listTemplates>>,
@@ -124,7 +126,7 @@ export function useListTemplates<TData = Awaited<ReturnType<typeof listTemplates
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListTemplates<TData = Awaited<ReturnType<typeof listTemplates>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListTemplates<TData = Awaited<ReturnType<typeof listTemplates>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTemplates>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listTemplates>>,
@@ -134,12 +136,12 @@ export function useListTemplates<TData = Awaited<ReturnType<typeof listTemplates
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListTemplates<TData = Awaited<ReturnType<typeof listTemplates>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListTemplates<TData = Awaited<ReturnType<typeof listTemplates>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTemplates>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListTemplates<TData = Awaited<ReturnType<typeof listTemplates>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListTemplates<TData = Awaited<ReturnType<typeof listTemplates>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTemplates>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -184,7 +186,7 @@ export const deleteTemplate = async (templateId: string, options?: Parameters<ty
 
 export const getDeleteTemplateMutationKey = () => ['deleteTemplate'] as const;
 
-export const getDeleteTemplateMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+export const getDeleteTemplateMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTemplate>>, TError,DeleteTemplateMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteTemplate>>, TError,DeleteTemplateMutationVariables, TContext> => {
 
@@ -213,10 +215,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type DeleteTemplateMutationResult = NonNullable<Awaited<ReturnType<typeof deleteTemplate>>>
 
-    export type DeleteTemplateMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>
+    export type DeleteTemplateMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type DeleteTemplateMutationVariables = {templateId: string}
 
-    export const useDeleteTemplate = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+    export const useDeleteTemplate = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTemplate>>, TError,DeleteTemplateMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteTemplate>>,
@@ -259,7 +261,7 @@ export const getReadTemplateQueryKey = (templateId: string,) => {
     }
 
 
-export const getReadTemplateQueryOptions = <TData = Awaited<ReturnType<typeof readTemplate>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(templateId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readTemplate>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getReadTemplateQueryOptions = <TData = Awaited<ReturnType<typeof readTemplate>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(templateId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readTemplate>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -278,10 +280,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadTemplateQueryResult = NonNullable<Awaited<ReturnType<typeof readTemplate>>>
-export type ReadTemplateQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadTemplateQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadTemplate<TData = Awaited<ReturnType<typeof readTemplate>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadTemplate<TData = Awaited<ReturnType<typeof readTemplate>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  templateId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readTemplate>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readTemplate>>,
@@ -291,7 +293,7 @@ export function useReadTemplate<TData = Awaited<ReturnType<typeof readTemplate>>
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadTemplate<TData = Awaited<ReturnType<typeof readTemplate>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadTemplate<TData = Awaited<ReturnType<typeof readTemplate>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  templateId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readTemplate>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readTemplate>>,
@@ -301,12 +303,12 @@ export function useReadTemplate<TData = Awaited<ReturnType<typeof readTemplate>>
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadTemplate<TData = Awaited<ReturnType<typeof readTemplate>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadTemplate<TData = Awaited<ReturnType<typeof readTemplate>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  templateId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readTemplate>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadTemplate<TData = Awaited<ReturnType<typeof readTemplate>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadTemplate<TData = Awaited<ReturnType<typeof readTemplate>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  templateId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readTemplate>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -335,7 +337,7 @@ export const getUpdateTemplateUrl = (templateId: string,) => {
  * Updates a image template configuration.
  */
 export const updateTemplate = async (templateId: string,
-    template: Template, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Template> => {
+    templateUpdate: TemplateUpdate, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Template> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -356,7 +358,7 @@ return kowabungaFetch<Template>(getUpdateTemplateUrl(templateId),
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(template)
+    body: JSON.stringify(templateUpdate)
   }
 );}
 
@@ -366,7 +368,7 @@ return kowabungaFetch<Template>(getUpdateTemplateUrl(templateId),
 
 export const getUpdateTemplateMutationKey = () => ['updateTemplate'] as const;
 
-export const getUpdateTemplateMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getUpdateTemplateMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTemplate>>, TError,UpdateTemplateMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateTemplate>>, TError,UpdateTemplateMutationVariables, TContext> => {
 
@@ -394,11 +396,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateTemplateMutationResult = NonNullable<Awaited<ReturnType<typeof updateTemplate>>>
-    export type UpdateTemplateMutationBody = BodyType<Template>
-    export type UpdateTemplateMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type UpdateTemplateMutationVariables = {templateId: string;data: BodyType<Template>}
+    export type UpdateTemplateMutationBody = BodyType<TemplateUpdate>
+    export type UpdateTemplateMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type UpdateTemplateMutationVariables = {templateId: string;data: BodyType<TemplateUpdate>}
 
-    export const useUpdateTemplate = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useUpdateTemplate = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTemplate>>, TError,UpdateTemplateMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateTemplate>>,

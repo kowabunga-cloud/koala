@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   useMutation,
@@ -28,8 +28,10 @@ import type {
   BadRequestResponse,
   ConflictResponse,
   DnsRecord,
+  DnsRecordUpdate,
   ForbiddenResponse,
   InsufficientResourceResponse,
+  InternalServerErrorResponse,
   NotFoundResponse,
   UnauthorizedResponse,
   UnprocessableEntityResponse
@@ -86,7 +88,7 @@ export const deleteDnsRecord = async (recordId: string, options?: Parameters<typ
 
 export const getDeleteDnsRecordMutationKey = () => ['deleteDnsRecord'] as const;
 
-export const getDeleteDnsRecordMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+export const getDeleteDnsRecordMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDnsRecord>>, TError,DeleteDnsRecordMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteDnsRecord>>, TError,DeleteDnsRecordMutationVariables, TContext> => {
 
@@ -115,10 +117,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type DeleteDnsRecordMutationResult = NonNullable<Awaited<ReturnType<typeof deleteDnsRecord>>>
 
-    export type DeleteDnsRecordMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>
+    export type DeleteDnsRecordMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type DeleteDnsRecordMutationVariables = {recordId: string}
 
-    export const useDeleteDnsRecord = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+    export const useDeleteDnsRecord = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDnsRecord>>, TError,DeleteDnsRecordMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteDnsRecord>>,
@@ -161,7 +163,7 @@ export const getReadDnsRecordQueryKey = (recordId: string,) => {
     }
 
 
-export const getReadDnsRecordQueryOptions = <TData = Awaited<ReturnType<typeof readDnsRecord>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(recordId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readDnsRecord>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getReadDnsRecordQueryOptions = <TData = Awaited<ReturnType<typeof readDnsRecord>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(recordId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readDnsRecord>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -180,10 +182,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadDnsRecordQueryResult = NonNullable<Awaited<ReturnType<typeof readDnsRecord>>>
-export type ReadDnsRecordQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadDnsRecordQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadDnsRecord<TData = Awaited<ReturnType<typeof readDnsRecord>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadDnsRecord<TData = Awaited<ReturnType<typeof readDnsRecord>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  recordId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readDnsRecord>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readDnsRecord>>,
@@ -193,7 +195,7 @@ export function useReadDnsRecord<TData = Awaited<ReturnType<typeof readDnsRecord
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadDnsRecord<TData = Awaited<ReturnType<typeof readDnsRecord>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadDnsRecord<TData = Awaited<ReturnType<typeof readDnsRecord>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  recordId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readDnsRecord>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readDnsRecord>>,
@@ -203,12 +205,12 @@ export function useReadDnsRecord<TData = Awaited<ReturnType<typeof readDnsRecord
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadDnsRecord<TData = Awaited<ReturnType<typeof readDnsRecord>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadDnsRecord<TData = Awaited<ReturnType<typeof readDnsRecord>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  recordId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readDnsRecord>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadDnsRecord<TData = Awaited<ReturnType<typeof readDnsRecord>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadDnsRecord<TData = Awaited<ReturnType<typeof readDnsRecord>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  recordId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readDnsRecord>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -237,7 +239,7 @@ export const getUpdateDnsRecordUrl = (recordId: string,) => {
  * Updates a DNS record configuration.
  */
 export const updateDnsRecord = async (recordId: string,
-    dnsRecord: DnsRecord, options?: Parameters<typeof kowabungaFetch>[1]): Promise<DnsRecord> => {
+    dnsRecordUpdate: DnsRecordUpdate, options?: Parameters<typeof kowabungaFetch>[1]): Promise<DnsRecord> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -258,7 +260,7 @@ return kowabungaFetch<DnsRecord>(getUpdateDnsRecordUrl(recordId),
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(dnsRecord)
+    body: JSON.stringify(dnsRecordUpdate)
   }
 );}
 
@@ -268,7 +270,7 @@ return kowabungaFetch<DnsRecord>(getUpdateDnsRecordUrl(recordId),
 
 export const getUpdateDnsRecordMutationKey = () => ['updateDnsRecord'] as const;
 
-export const getUpdateDnsRecordMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getUpdateDnsRecordMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateDnsRecord>>, TError,UpdateDnsRecordMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateDnsRecord>>, TError,UpdateDnsRecordMutationVariables, TContext> => {
 
@@ -296,11 +298,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateDnsRecordMutationResult = NonNullable<Awaited<ReturnType<typeof updateDnsRecord>>>
-    export type UpdateDnsRecordMutationBody = BodyType<DnsRecord>
-    export type UpdateDnsRecordMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type UpdateDnsRecordMutationVariables = {recordId: string;data: BodyType<DnsRecord>}
+    export type UpdateDnsRecordMutationBody = BodyType<DnsRecordUpdate>
+    export type UpdateDnsRecordMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type UpdateDnsRecordMutationVariables = {recordId: string;data: BodyType<DnsRecordUpdate>}
 
-    export const useUpdateDnsRecord = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useUpdateDnsRecord = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateDnsRecord>>, TError,UpdateDnsRecordMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateDnsRecord>>,

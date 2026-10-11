@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   useMutation,
@@ -29,7 +29,9 @@ import type {
   ConflictResponse,
   ForbiddenResponse,
   InsufficientResourceResponse,
+  InternalServerErrorResponse,
   Kiwi,
+  KiwiUpdate,
   NotFoundResponse,
   ObjectIds,
   UnauthorizedResponse,
@@ -92,7 +94,7 @@ export const getListKiwisQueryKey = () => {
     }
 
 
-export const getListKiwisQueryOptions = <TData = Awaited<ReturnType<typeof listKiwis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKiwis>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListKiwisQueryOptions = <TData = Awaited<ReturnType<typeof listKiwis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKiwis>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -111,10 +113,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListKiwisQueryResult = NonNullable<Awaited<ReturnType<typeof listKiwis>>>
-export type ListKiwisQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+export type ListKiwisQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>
 
 
-export function useListKiwis<TData = Awaited<ReturnType<typeof listKiwis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListKiwis<TData = Awaited<ReturnType<typeof listKiwis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKiwis>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listKiwis>>,
@@ -124,7 +126,7 @@ export function useListKiwis<TData = Awaited<ReturnType<typeof listKiwis>>, TErr
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListKiwis<TData = Awaited<ReturnType<typeof listKiwis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListKiwis<TData = Awaited<ReturnType<typeof listKiwis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKiwis>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listKiwis>>,
@@ -134,12 +136,12 @@ export function useListKiwis<TData = Awaited<ReturnType<typeof listKiwis>>, TErr
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListKiwis<TData = Awaited<ReturnType<typeof listKiwis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListKiwis<TData = Awaited<ReturnType<typeof listKiwis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKiwis>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListKiwis<TData = Awaited<ReturnType<typeof listKiwis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListKiwis<TData = Awaited<ReturnType<typeof listKiwis>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKiwis>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -184,7 +186,7 @@ export const deleteKiwi = async (kiwiId: string, options?: Parameters<typeof kow
 
 export const getDeleteKiwiMutationKey = () => ['deleteKiwi'] as const;
 
-export const getDeleteKiwiMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+export const getDeleteKiwiMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteKiwi>>, TError,DeleteKiwiMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteKiwi>>, TError,DeleteKiwiMutationVariables, TContext> => {
 
@@ -213,10 +215,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type DeleteKiwiMutationResult = NonNullable<Awaited<ReturnType<typeof deleteKiwi>>>
 
-    export type DeleteKiwiMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>
+    export type DeleteKiwiMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type DeleteKiwiMutationVariables = {kiwiId: string}
 
-    export const useDeleteKiwi = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+    export const useDeleteKiwi = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteKiwi>>, TError,DeleteKiwiMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteKiwi>>,
@@ -259,7 +261,7 @@ export const getReadKiwiQueryKey = (kiwiId: string,) => {
     }
 
 
-export const getReadKiwiQueryOptions = <TData = Awaited<ReturnType<typeof readKiwi>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(kiwiId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKiwi>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getReadKiwiQueryOptions = <TData = Awaited<ReturnType<typeof readKiwi>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(kiwiId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKiwi>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -278,10 +280,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadKiwiQueryResult = NonNullable<Awaited<ReturnType<typeof readKiwi>>>
-export type ReadKiwiQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadKiwiQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadKiwi<TData = Awaited<ReturnType<typeof readKiwi>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKiwi<TData = Awaited<ReturnType<typeof readKiwi>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kiwiId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKiwi>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readKiwi>>,
@@ -291,7 +293,7 @@ export function useReadKiwi<TData = Awaited<ReturnType<typeof readKiwi>>, TError
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadKiwi<TData = Awaited<ReturnType<typeof readKiwi>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKiwi<TData = Awaited<ReturnType<typeof readKiwi>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kiwiId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKiwi>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readKiwi>>,
@@ -301,12 +303,12 @@ export function useReadKiwi<TData = Awaited<ReturnType<typeof readKiwi>>, TError
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadKiwi<TData = Awaited<ReturnType<typeof readKiwi>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKiwi<TData = Awaited<ReturnType<typeof readKiwi>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kiwiId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKiwi>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadKiwi<TData = Awaited<ReturnType<typeof readKiwi>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKiwi<TData = Awaited<ReturnType<typeof readKiwi>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kiwiId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKiwi>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -335,7 +337,7 @@ export const getUpdateKiwiUrl = (kiwiId: string,) => {
  * Updates a Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. configuration.
  */
 export const updateKiwi = async (kiwiId: string,
-    kiwi: Kiwi, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Kiwi> => {
+    kiwiUpdate: KiwiUpdate, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Kiwi> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -356,7 +358,7 @@ return kowabungaFetch<Kiwi>(getUpdateKiwiUrl(kiwiId),
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(kiwi)
+    body: JSON.stringify(kiwiUpdate)
   }
 );}
 
@@ -366,7 +368,7 @@ return kowabungaFetch<Kiwi>(getUpdateKiwiUrl(kiwiId),
 
 export const getUpdateKiwiMutationKey = () => ['updateKiwi'] as const;
 
-export const getUpdateKiwiMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getUpdateKiwiMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKiwi>>, TError,UpdateKiwiMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateKiwi>>, TError,UpdateKiwiMutationVariables, TContext> => {
 
@@ -394,11 +396,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateKiwiMutationResult = NonNullable<Awaited<ReturnType<typeof updateKiwi>>>
-    export type UpdateKiwiMutationBody = BodyType<Kiwi>
-    export type UpdateKiwiMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type UpdateKiwiMutationVariables = {kiwiId: string;data: BodyType<Kiwi>}
+    export type UpdateKiwiMutationBody = BodyType<KiwiUpdate>
+    export type UpdateKiwiMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type UpdateKiwiMutationVariables = {kiwiId: string;data: BodyType<KiwiUpdate>}
 
-    export const useUpdateKiwi = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useUpdateKiwi = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKiwi>>, TError,UpdateKiwiMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateKiwi>>,

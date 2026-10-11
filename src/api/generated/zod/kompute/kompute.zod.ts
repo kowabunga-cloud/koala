@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import * as zod from 'zod';
 
@@ -30,21 +30,26 @@ export const ReadKomputeParams = zod.object({
   "komputeId": zod.string().describe('The ID of the Kompute.')
 })
 
+
+
+
 export const readKomputeResponseDataDiskDefault = 0;
+export const readKomputeResponseDataDiskMin = 0;
+
 export const readKomputeResponseUefiDefault = true;
 export const readKomputeResponseKmotionEnabledDefault = true;
 
 export const ReadKomputeResponse = zod.object({
-  "id": zod.string().optional().describe('The Kompute ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kompute ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kompute name.'),
   "description": zod.string().optional().describe('The Kompute description.'),
-  "memory": zod.int().describe('The Kompute memory size (in bytes).'),
-  "vcpus": zod.int().describe('The Kompute number of vCPUs.'),
-  "disk": zod.int().describe('The Kompute OS disk size (in bytes).'),
-  "data_disk": zod.int().default(readKomputeResponseDataDiskDefault).describe('The Kompute extra data disk size (in bytes). If unspecified, no extra data disk will be assigned.'),
+  "memory": zod.int().min(1).describe('The Kompute memory size (in bytes).'),
+  "vcpus": zod.int().min(1).describe('The Kompute number of vCPUs.'),
+  "disk": zod.int().min(1).describe('The Kompute OS disk size (in bytes).'),
+  "data_disk": zod.int().min(readKomputeResponseDataDiskMin).default(readKomputeResponseDataDiskDefault).describe('The Kompute extra data disk size (in bytes). If unspecified, no extra data disk will be assigned.'),
   "ip": zod.string().optional().describe('The Kompute assigned private IPv4 address (read-only).'),
-  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at Kompute creation time, to elect an initial host consistent with the referenced groups policies and register the Kompute as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices.'),
-  "uefi": zod.boolean().default(readKomputeResponseUefiDefault).describe('enable UEFI secure firmware (vs. legacy BIOS).'),
+  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at Kompute creation time, to elect an initial host consistent with the referenced groups policies and register the Kompute as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices. Can only be set at creation time, ignored on updates.'),
+  "uefi": zod.boolean().default(readKomputeResponseUefiDefault).describe('Enable UEFI secure firmware (vs. legacy BIOS). Can only be set at creation time, ignored on updates.'),
   "kmotion_enabled": zod.boolean().default(readKomputeResponseKmotionEnabledDefault).describe('Whether kMotion (live/cold host migration) is enabled for the Kompute. When disabled, the instance remains bound to its original hosting node.')
 }).describe('A Kompute is a wrapper object for bare virtual machines. It consists of an instance, one to several attached volumes and 2 network adapters (a private one, a public one). This is the prefered way for creating virtual machines. IP addresses will be automatically assigned.')
 
@@ -55,39 +60,43 @@ export const UpdateKomputeParams = zod.object({
   "komputeId": zod.string().describe('The ID of the Kompute.')
 })
 
-export const updateKomputeBodyDataDiskDefault = 0;
-export const updateKomputeBodyUefiDefault = true;
-export const updateKomputeBodyKmotionEnabledDefault = true;
+
+
+
+export const updateKomputeBodyDataDiskMin = 0;
+
+
 
 export const UpdateKomputeBody = zod.object({
-  "id": zod.string().optional().describe('The Kompute ID (auto-generated).'),
-  "name": zod.string().describe('The Kompute name.'),
+  "name": zod.string().optional().describe('The Kompute name.'),
   "description": zod.string().optional().describe('The Kompute description.'),
-  "memory": zod.int().describe('The Kompute memory size (in bytes).'),
-  "vcpus": zod.int().describe('The Kompute number of vCPUs.'),
-  "disk": zod.int().describe('The Kompute OS disk size (in bytes).'),
-  "data_disk": zod.int().default(updateKomputeBodyDataDiskDefault).describe('The Kompute extra data disk size (in bytes). If unspecified, no extra data disk will be assigned.'),
-  "ip": zod.string().optional().describe('The Kompute assigned private IPv4 address (read-only).'),
-  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at Kompute creation time, to elect an initial host consistent with the referenced groups policies and register the Kompute as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices.'),
-  "uefi": zod.boolean().default(updateKomputeBodyUefiDefault).describe('enable UEFI secure firmware (vs. legacy BIOS).'),
-  "kmotion_enabled": zod.boolean().default(updateKomputeBodyKmotionEnabledDefault).describe('Whether kMotion (live/cold host migration) is enabled for the Kompute. When disabled, the instance remains bound to its original hosting node.')
-}).describe('A Kompute is a wrapper object for bare virtual machines. It consists of an instance, one to several attached volumes and 2 network adapters (a private one, a public one). This is the prefered way for creating virtual machines. IP addresses will be automatically assigned.')
+  "memory": zod.int().min(1).optional().describe('The Kompute memory size (in bytes).'),
+  "vcpus": zod.int().min(1).optional().describe('The Kompute number of vCPUs.'),
+  "disk": zod.int().min(1).optional().describe('The Kompute OS disk size (in bytes).'),
+  "data_disk": zod.int().min(updateKomputeBodyDataDiskMin).optional().describe('The Kompute extra data disk size (in bytes). If unspecified, no extra data disk will be assigned.'),
+  "kmotion_enabled": zod.boolean().optional().describe('Whether kMotion (live/cold host migration) is enabled for the Kompute. When disabled, the instance remains bound to its original hosting node.')
+}).describe('A Kompute update (unspecified properties are left unchanged).')
+
+
+
 
 export const updateKomputeResponseDataDiskDefault = 0;
+export const updateKomputeResponseDataDiskMin = 0;
+
 export const updateKomputeResponseUefiDefault = true;
 export const updateKomputeResponseKmotionEnabledDefault = true;
 
 export const UpdateKomputeResponse = zod.object({
-  "id": zod.string().optional().describe('The Kompute ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kompute ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kompute name.'),
   "description": zod.string().optional().describe('The Kompute description.'),
-  "memory": zod.int().describe('The Kompute memory size (in bytes).'),
-  "vcpus": zod.int().describe('The Kompute number of vCPUs.'),
-  "disk": zod.int().describe('The Kompute OS disk size (in bytes).'),
-  "data_disk": zod.int().default(updateKomputeResponseDataDiskDefault).describe('The Kompute extra data disk size (in bytes). If unspecified, no extra data disk will be assigned.'),
+  "memory": zod.int().min(1).describe('The Kompute memory size (in bytes).'),
+  "vcpus": zod.int().min(1).describe('The Kompute number of vCPUs.'),
+  "disk": zod.int().min(1).describe('The Kompute OS disk size (in bytes).'),
+  "data_disk": zod.int().min(updateKomputeResponseDataDiskMin).default(updateKomputeResponseDataDiskDefault).describe('The Kompute extra data disk size (in bytes). If unspecified, no extra data disk will be assigned.'),
   "ip": zod.string().optional().describe('The Kompute assigned private IPv4 address (read-only).'),
-  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at Kompute creation time, to elect an initial host consistent with the referenced groups policies and register the Kompute as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices.'),
-  "uefi": zod.boolean().default(updateKomputeResponseUefiDefault).describe('enable UEFI secure firmware (vs. legacy BIOS).'),
+  "kwarantines": zod.array(zod.string()).optional().describe('An optional list of existing Kwarantine anti-affinity group IDs. Only considered at Kompute creation time, to elect an initial host consistent with the referenced groups policies and register the Kompute as one of their members. Read-only afterwards, always reflecting current membership, which should be managed going forward via the Kwarantine webservices. Can only be set at creation time, ignored on updates.'),
+  "uefi": zod.boolean().default(updateKomputeResponseUefiDefault).describe('Enable UEFI secure firmware (vs. legacy BIOS). Can only be set at creation time, ignored on updates.'),
   "kmotion_enabled": zod.boolean().default(updateKomputeResponseKmotionEnabledDefault).describe('Whether kMotion (live/cold host migration) is enabled for the Kompute. When disabled, the instance remains bound to its original hosting node.')
 }).describe('A Kompute is a wrapper object for bare virtual machines. It consists of an instance, one to several attached volumes and 2 network adapters (a private one, a public one). This is the prefered way for creating virtual machines. IP addresses will be automatically assigned.')
 
@@ -183,7 +192,7 @@ export const PlanKomputeKMotionBody = zod.object({
 }).describe('A virtual machine instance kMotion plan request.')
 
 export const PlanKomputeKMotionResponse = zod.object({
-  "id": zod.string().optional().describe('The kMotion plan ID (auto-generated).'),
+  "id": zod.string().optional().describe('The kMotion plan ID (auto-generated) (read-only).'),
   "instance": zod.string().describe('The ID of the virtual machine instance this kMotion plan applies to.'),
   "source": zod.string().describe('The ID of the Kaktus computing node currently hosting the instance.'),
   "target": zod.string().describe('The ID of the Kaktus computing node elected to host the instance once the kMotion completes.'),

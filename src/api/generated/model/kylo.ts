@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import type { KyloAccess } from './kyloAccess';
 import type { KyloProtocolsItem } from './kyloProtocolsItem';
@@ -12,8 +12,8 @@ import type { KyloProtocolsItem } from './kyloProtocolsItem';
  * A Kylo provides an elastic NFS-like remote storage volume.
  */
 export interface Kylo {
-  /** The Kylo ID (auto-generated). */
-  id?: string;
+  /** The Kylo ID (auto-generated) (read-only). */
+  readonly id?: string;
   /** The Kylo name. */
   name: string;
   /** The Kylo description. */
@@ -23,7 +23,7 @@ export interface Kylo {
   /** The Kylo NFS protocol versions to be supported. */
   protocols?: KyloProtocolsItem[];
   /** The Kylo endpoint FQDN (read-only). */
-  endpoint?: string;
+  readonly endpoint?: string;
   /** The Kylo volume bytes used (read-only). */
-  size?: number;
+  readonly size?: number;
 }

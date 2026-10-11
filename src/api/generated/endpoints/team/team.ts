@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   useMutation,
@@ -29,15 +29,44 @@ import type {
   ConflictResponse,
   ForbiddenResponse,
   InsufficientResourceResponse,
+  InternalServerErrorResponse,
   NotFoundResponse,
   ObjectIds,
   Team,
+  TeamUpdate,
   UnauthorizedResponse,
   UnprocessableEntityResponse
 } from '../../model';
 
 import { kowabungaFetch } from '../../../client';
 import type { ErrorType , BodyType } from '../../../client';
+
+// https://stackoverflow.com/questions/49579094/typescript-conditional-types-filter-out-readonly-properties-pick-only-requir/49579497#49579497
+type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <
+T,
+>() => T extends Y ? 1 : 2
+? A
+: B;
+
+type WritableKeys<T> = {
+[P in keyof T]-?: IfEquals<
+  { [Q in P]: T[P] },
+  { -readonly [Q in P]: T[P] },
+  P
+>;
+}[keyof T];
+
+type UnionToIntersection<U> =
+  (U extends any ? (k: U)=>void : never) extends ((k: infer I)=>void) ? I : never;
+type DistributeReadOnlyOverUnions<T> = T extends any ? NonReadonly<T> : never;
+
+type Writable<T> = Pick<T, WritableKeys<T>>;
+type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
+  [P in keyof Writable<T>]: T[P] extends object
+    ? NonReadonly<NonNullable<T[P]>>
+    : T[P];
+} : DistributeReadOnlyOverUnions<T>;
+
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -92,7 +121,7 @@ export const getListTeamsQueryKey = () => {
     }
 
 
-export const getListTeamsQueryOptions = <TData = Awaited<ReturnType<typeof listTeams>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTeams>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListTeamsQueryOptions = <TData = Awaited<ReturnType<typeof listTeams>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTeams>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -111,10 +140,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListTeamsQueryResult = NonNullable<Awaited<ReturnType<typeof listTeams>>>
-export type ListTeamsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+export type ListTeamsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>
 
 
-export function useListTeams<TData = Awaited<ReturnType<typeof listTeams>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListTeams<TData = Awaited<ReturnType<typeof listTeams>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTeams>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listTeams>>,
@@ -124,7 +153,7 @@ export function useListTeams<TData = Awaited<ReturnType<typeof listTeams>>, TErr
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListTeams<TData = Awaited<ReturnType<typeof listTeams>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListTeams<TData = Awaited<ReturnType<typeof listTeams>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTeams>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listTeams>>,
@@ -134,12 +163,12 @@ export function useListTeams<TData = Awaited<ReturnType<typeof listTeams>>, TErr
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListTeams<TData = Awaited<ReturnType<typeof listTeams>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListTeams<TData = Awaited<ReturnType<typeof listTeams>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTeams>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListTeams<TData = Awaited<ReturnType<typeof listTeams>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListTeams<TData = Awaited<ReturnType<typeof listTeams>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listTeams>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -167,7 +196,7 @@ export const getCreateTeamUrl = () => {
 /**
  * Creates a new Kowabunga users team.
  */
-export const createTeam = async (team: Team, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Team> => {
+export const createTeam = async (team: NonReadonly<Team>, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Team> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -198,7 +227,7 @@ return kowabungaFetch<Team>(getCreateTeamUrl(),
 
 export const getCreateTeamMutationKey = () => ['createTeam'] as const;
 
-export const getCreateTeamMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getCreateTeamMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTeam>>, TError,CreateTeamMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof createTeam>>, TError,CreateTeamMutationVariables, TContext> => {
 
@@ -226,11 +255,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type CreateTeamMutationResult = NonNullable<Awaited<ReturnType<typeof createTeam>>>
-    export type CreateTeamMutationBody = BodyType<Team>
-    export type CreateTeamMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateTeamMutationVariables = {data: BodyType<Team>}
+    export type CreateTeamMutationBody = BodyType<NonReadonly<Team>>
+    export type CreateTeamMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateTeamMutationVariables = {data: BodyType<NonReadonly<Team>>}
 
-    export const useCreateTeam = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useCreateTeam = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTeam>>, TError,CreateTeamMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof createTeam>>,
@@ -268,7 +297,7 @@ export const deleteTeam = async (teamId: string, options?: Parameters<typeof kow
 
 export const getDeleteTeamMutationKey = () => ['deleteTeam'] as const;
 
-export const getDeleteTeamMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+export const getDeleteTeamMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTeam>>, TError,DeleteTeamMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteTeam>>, TError,DeleteTeamMutationVariables, TContext> => {
 
@@ -297,10 +326,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type DeleteTeamMutationResult = NonNullable<Awaited<ReturnType<typeof deleteTeam>>>
 
-    export type DeleteTeamMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>
+    export type DeleteTeamMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type DeleteTeamMutationVariables = {teamId: string}
 
-    export const useDeleteTeam = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+    export const useDeleteTeam = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteTeam>>, TError,DeleteTeamMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteTeam>>,
@@ -343,7 +372,7 @@ export const getReadTeamQueryKey = (teamId: string,) => {
     }
 
 
-export const getReadTeamQueryOptions = <TData = Awaited<ReturnType<typeof readTeam>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(teamId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readTeam>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getReadTeamQueryOptions = <TData = Awaited<ReturnType<typeof readTeam>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(teamId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readTeam>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -362,10 +391,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadTeamQueryResult = NonNullable<Awaited<ReturnType<typeof readTeam>>>
-export type ReadTeamQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadTeamQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadTeam<TData = Awaited<ReturnType<typeof readTeam>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadTeam<TData = Awaited<ReturnType<typeof readTeam>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  teamId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readTeam>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readTeam>>,
@@ -375,7 +404,7 @@ export function useReadTeam<TData = Awaited<ReturnType<typeof readTeam>>, TError
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadTeam<TData = Awaited<ReturnType<typeof readTeam>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadTeam<TData = Awaited<ReturnType<typeof readTeam>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  teamId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readTeam>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readTeam>>,
@@ -385,12 +414,12 @@ export function useReadTeam<TData = Awaited<ReturnType<typeof readTeam>>, TError
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadTeam<TData = Awaited<ReturnType<typeof readTeam>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadTeam<TData = Awaited<ReturnType<typeof readTeam>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  teamId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readTeam>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadTeam<TData = Awaited<ReturnType<typeof readTeam>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadTeam<TData = Awaited<ReturnType<typeof readTeam>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  teamId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readTeam>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -419,7 +448,7 @@ export const getUpdateTeamUrl = (teamId: string,) => {
  * Updates a Kowabunga users team configuration.
  */
 export const updateTeam = async (teamId: string,
-    team: Team, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Team> => {
+    teamUpdate: TeamUpdate, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Team> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -440,7 +469,7 @@ return kowabungaFetch<Team>(getUpdateTeamUrl(teamId),
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(team)
+    body: JSON.stringify(teamUpdate)
   }
 );}
 
@@ -450,7 +479,7 @@ return kowabungaFetch<Team>(getUpdateTeamUrl(teamId),
 
 export const getUpdateTeamMutationKey = () => ['updateTeam'] as const;
 
-export const getUpdateTeamMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getUpdateTeamMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTeam>>, TError,UpdateTeamMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateTeam>>, TError,UpdateTeamMutationVariables, TContext> => {
 
@@ -478,11 +507,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateTeamMutationResult = NonNullable<Awaited<ReturnType<typeof updateTeam>>>
-    export type UpdateTeamMutationBody = BodyType<Team>
-    export type UpdateTeamMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type UpdateTeamMutationVariables = {teamId: string;data: BodyType<Team>}
+    export type UpdateTeamMutationBody = BodyType<TeamUpdate>
+    export type UpdateTeamMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type UpdateTeamMutationVariables = {teamId: string;data: BodyType<TeamUpdate>}
 
-    export const useUpdateTeam = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useUpdateTeam = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateTeam>>, TError,UpdateTeamMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateTeam>>,

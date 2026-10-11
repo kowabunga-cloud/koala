@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 
 /**
@@ -11,9 +11,9 @@
  */
 export interface KawaiiNetIpZone {
   /** The Kawaii zone name (read-only). */
-  zone: string;
-  /** The Kawaii zone gateway public virtual IP (read-only). */
-  public: string;
+  readonly zone: string;
+  /** The Kawaii zone gateway public virtual IP (unset for VPC peered subnets) (read-only). */
+  readonly public?: string;
   /** The Kawaii zone gateway private virtual IP (read-only). */
-  private: string;
+  readonly private: string;
 }

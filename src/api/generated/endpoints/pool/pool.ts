@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   useMutation,
@@ -29,9 +29,11 @@ import type {
   ConflictResponse,
   ForbiddenResponse,
   InsufficientResourceResponse,
+  InternalServerErrorResponse,
   NotFoundResponse,
   ObjectIds,
   StoragePool,
+  StoragePoolUpdate,
   Template,
   UnauthorizedResponse,
   UnprocessableEntityResponse
@@ -39,6 +41,33 @@ import type {
 
 import { kowabungaFetch } from '../../../client';
 import type { ErrorType , BodyType } from '../../../client';
+
+// https://stackoverflow.com/questions/49579094/typescript-conditional-types-filter-out-readonly-properties-pick-only-requir/49579497#49579497
+type IfEquals<X, Y, A = X, B = never> = (<T>() => T extends X ? 1 : 2) extends <
+T,
+>() => T extends Y ? 1 : 2
+? A
+: B;
+
+type WritableKeys<T> = {
+[P in keyof T]-?: IfEquals<
+  { [Q in P]: T[P] },
+  { -readonly [Q in P]: T[P] },
+  P
+>;
+}[keyof T];
+
+type UnionToIntersection<U> =
+  (U extends any ? (k: U)=>void : never) extends ((k: infer I)=>void) ? I : never;
+type DistributeReadOnlyOverUnions<T> = T extends any ? NonReadonly<T> : never;
+
+type Writable<T> = Pick<T, WritableKeys<T>>;
+type NonReadonly<T> = [T] extends [UnionToIntersection<T>] ? {
+  [P in keyof Writable<T>]: T[P] extends object
+    ? NonReadonly<NonNullable<T[P]>>
+    : T[P];
+} : DistributeReadOnlyOverUnions<T>;
+
 
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
@@ -93,7 +122,7 @@ export const getListStoragePoolsQueryKey = () => {
     }
 
 
-export const getListStoragePoolsQueryOptions = <TData = Awaited<ReturnType<typeof listStoragePools>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStoragePools>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListStoragePoolsQueryOptions = <TData = Awaited<ReturnType<typeof listStoragePools>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStoragePools>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -112,10 +141,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListStoragePoolsQueryResult = NonNullable<Awaited<ReturnType<typeof listStoragePools>>>
-export type ListStoragePoolsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+export type ListStoragePoolsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>
 
 
-export function useListStoragePools<TData = Awaited<ReturnType<typeof listStoragePools>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListStoragePools<TData = Awaited<ReturnType<typeof listStoragePools>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStoragePools>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listStoragePools>>,
@@ -125,7 +154,7 @@ export function useListStoragePools<TData = Awaited<ReturnType<typeof listStorag
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListStoragePools<TData = Awaited<ReturnType<typeof listStoragePools>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListStoragePools<TData = Awaited<ReturnType<typeof listStoragePools>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStoragePools>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listStoragePools>>,
@@ -135,12 +164,12 @@ export function useListStoragePools<TData = Awaited<ReturnType<typeof listStorag
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListStoragePools<TData = Awaited<ReturnType<typeof listStoragePools>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListStoragePools<TData = Awaited<ReturnType<typeof listStoragePools>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStoragePools>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListStoragePools<TData = Awaited<ReturnType<typeof listStoragePools>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListStoragePools<TData = Awaited<ReturnType<typeof listStoragePools>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStoragePools>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -185,7 +214,7 @@ export const deleteStoragePool = async (poolId: string, options?: Parameters<typ
 
 export const getDeleteStoragePoolMutationKey = () => ['deleteStoragePool'] as const;
 
-export const getDeleteStoragePoolMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+export const getDeleteStoragePoolMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteStoragePool>>, TError,DeleteStoragePoolMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteStoragePool>>, TError,DeleteStoragePoolMutationVariables, TContext> => {
 
@@ -214,10 +243,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type DeleteStoragePoolMutationResult = NonNullable<Awaited<ReturnType<typeof deleteStoragePool>>>
 
-    export type DeleteStoragePoolMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>
+    export type DeleteStoragePoolMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type DeleteStoragePoolMutationVariables = {poolId: string}
 
-    export const useDeleteStoragePool = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+    export const useDeleteStoragePool = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteStoragePool>>, TError,DeleteStoragePoolMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteStoragePool>>,
@@ -260,7 +289,7 @@ export const getReadStoragePoolQueryKey = (poolId: string,) => {
     }
 
 
-export const getReadStoragePoolQueryOptions = <TData = Awaited<ReturnType<typeof readStoragePool>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(poolId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readStoragePool>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getReadStoragePoolQueryOptions = <TData = Awaited<ReturnType<typeof readStoragePool>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(poolId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readStoragePool>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -279,10 +308,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadStoragePoolQueryResult = NonNullable<Awaited<ReturnType<typeof readStoragePool>>>
-export type ReadStoragePoolQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadStoragePoolQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadStoragePool<TData = Awaited<ReturnType<typeof readStoragePool>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadStoragePool<TData = Awaited<ReturnType<typeof readStoragePool>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  poolId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readStoragePool>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readStoragePool>>,
@@ -292,7 +321,7 @@ export function useReadStoragePool<TData = Awaited<ReturnType<typeof readStorage
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadStoragePool<TData = Awaited<ReturnType<typeof readStoragePool>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadStoragePool<TData = Awaited<ReturnType<typeof readStoragePool>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  poolId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readStoragePool>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readStoragePool>>,
@@ -302,12 +331,12 @@ export function useReadStoragePool<TData = Awaited<ReturnType<typeof readStorage
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadStoragePool<TData = Awaited<ReturnType<typeof readStoragePool>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadStoragePool<TData = Awaited<ReturnType<typeof readStoragePool>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  poolId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readStoragePool>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadStoragePool<TData = Awaited<ReturnType<typeof readStoragePool>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadStoragePool<TData = Awaited<ReturnType<typeof readStoragePool>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  poolId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readStoragePool>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -336,7 +365,7 @@ export const getUpdateStoragePoolUrl = (poolId: string,) => {
  * Updates a storage pool configuration.
  */
 export const updateStoragePool = async (poolId: string,
-    storagePool: StoragePool, options?: Parameters<typeof kowabungaFetch>[1]): Promise<StoragePool> => {
+    storagePoolUpdate: StoragePoolUpdate, options?: Parameters<typeof kowabungaFetch>[1]): Promise<StoragePool> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -357,7 +386,7 @@ return kowabungaFetch<StoragePool>(getUpdateStoragePoolUrl(poolId),
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(storagePool)
+    body: JSON.stringify(storagePoolUpdate)
   }
 );}
 
@@ -367,7 +396,7 @@ return kowabungaFetch<StoragePool>(getUpdateStoragePoolUrl(poolId),
 
 export const getUpdateStoragePoolMutationKey = () => ['updateStoragePool'] as const;
 
-export const getUpdateStoragePoolMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getUpdateStoragePoolMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateStoragePool>>, TError,UpdateStoragePoolMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateStoragePool>>, TError,UpdateStoragePoolMutationVariables, TContext> => {
 
@@ -395,11 +424,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateStoragePoolMutationResult = NonNullable<Awaited<ReturnType<typeof updateStoragePool>>>
-    export type UpdateStoragePoolMutationBody = BodyType<StoragePool>
-    export type UpdateStoragePoolMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type UpdateStoragePoolMutationVariables = {poolId: string;data: BodyType<StoragePool>}
+    export type UpdateStoragePoolMutationBody = BodyType<StoragePoolUpdate>
+    export type UpdateStoragePoolMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type UpdateStoragePoolMutationVariables = {poolId: string;data: BodyType<StoragePoolUpdate>}
 
-    export const useUpdateStoragePool = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useUpdateStoragePool = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateStoragePool>>, TError,UpdateStoragePoolMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateStoragePool>>,
@@ -442,7 +471,7 @@ export const getListStoragePoolVolumesQueryKey = (poolId: string,) => {
     }
 
 
-export const getListStoragePoolVolumesQueryOptions = <TData = Awaited<ReturnType<typeof listStoragePoolVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(poolId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStoragePoolVolumes>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListStoragePoolVolumesQueryOptions = <TData = Awaited<ReturnType<typeof listStoragePoolVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(poolId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStoragePoolVolumes>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -461,10 +490,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListStoragePoolVolumesQueryResult = NonNullable<Awaited<ReturnType<typeof listStoragePoolVolumes>>>
-export type ListStoragePoolVolumesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ListStoragePoolVolumesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useListStoragePoolVolumes<TData = Awaited<ReturnType<typeof listStoragePoolVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListStoragePoolVolumes<TData = Awaited<ReturnType<typeof listStoragePoolVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  poolId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStoragePoolVolumes>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listStoragePoolVolumes>>,
@@ -474,7 +503,7 @@ export function useListStoragePoolVolumes<TData = Awaited<ReturnType<typeof list
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListStoragePoolVolumes<TData = Awaited<ReturnType<typeof listStoragePoolVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListStoragePoolVolumes<TData = Awaited<ReturnType<typeof listStoragePoolVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  poolId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStoragePoolVolumes>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listStoragePoolVolumes>>,
@@ -484,12 +513,12 @@ export function useListStoragePoolVolumes<TData = Awaited<ReturnType<typeof list
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListStoragePoolVolumes<TData = Awaited<ReturnType<typeof listStoragePoolVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListStoragePoolVolumes<TData = Awaited<ReturnType<typeof listStoragePoolVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  poolId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStoragePoolVolumes>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListStoragePoolVolumes<TData = Awaited<ReturnType<typeof listStoragePoolVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListStoragePoolVolumes<TData = Awaited<ReturnType<typeof listStoragePoolVolumes>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  poolId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStoragePoolVolumes>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -506,7 +535,7 @@ export function useListStoragePoolVolumes<TData = Awaited<ReturnType<typeof list
 
 
 
-export const getCreateTemplateUrl = (poolId: string,) => {
+export const getCreateStoragePoolTemplateUrl = (poolId: string,) => {
 
 
 
@@ -517,8 +546,8 @@ export const getCreateTemplateUrl = (poolId: string,) => {
 /**
  * Creates a new image template.
  */
-export const createTemplate = async (poolId: string,
-    template: Template, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Template> => {
+export const createStoragePoolTemplate = async (poolId: string,
+    template: NonReadonly<Template>, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Template> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -534,7 +563,7 @@ export const createTemplate = async (poolId: string,
     }
     return headers;
   };
-return kowabungaFetch<Template>(getCreateTemplateUrl(poolId),
+return kowabungaFetch<Template>(getCreateStoragePoolTemplateUrl(poolId),
   {
     ...options,
     method: 'POST',
@@ -547,13 +576,13 @@ return kowabungaFetch<Template>(getCreateTemplateUrl(poolId),
 
 
 
-export const getCreateTemplateMutationKey = () => ['createTemplate'] as const;
+export const getCreateStoragePoolTemplateMutationKey = () => ['createStoragePoolTemplate'] as const;
 
-export const getCreateTemplateMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTemplate>>, TError,CreateTemplateMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
-): UseMutationOptions<Awaited<ReturnType<typeof createTemplate>>, TError,CreateTemplateMutationVariables, TContext> => {
+export const getCreateStoragePoolTemplateMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStoragePoolTemplate>>, TError,CreateStoragePoolTemplateMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createStoragePoolTemplate>>, TError,CreateStoragePoolTemplateMutationVariables, TContext> => {
 
-const mutationKey = getCreateTemplateMutationKey();
+const mutationKey = getCreateStoragePoolTemplateMutationKey();
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -563,10 +592,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createTemplate>>, CreateTemplateMutationVariables> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createStoragePoolTemplate>>, CreateStoragePoolTemplateMutationVariables> = (props) => {
           const {poolId,data} = props ?? {};
 
-          return  createTemplate(poolId,data,requestOptions)
+          return  createStoragePoolTemplate(poolId,data,requestOptions)
         }
 
 
@@ -576,20 +605,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type CreateTemplateMutationResult = NonNullable<Awaited<ReturnType<typeof createTemplate>>>
-    export type CreateTemplateMutationBody = BodyType<Template>
-    export type CreateTemplateMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type CreateTemplateMutationVariables = {poolId: string;data: BodyType<Template>}
+    export type CreateStoragePoolTemplateMutationResult = NonNullable<Awaited<ReturnType<typeof createStoragePoolTemplate>>>
+    export type CreateStoragePoolTemplateMutationBody = BodyType<NonReadonly<Template>>
+    export type CreateStoragePoolTemplateMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type CreateStoragePoolTemplateMutationVariables = {poolId: string;data: BodyType<NonReadonly<Template>>}
 
-    export const useCreateTemplate = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createTemplate>>, TError,CreateTemplateMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
+    export const useCreateStoragePoolTemplate = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createStoragePoolTemplate>>, TError,CreateStoragePoolTemplateMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof createTemplate>>,
+        Awaited<ReturnType<typeof createStoragePoolTemplate>>,
         TError,
-        CreateTemplateMutationVariables,
+        CreateStoragePoolTemplateMutationVariables,
         TContext
       > => {
-      return useMutation(getCreateTemplateMutationOptions(options), queryClient);
+      return useMutation(getCreateStoragePoolTemplateMutationOptions(options), queryClient);
     }
     export const getSetStoragePoolDefaultTemplateUrl = (poolId: string,
     templateId: string,) => {
@@ -621,7 +650,7 @@ export const setStoragePoolDefaultTemplate = async (poolId: string,
 
 export const getSetStoragePoolDefaultTemplateMutationKey = () => ['setStoragePoolDefaultTemplate'] as const;
 
-export const getSetStoragePoolDefaultTemplateMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+export const getSetStoragePoolDefaultTemplateMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setStoragePoolDefaultTemplate>>, TError,SetStoragePoolDefaultTemplateMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof setStoragePoolDefaultTemplate>>, TError,SetStoragePoolDefaultTemplateMutationVariables, TContext> => {
 
@@ -650,10 +679,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type SetStoragePoolDefaultTemplateMutationResult = NonNullable<Awaited<ReturnType<typeof setStoragePoolDefaultTemplate>>>
 
-    export type SetStoragePoolDefaultTemplateMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>
+    export type SetStoragePoolDefaultTemplateMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type SetStoragePoolDefaultTemplateMutationVariables = {poolId: string;templateId: string}
 
-    export const useSetStoragePoolDefaultTemplate = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+    export const useSetStoragePoolDefaultTemplate = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setStoragePoolDefaultTemplate>>, TError,SetStoragePoolDefaultTemplateMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof setStoragePoolDefaultTemplate>>,
@@ -696,7 +725,7 @@ export const getListStoragePoolTemplatesQueryKey = (poolId: string,) => {
     }
 
 
-export const getListStoragePoolTemplatesQueryOptions = <TData = Awaited<ReturnType<typeof listStoragePoolTemplates>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(poolId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStoragePoolTemplates>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListStoragePoolTemplatesQueryOptions = <TData = Awaited<ReturnType<typeof listStoragePoolTemplates>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(poolId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStoragePoolTemplates>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -715,10 +744,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListStoragePoolTemplatesQueryResult = NonNullable<Awaited<ReturnType<typeof listStoragePoolTemplates>>>
-export type ListStoragePoolTemplatesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ListStoragePoolTemplatesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useListStoragePoolTemplates<TData = Awaited<ReturnType<typeof listStoragePoolTemplates>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListStoragePoolTemplates<TData = Awaited<ReturnType<typeof listStoragePoolTemplates>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  poolId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStoragePoolTemplates>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listStoragePoolTemplates>>,
@@ -728,7 +757,7 @@ export function useListStoragePoolTemplates<TData = Awaited<ReturnType<typeof li
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListStoragePoolTemplates<TData = Awaited<ReturnType<typeof listStoragePoolTemplates>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListStoragePoolTemplates<TData = Awaited<ReturnType<typeof listStoragePoolTemplates>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  poolId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStoragePoolTemplates>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listStoragePoolTemplates>>,
@@ -738,12 +767,12 @@ export function useListStoragePoolTemplates<TData = Awaited<ReturnType<typeof li
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListStoragePoolTemplates<TData = Awaited<ReturnType<typeof listStoragePoolTemplates>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListStoragePoolTemplates<TData = Awaited<ReturnType<typeof listStoragePoolTemplates>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  poolId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStoragePoolTemplates>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListStoragePoolTemplates<TData = Awaited<ReturnType<typeof listStoragePoolTemplates>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListStoragePoolTemplates<TData = Awaited<ReturnType<typeof listStoragePoolTemplates>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  poolId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listStoragePoolTemplates>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {

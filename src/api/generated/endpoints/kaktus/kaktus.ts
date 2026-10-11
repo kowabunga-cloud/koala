@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   useMutation,
@@ -29,8 +29,10 @@ import type {
   ConflictResponse,
   ForbiddenResponse,
   InsufficientResourceResponse,
+  InternalServerErrorResponse,
   Kaktus,
   KaktusCaps,
+  KaktusUpdate,
   NotFoundResponse,
   ObjectIds,
   UnauthorizedResponse,
@@ -60,7 +62,7 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   return result;
 };
 
-export const getListKaktussUrl = () => {
+export const getListKaktusesUrl = () => {
 
 
 
@@ -71,9 +73,9 @@ export const getListKaktussUrl = () => {
 /**
  * Returns the IDs of Kaktus computing node objects.
  */
-export const listKaktuss = async ( options?: Parameters<typeof kowabungaFetch>[1]): Promise<ObjectIds> => {
+export const listKaktuses = async ( options?: Parameters<typeof kowabungaFetch>[1]): Promise<ObjectIds> => {
 
-  return kowabungaFetch<ObjectIds>(getListKaktussUrl(),
+  return kowabungaFetch<ObjectIds>(getListKaktusesUrl(),
   {
     ...options,
     method: 'GET'
@@ -86,66 +88,66 @@ export const listKaktuss = async ( options?: Parameters<typeof kowabungaFetch>[1
 
 
 
-export const getListKaktussQueryKey = () => {
+export const getListKaktusesQueryKey = () => {
     return [
     `/kaktus`
     ] as const;
     }
 
 
-export const getListKaktussQueryOptions = <TData = Awaited<ReturnType<typeof listKaktuss>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKaktuss>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListKaktusesQueryOptions = <TData = Awaited<ReturnType<typeof listKaktuses>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKaktuses>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListKaktussQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getListKaktusesQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listKaktuss>>> = ({ signal }) => listKaktuss({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listKaktuses>>> = ({ signal }) => listKaktuses({ signal, ...requestOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listKaktuss>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listKaktuses>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type ListKaktussQueryResult = NonNullable<Awaited<ReturnType<typeof listKaktuss>>>
-export type ListKaktussQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+export type ListKaktusesQueryResult = NonNullable<Awaited<ReturnType<typeof listKaktuses>>>
+export type ListKaktusesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>
 
 
-export function useListKaktuss<TData = Awaited<ReturnType<typeof listKaktuss>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKaktuss>>, TError, TData>> & Pick<
+export function useListKaktuses<TData = Awaited<ReturnType<typeof listKaktuses>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKaktuses>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listKaktuss>>,
+          Awaited<ReturnType<typeof listKaktuses>>,
           TError,
-          Awaited<ReturnType<typeof listKaktuss>>
+          Awaited<ReturnType<typeof listKaktuses>>
         > , 'initialData'
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListKaktuss<TData = Awaited<ReturnType<typeof listKaktuss>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKaktuss>>, TError, TData>> & Pick<
+export function useListKaktuses<TData = Awaited<ReturnType<typeof listKaktuses>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKaktuses>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof listKaktuss>>,
+          Awaited<ReturnType<typeof listKaktuses>>,
           TError,
-          Awaited<ReturnType<typeof listKaktuss>>
+          Awaited<ReturnType<typeof listKaktuses>>
         > , 'initialData'
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListKaktuss<TData = Awaited<ReturnType<typeof listKaktuss>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKaktuss>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export function useListKaktuses<TData = Awaited<ReturnType<typeof listKaktuses>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKaktuses>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListKaktuss<TData = Awaited<ReturnType<typeof listKaktuss>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKaktuss>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export function useListKaktuses<TData = Awaited<ReturnType<typeof listKaktuses>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKaktuses>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getListKaktussQueryOptions(options)
+  const queryOptions = getListKaktusesQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -185,7 +187,7 @@ export const deleteKaktus = async (kaktusId: string, options?: Parameters<typeof
 
 export const getDeleteKaktusMutationKey = () => ['deleteKaktus'] as const;
 
-export const getDeleteKaktusMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+export const getDeleteKaktusMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteKaktus>>, TError,DeleteKaktusMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteKaktus>>, TError,DeleteKaktusMutationVariables, TContext> => {
 
@@ -214,10 +216,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type DeleteKaktusMutationResult = NonNullable<Awaited<ReturnType<typeof deleteKaktus>>>
 
-    export type DeleteKaktusMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>
+    export type DeleteKaktusMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type DeleteKaktusMutationVariables = {kaktusId: string}
 
-    export const useDeleteKaktus = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+    export const useDeleteKaktus = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteKaktus>>, TError,DeleteKaktusMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteKaktus>>,
@@ -260,7 +262,7 @@ export const getReadKaktusQueryKey = (kaktusId: string,) => {
     }
 
 
-export const getReadKaktusQueryOptions = <TData = Awaited<ReturnType<typeof readKaktus>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(kaktusId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKaktus>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getReadKaktusQueryOptions = <TData = Awaited<ReturnType<typeof readKaktus>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(kaktusId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKaktus>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -279,10 +281,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadKaktusQueryResult = NonNullable<Awaited<ReturnType<typeof readKaktus>>>
-export type ReadKaktusQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadKaktusQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadKaktus<TData = Awaited<ReturnType<typeof readKaktus>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKaktus<TData = Awaited<ReturnType<typeof readKaktus>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kaktusId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKaktus>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readKaktus>>,
@@ -292,7 +294,7 @@ export function useReadKaktus<TData = Awaited<ReturnType<typeof readKaktus>>, TE
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadKaktus<TData = Awaited<ReturnType<typeof readKaktus>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKaktus<TData = Awaited<ReturnType<typeof readKaktus>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kaktusId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKaktus>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readKaktus>>,
@@ -302,12 +304,12 @@ export function useReadKaktus<TData = Awaited<ReturnType<typeof readKaktus>>, TE
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadKaktus<TData = Awaited<ReturnType<typeof readKaktus>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKaktus<TData = Awaited<ReturnType<typeof readKaktus>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kaktusId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKaktus>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadKaktus<TData = Awaited<ReturnType<typeof readKaktus>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKaktus<TData = Awaited<ReturnType<typeof readKaktus>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kaktusId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKaktus>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -336,7 +338,7 @@ export const getUpdateKaktusUrl = (kaktusId: string,) => {
  * Updates a Kaktus computing node configuration.
  */
 export const updateKaktus = async (kaktusId: string,
-    kaktus: Kaktus, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Kaktus> => {
+    kaktusUpdate: KaktusUpdate, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Kaktus> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -357,7 +359,7 @@ return kowabungaFetch<Kaktus>(getUpdateKaktusUrl(kaktusId),
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(kaktus)
+    body: JSON.stringify(kaktusUpdate)
   }
 );}
 
@@ -367,7 +369,7 @@ return kowabungaFetch<Kaktus>(getUpdateKaktusUrl(kaktusId),
 
 export const getUpdateKaktusMutationKey = () => ['updateKaktus'] as const;
 
-export const getUpdateKaktusMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getUpdateKaktusMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKaktus>>, TError,UpdateKaktusMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateKaktus>>, TError,UpdateKaktusMutationVariables, TContext> => {
 
@@ -395,11 +397,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateKaktusMutationResult = NonNullable<Awaited<ReturnType<typeof updateKaktus>>>
-    export type UpdateKaktusMutationBody = BodyType<Kaktus>
-    export type UpdateKaktusMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type UpdateKaktusMutationVariables = {kaktusId: string;data: BodyType<Kaktus>}
+    export type UpdateKaktusMutationBody = BodyType<KaktusUpdate>
+    export type UpdateKaktusMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type UpdateKaktusMutationVariables = {kaktusId: string;data: BodyType<KaktusUpdate>}
 
-    export const useUpdateKaktus = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useUpdateKaktus = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKaktus>>, TError,UpdateKaktusMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateKaktus>>,
@@ -437,7 +439,7 @@ export const enableKaktusMaintenance = async (kaktusId: string, options?: Parame
 
 export const getEnableKaktusMaintenanceMutationKey = () => ['enableKaktusMaintenance'] as const;
 
-export const getEnableKaktusMaintenanceMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+export const getEnableKaktusMaintenanceMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof enableKaktusMaintenance>>, TError,EnableKaktusMaintenanceMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof enableKaktusMaintenance>>, TError,EnableKaktusMaintenanceMutationVariables, TContext> => {
 
@@ -466,10 +468,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type EnableKaktusMaintenanceMutationResult = NonNullable<Awaited<ReturnType<typeof enableKaktusMaintenance>>>
 
-    export type EnableKaktusMaintenanceMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>
+    export type EnableKaktusMaintenanceMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type EnableKaktusMaintenanceMutationVariables = {kaktusId: string}
 
-    export const useEnableKaktusMaintenance = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+    export const useEnableKaktusMaintenance = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof enableKaktusMaintenance>>, TError,EnableKaktusMaintenanceMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof enableKaktusMaintenance>>,
@@ -507,7 +509,7 @@ export const disableKaktusMaintenance = async (kaktusId: string, options?: Param
 
 export const getDisableKaktusMaintenanceMutationKey = () => ['disableKaktusMaintenance'] as const;
 
-export const getDisableKaktusMaintenanceMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+export const getDisableKaktusMaintenanceMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof disableKaktusMaintenance>>, TError,DisableKaktusMaintenanceMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof disableKaktusMaintenance>>, TError,DisableKaktusMaintenanceMutationVariables, TContext> => {
 
@@ -536,10 +538,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type DisableKaktusMaintenanceMutationResult = NonNullable<Awaited<ReturnType<typeof disableKaktusMaintenance>>>
 
-    export type DisableKaktusMaintenanceMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>
+    export type DisableKaktusMaintenanceMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type DisableKaktusMaintenanceMutationVariables = {kaktusId: string}
 
-    export const useDisableKaktusMaintenance = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse>,
+    export const useDisableKaktusMaintenance = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof disableKaktusMaintenance>>, TError,DisableKaktusMaintenanceMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof disableKaktusMaintenance>>,
@@ -582,7 +584,7 @@ export const getReadKaktusCapsQueryKey = (kaktusId: string,) => {
     }
 
 
-export const getReadKaktusCapsQueryOptions = <TData = Awaited<ReturnType<typeof readKaktusCaps>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(kaktusId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKaktusCaps>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getReadKaktusCapsQueryOptions = <TData = Awaited<ReturnType<typeof readKaktusCaps>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(kaktusId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKaktusCaps>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -601,10 +603,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadKaktusCapsQueryResult = NonNullable<Awaited<ReturnType<typeof readKaktusCaps>>>
-export type ReadKaktusCapsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadKaktusCapsQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadKaktusCaps<TData = Awaited<ReturnType<typeof readKaktusCaps>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKaktusCaps<TData = Awaited<ReturnType<typeof readKaktusCaps>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kaktusId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKaktusCaps>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readKaktusCaps>>,
@@ -614,7 +616,7 @@ export function useReadKaktusCaps<TData = Awaited<ReturnType<typeof readKaktusCa
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadKaktusCaps<TData = Awaited<ReturnType<typeof readKaktusCaps>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKaktusCaps<TData = Awaited<ReturnType<typeof readKaktusCaps>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kaktusId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKaktusCaps>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readKaktusCaps>>,
@@ -624,12 +626,12 @@ export function useReadKaktusCaps<TData = Awaited<ReturnType<typeof readKaktusCa
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadKaktusCaps<TData = Awaited<ReturnType<typeof readKaktusCaps>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKaktusCaps<TData = Awaited<ReturnType<typeof readKaktusCaps>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kaktusId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKaktusCaps>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadKaktusCaps<TData = Awaited<ReturnType<typeof readKaktusCaps>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKaktusCaps<TData = Awaited<ReturnType<typeof readKaktusCaps>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kaktusId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKaktusCaps>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -679,7 +681,7 @@ export const getListKaktusInstancesQueryKey = (kaktusId: string,) => {
     }
 
 
-export const getListKaktusInstancesQueryOptions = <TData = Awaited<ReturnType<typeof listKaktusInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(kaktusId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKaktusInstances>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListKaktusInstancesQueryOptions = <TData = Awaited<ReturnType<typeof listKaktusInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(kaktusId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKaktusInstances>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -698,10 +700,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListKaktusInstancesQueryResult = NonNullable<Awaited<ReturnType<typeof listKaktusInstances>>>
-export type ListKaktusInstancesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ListKaktusInstancesQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useListKaktusInstances<TData = Awaited<ReturnType<typeof listKaktusInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListKaktusInstances<TData = Awaited<ReturnType<typeof listKaktusInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kaktusId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKaktusInstances>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listKaktusInstances>>,
@@ -711,7 +713,7 @@ export function useListKaktusInstances<TData = Awaited<ReturnType<typeof listKak
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListKaktusInstances<TData = Awaited<ReturnType<typeof listKaktusInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListKaktusInstances<TData = Awaited<ReturnType<typeof listKaktusInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kaktusId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKaktusInstances>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listKaktusInstances>>,
@@ -721,12 +723,12 @@ export function useListKaktusInstances<TData = Awaited<ReturnType<typeof listKak
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListKaktusInstances<TData = Awaited<ReturnType<typeof listKaktusInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListKaktusInstances<TData = Awaited<ReturnType<typeof listKaktusInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kaktusId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKaktusInstances>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListKaktusInstances<TData = Awaited<ReturnType<typeof listKaktusInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useListKaktusInstances<TData = Awaited<ReturnType<typeof listKaktusInstances>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kaktusId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKaktusInstances>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {

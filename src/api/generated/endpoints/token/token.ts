@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   useMutation,
@@ -26,10 +26,12 @@ import type {
 
 import type {
   ApiToken,
+  ApiTokenUpdate,
   BadRequestResponse,
   ConflictResponse,
   ForbiddenResponse,
   InsufficientResourceResponse,
+  InternalServerErrorResponse,
   NotFoundResponse,
   ObjectIds,
   UnauthorizedResponse,
@@ -92,7 +94,7 @@ export const getListApiTokensQueryKey = () => {
     }
 
 
-export const getListApiTokensQueryOptions = <TData = Awaited<ReturnType<typeof listApiTokens>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listApiTokens>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListApiTokensQueryOptions = <TData = Awaited<ReturnType<typeof listApiTokens>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listApiTokens>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -111,10 +113,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListApiTokensQueryResult = NonNullable<Awaited<ReturnType<typeof listApiTokens>>>
-export type ListApiTokensQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+export type ListApiTokensQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>
 
 
-export function useListApiTokens<TData = Awaited<ReturnType<typeof listApiTokens>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListApiTokens<TData = Awaited<ReturnType<typeof listApiTokens>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listApiTokens>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listApiTokens>>,
@@ -124,7 +126,7 @@ export function useListApiTokens<TData = Awaited<ReturnType<typeof listApiTokens
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListApiTokens<TData = Awaited<ReturnType<typeof listApiTokens>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListApiTokens<TData = Awaited<ReturnType<typeof listApiTokens>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listApiTokens>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listApiTokens>>,
@@ -134,12 +136,12 @@ export function useListApiTokens<TData = Awaited<ReturnType<typeof listApiTokens
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListApiTokens<TData = Awaited<ReturnType<typeof listApiTokens>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListApiTokens<TData = Awaited<ReturnType<typeof listApiTokens>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listApiTokens>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListApiTokens<TData = Awaited<ReturnType<typeof listApiTokens>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListApiTokens<TData = Awaited<ReturnType<typeof listApiTokens>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listApiTokens>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -184,7 +186,7 @@ export const deleteApiToken = async (tokenId: string, options?: Parameters<typeo
 
 export const getDeleteApiTokenMutationKey = () => ['deleteApiToken'] as const;
 
-export const getDeleteApiTokenMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+export const getDeleteApiTokenMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiToken>>, TError,DeleteApiTokenMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteApiToken>>, TError,DeleteApiTokenMutationVariables, TContext> => {
 
@@ -213,10 +215,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type DeleteApiTokenMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiToken>>>
 
-    export type DeleteApiTokenMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>
+    export type DeleteApiTokenMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type DeleteApiTokenMutationVariables = {tokenId: string}
 
-    export const useDeleteApiToken = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+    export const useDeleteApiToken = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiToken>>, TError,DeleteApiTokenMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteApiToken>>,
@@ -259,7 +261,7 @@ export const getReadApiTokenQueryKey = (tokenId: string,) => {
     }
 
 
-export const getReadApiTokenQueryOptions = <TData = Awaited<ReturnType<typeof readApiToken>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(tokenId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readApiToken>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getReadApiTokenQueryOptions = <TData = Awaited<ReturnType<typeof readApiToken>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(tokenId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readApiToken>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -278,10 +280,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadApiTokenQueryResult = NonNullable<Awaited<ReturnType<typeof readApiToken>>>
-export type ReadApiTokenQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadApiTokenQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadApiToken<TData = Awaited<ReturnType<typeof readApiToken>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadApiToken<TData = Awaited<ReturnType<typeof readApiToken>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  tokenId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readApiToken>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readApiToken>>,
@@ -291,7 +293,7 @@ export function useReadApiToken<TData = Awaited<ReturnType<typeof readApiToken>>
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadApiToken<TData = Awaited<ReturnType<typeof readApiToken>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadApiToken<TData = Awaited<ReturnType<typeof readApiToken>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  tokenId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readApiToken>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readApiToken>>,
@@ -301,12 +303,12 @@ export function useReadApiToken<TData = Awaited<ReturnType<typeof readApiToken>>
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadApiToken<TData = Awaited<ReturnType<typeof readApiToken>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadApiToken<TData = Awaited<ReturnType<typeof readApiToken>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  tokenId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readApiToken>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadApiToken<TData = Awaited<ReturnType<typeof readApiToken>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadApiToken<TData = Awaited<ReturnType<typeof readApiToken>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  tokenId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readApiToken>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -335,7 +337,7 @@ export const getUpdateApiTokenUrl = (tokenId: string,) => {
  * Updates a server-to-server authentication security token configuration.
  */
 export const updateApiToken = async (tokenId: string,
-    apiToken: ApiToken, options?: Parameters<typeof kowabungaFetch>[1]): Promise<ApiToken> => {
+    apiTokenUpdate: ApiTokenUpdate, options?: Parameters<typeof kowabungaFetch>[1]): Promise<ApiToken> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -356,7 +358,7 @@ return kowabungaFetch<ApiToken>(getUpdateApiTokenUrl(tokenId),
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(apiToken)
+    body: JSON.stringify(apiTokenUpdate)
   }
 );}
 
@@ -366,7 +368,7 @@ return kowabungaFetch<ApiToken>(getUpdateApiTokenUrl(tokenId),
 
 export const getUpdateApiTokenMutationKey = () => ['updateApiToken'] as const;
 
-export const getUpdateApiTokenMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getUpdateApiTokenMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateApiToken>>, TError,UpdateApiTokenMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateApiToken>>, TError,UpdateApiTokenMutationVariables, TContext> => {
 
@@ -394,11 +396,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateApiTokenMutationResult = NonNullable<Awaited<ReturnType<typeof updateApiToken>>>
-    export type UpdateApiTokenMutationBody = BodyType<ApiToken>
-    export type UpdateApiTokenMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type UpdateApiTokenMutationVariables = {tokenId: string;data: BodyType<ApiToken>}
+    export type UpdateApiTokenMutationBody = BodyType<ApiTokenUpdate>
+    export type UpdateApiTokenMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type UpdateApiTokenMutationVariables = {tokenId: string;data: BodyType<ApiTokenUpdate>}
 
-    export const useUpdateApiToken = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useUpdateApiToken = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateApiToken>>, TError,UpdateApiTokenMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateApiToken>>,

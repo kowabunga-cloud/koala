@@ -3,17 +3,17 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
+import type { KawaiiNetIpZone } from './kawaiiNetIpZone';
 import type { KawaiiVpcForwardRule } from './kawaiiVpcForwardRule';
-import type { KawaiiVpcNetIpZone } from './kawaiiVpcNetIpZone';
 import type { KawaiiVpcPeeringPolicy } from './kawaiiVpcPeeringPolicy';
 
 /**
  * A Kawaii internal VPC subnet peering.
  */
 export interface KawaiiVpcPeering {
-  /** Kowabunga Subnet ID to be peered with (subnet local IP addresses will be automatically assigned to Kawaii instances).. */
+  /** Kowabunga Subnet ID to be peered with (subnet local IP addresses will be automatically assigned to Kawaii instances). */
   subnet: string;
   /** The default VPC traffic forwarding policy. */
   policy?: KawaiiVpcPeeringPolicy;
@@ -22,5 +22,5 @@ export interface KawaiiVpcPeering {
   /** The firewall list of forwarding egress rules to VPC peered subnet. ICMP traffic is always accepted. The specified ruleset will be explicitly accepted if drop is the default policy (useless otherwise). */
   egress?: KawaiiVpcForwardRule[];
   /** The per-zone auto-assigned private IPs in peered subnet (read-only). */
-  netip?: KawaiiVpcNetIpZone[];
+  readonly netip?: readonly KawaiiNetIpZone[];
 }

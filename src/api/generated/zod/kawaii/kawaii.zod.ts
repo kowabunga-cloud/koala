@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import * as zod from 'zod';
 
@@ -39,30 +39,19 @@ export const readKawaiiResponseDnatItemProtocolDefault = `tcp`;
 export const readKawaiiResponseVpcPeeringsItemPolicyDefault = `drop`;
 export const readKawaiiResponseVpcPeeringsItemIngressItemProtocolDefault = `tcp`;
 export const readKawaiiResponseVpcPeeringsItemEgressItemProtocolDefault = `tcp`;
-export const readKawaiiResponseIpsecConnectionsItemDpdTimeoutActionDefault = `restart`;
-export const readKawaiiResponseIpsecConnectionsItemDpdTimeoutDefault = `240s`;
-export const readKawaiiResponseIpsecConnectionsItemStartActionDefault = `start`;
-export const readKawaiiResponseIpsecConnectionsItemRekeyTimeDefault = `2h`;
-export const readKawaiiResponseIpsecConnectionsItemPhase1LifetimeDefault = `1h`;
-export const readKawaiiResponseIpsecConnectionsItemPhase2LifetimeDefault = `1h`;
-export const readKawaiiResponseIpsecConnectionsItemFirewallOneIngressItemSourceDefault = `0.0.0.0/0`;
-export const readKawaiiResponseIpsecConnectionsItemFirewallOneIngressItemProtocolDefault = `tcp`;
-export const readKawaiiResponseIpsecConnectionsItemFirewallOneEgressPolicyDefault = `accept`;
-export const readKawaiiResponseIpsecConnectionsItemFirewallOneEgressItemDestinationDefault = `0.0.0.0/0`;
-export const readKawaiiResponseIpsecConnectionsItemFirewallOneEgressItemProtocolDefault = `tcp`;
 
 export const ReadKawaiiResponse = zod.object({
-  "id": zod.string().optional().describe('The Kawaii ID (auto-generated).'),
-  "name": zod.string().optional().describe('The Kawaii name.'),
+  "id": zod.string().optional().describe('The Kawaii ID (auto-generated) (read-only).'),
+  "name": zod.string().optional().describe('The Kawaii name, auto-generated from the project name.'),
   "description": zod.string().optional().describe('The Kawaii description.'),
   "netip": zod.object({
   "public": zod.array(zod.string()).describe('The Kawaii global public gateways virtual IP addresses (read-only).'),
   "private": zod.array(zod.string()).describe('The Kawaii global private gateways virtual IP addresses (read-only).'),
   "zones": zod.array(zod.object({
   "zone": zod.string().describe('The Kawaii zone name (read-only).'),
-  "public": zod.string().describe('The Kawaii zone gateway public virtual IP (read-only).'),
+  "public": zod.string().optional().describe('The Kawaii zone gateway public virtual IP (unset for VPC peered subnets) (read-only).'),
   "private": zod.string().describe('The Kawaii zone gateway private virtual IP (read-only).')
-}).describe('A Kawaii Network IP zone settings.')).describe('The Kawaii per-zone list of Kowabunga virtual IP addresses.')
+}).describe('A Kawaii Network IP zone settings.')).describe('The Kawaii per-zone list of Kowabunga virtual IP addresses (read-only).')
 }).describe('A Kawaii Network IP settings.').optional().describe('The Kawaii list of assigned virtual IPs per-zone addresses (read-only).'),
   "firewall": zod.object({
   "ingress": zod.array(zod.object({
@@ -75,63 +64,30 @@ export const ReadKawaiiResponse = zod.object({
   "destination": zod.string().default(readKawaiiResponseFirewallOneEgressItemDestinationDefault).describe('The destination IP or CIDR to accept/drop public traffic to.'),
   "protocol": zod.enum(['tcp', 'udp']).default(readKawaiiResponseFirewallOneEgressItemProtocolDefault).describe('The transport layer protocol to accept/drop public traffic to.'),
   "ports": zod.string().describe('The port (or list of ports) to accept/drop public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall egress rule.')).optional().describe('The Kawaii public firewall list of egress rules. Kawaii default policy is to accept all outgoing traffic, including ICMP. Specified ruleset will be explicitly dropped if egress_policy is set to accept, and explicitly accepted if egress policy is set to drop..')
-}).describe('A Kawaii public firewall settings.').optional().describe('The Kawaii firewall settings from/to public Internet).'),
+}).describe('A Kawaii public firewall egress rule.')).optional().describe('The Kawaii public firewall list of egress rules. Kawaii default policy is to accept all outgoing traffic, including ICMP. Specified ruleset will be explicitly dropped if egress_policy is set to accept, and explicitly accepted if egress policy is set to drop.')
+}).describe('A Kawaii public firewall settings.').optional().describe('The Kawaii firewall settings from/to public Internet.'),
   "dnat": zod.array(zod.object({
   "destination": zod.string().describe('Target private IP address to forward public traffic to.'),
   "protocol": zod.enum(['tcp', 'udp']).default(readKawaiiResponseDnatItemProtocolDefault).describe('The transport layer protocol to forward public traffic to.'),
   "ports": zod.string().describe('The port (or list of ports) to forward public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
 }).describe('A Kawaii public firewall destination NAT rule.')).optional().describe('The Kawaii list of NAT forwarding entries. Kawaii will forward public Internet traffic from all public virtual IPs to requested private subnet IP addresses.'),
   "vpc_peerings": zod.array(zod.object({
-  "subnet": zod.string().describe('Kowabunga Subnet ID to be peered with (subnet local IP addresses will be automatically assigned to Kawaii instances)..'),
+  "subnet": zod.string().describe('Kowabunga Subnet ID to be peered with (subnet local IP addresses will be automatically assigned to Kawaii instances).'),
   "policy": zod.enum(['accept', 'drop']).default(readKawaiiResponseVpcPeeringsItemPolicyDefault).describe('The default VPC traffic forwarding policy.'),
   "ingress": zod.array(zod.object({
-  "protocol": zod.enum(['tcp', 'udp']).default(readKawaiiResponseVpcPeeringsItemIngressItemProtocolDefault).describe('The transport layer protocol to forward public traffic to.'),
-  "ports": zod.string().describe('The port (or list of ports) to forward public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
+  "protocol": zod.enum(['tcp', 'udp']).default(readKawaiiResponseVpcPeeringsItemIngressItemProtocolDefault).describe('The transport layer protocol to forward VPC traffic to.'),
+  "ports": zod.string().describe('The port (or list of ports) to forward VPC traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
 }).describe('A Kawaii VPC firewall forwarding rule.')).optional().describe('The firewall list of forwarding ingress rules from VPC peered subnet. ICMP traffic is always accepted. The specified ruleset will be explicitly accepted if drop is the default policy (useless otherwise).'),
   "egress": zod.array(zod.object({
-  "protocol": zod.enum(['tcp', 'udp']).default(readKawaiiResponseVpcPeeringsItemEgressItemProtocolDefault).describe('The transport layer protocol to forward public traffic to.'),
-  "ports": zod.string().describe('The port (or list of ports) to forward public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
+  "protocol": zod.enum(['tcp', 'udp']).default(readKawaiiResponseVpcPeeringsItemEgressItemProtocolDefault).describe('The transport layer protocol to forward VPC traffic to.'),
+  "ports": zod.string().describe('The port (or list of ports) to forward VPC traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
 }).describe('A Kawaii VPC firewall forwarding rule.')).optional().describe('The firewall list of forwarding egress rules to VPC peered subnet. ICMP traffic is always accepted. The specified ruleset will be explicitly accepted if drop is the default policy (useless otherwise).'),
   "netip": zod.array(zod.object({
   "zone": zod.string().describe('The Kawaii zone name (read-only).'),
-  "private": zod.string().describe('The Kawaii zone gateway private IP address in VPC peered subnet  (read-only).')
-}).describe('A Kawaii VPC Network IP zone settings.')).optional().describe('The per-zone auto-assigned private IPs in peered subnet (read-only).')
-}).describe('A Kawaii internal VPC subnet peering.')).optional().describe('The Kawaii list of Kowabunga private VPC subnet peering entries.'),
-  "ipsec_connections": zod.array(zod.object({
-  "id": zod.string().optional().describe('The Kawaii IPsec connection ID (auto-generated).'),
-  "name": zod.string().describe('The Kawaii IPsec connection name.'),
-  "description": zod.string().optional().describe('The Kawaii IPsec connection description.'),
-  "ip": zod.string().optional().describe('The Kawaii IPsec connection IPSec IP.'),
-  "remote_ip": zod.string().describe('The Kawaii IPsec connection remote peer VPN Gateway.'),
-  "remote_subnet": zod.string().describe('The Kawaii IPsec connection remote subnet.'),
-  "pre_shared_key": zod.string().describe('The Kawaii IPsec connection pre-shared key(PSK).'),
-  "dpd_timeout_action": zod.enum(['clear', 'restart', 'start']).default(readKawaiiResponseIpsecConnectionsItemDpdTimeoutActionDefault).describe('The Kawaii IPsec connection Dead Peer Detection Action (clear,restart or trap).'),
-  "dpd_timeout": zod.string().default(readKawaiiResponseIpsecConnectionsItemDpdTimeoutDefault).describe('The Kawaii IPsec connection Dead Peer Detection Timeout.'),
-  "start_action": zod.enum(['none', 'start', 'trap']).default(readKawaiiResponseIpsecConnectionsItemStartActionDefault).describe('The Kawaii IPsec connection start action (none, start, trap).'),
-  "rekey_time": zod.string().default(readKawaiiResponseIpsecConnectionsItemRekeyTimeDefault).describe('The Kawaii IPsec connection rekey time. Default is 2h.'),
-  "phase1_lifetime": zod.string().default(readKawaiiResponseIpsecConnectionsItemPhase1LifetimeDefault).describe('The Kawaii IPsec connection Lifetime for phase 1 negociation. Default is 1h.'),
-  "phase1_dh_group_number": zod.union([zod.literal(2),zod.literal(5),zod.literal(14),zod.literal(15),zod.literal(16),zod.literal(17),zod.literal(18),zod.literal(19),zod.literal(20),zod.literal(21),zod.literal(22),zod.literal(23),zod.literal(24)]).describe('The Kawaii IPsec connection phase 1 Diffie Hellman IANA algorithm.'),
-  "phase1_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 1 integrity algorithm..'),
-  "phase1_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 1 encryption algorithm..'),
-  "phase2_lifetime": zod.string().default(readKawaiiResponseIpsecConnectionsItemPhase2LifetimeDefault).describe('The Kawaii IPsec connection Lifetime for phase 2 negociation. Default is 1h.'),
-  "phase2_dh_group_number": zod.union([zod.literal(2),zod.literal(5),zod.literal(14),zod.literal(15),zod.literal(16),zod.literal(17),zod.literal(18),zod.literal(19),zod.literal(20),zod.literal(21),zod.literal(22),zod.literal(23),zod.literal(24)]).describe('The Kawaii IPsec connection phase 2 Diffie Hellman IANA algorithm.'),
-  "phase2_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 2 integrity algorithm..'),
-  "phase2_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 2 encryption algorithm..'),
-  "firewall": zod.object({
-  "ingress": zod.array(zod.object({
-  "source": zod.string().default(readKawaiiResponseIpsecConnectionsItemFirewallOneIngressItemSourceDefault).describe('The source IP or CIDR to accept public traffic from.'),
-  "protocol": zod.enum(['tcp', 'udp']).default(readKawaiiResponseIpsecConnectionsItemFirewallOneIngressItemProtocolDefault).describe('The transport layer protocol to accept public traffic from.'),
-  "ports": zod.string().describe('The port (or list of ports) to accept public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall ingress rule.')).optional().describe('The Kawaii public firewall list of ingress rules. Kawaii default policy is to drop all incoming traffic, including ICMP. Specified ruleset will be explicitly accepted.'),
-  "egress_policy": zod.enum(['accept', 'drop']).default(readKawaiiResponseIpsecConnectionsItemFirewallOneEgressPolicyDefault).describe('The default public traffic egress policy.'),
-  "egress": zod.array(zod.object({
-  "destination": zod.string().default(readKawaiiResponseIpsecConnectionsItemFirewallOneEgressItemDestinationDefault).describe('The destination IP or CIDR to accept/drop public traffic to.'),
-  "protocol": zod.enum(['tcp', 'udp']).default(readKawaiiResponseIpsecConnectionsItemFirewallOneEgressItemProtocolDefault).describe('The transport layer protocol to accept/drop public traffic to.'),
-  "ports": zod.string().describe('The port (or list of ports) to accept/drop public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall egress rule.')).optional().describe('The Kawaii public firewall list of egress rules. Kawaii default policy is to accept all outgoing traffic, including ICMP. Specified ruleset will be explicitly dropped if egress_policy is set to accept, and explicitly accepted if egress policy is set to drop..')
-}).describe('A Kawaii public firewall settings.').optional().describe('The Kawaii IPsec connection firewall settings on the IPsec interface.')
-}).describe('A Kawaii IPsec connection.')).optional().describe('The Kawaii list of Kowabunga IPsec connections.')
+  "public": zod.string().optional().describe('The Kawaii zone gateway public virtual IP (unset for VPC peered subnets) (read-only).'),
+  "private": zod.string().describe('The Kawaii zone gateway private virtual IP (read-only).')
+}).describe('A Kawaii Network IP zone settings.')).optional().describe('The per-zone auto-assigned private IPs in peered subnet (read-only).')
+}).describe('A Kawaii internal VPC subnet peering.')).optional().describe('The Kawaii list of Kowabunga private VPC subnet peering entries. Can only be set at creation time, ignored on updates.')
 }).describe('A Kawaii (Kowabunga Adapative WAn Intelligent Interface) is a network gateway used for your Internet inbound and outbound traffic.')
 
 /**
@@ -147,34 +103,10 @@ export const updateKawaiiBodyFirewallOneEgressPolicyDefault = `accept`;
 export const updateKawaiiBodyFirewallOneEgressItemDestinationDefault = `0.0.0.0/0`;
 export const updateKawaiiBodyFirewallOneEgressItemProtocolDefault = `tcp`;
 export const updateKawaiiBodyDnatItemProtocolDefault = `tcp`;
-export const updateKawaiiBodyVpcPeeringsItemPolicyDefault = `drop`;
-export const updateKawaiiBodyVpcPeeringsItemIngressItemProtocolDefault = `tcp`;
-export const updateKawaiiBodyVpcPeeringsItemEgressItemProtocolDefault = `tcp`;
-export const updateKawaiiBodyIpsecConnectionsItemDpdTimeoutActionDefault = `restart`;
-export const updateKawaiiBodyIpsecConnectionsItemDpdTimeoutDefault = `240s`;
-export const updateKawaiiBodyIpsecConnectionsItemStartActionDefault = `start`;
-export const updateKawaiiBodyIpsecConnectionsItemRekeyTimeDefault = `2h`;
-export const updateKawaiiBodyIpsecConnectionsItemPhase1LifetimeDefault = `1h`;
-export const updateKawaiiBodyIpsecConnectionsItemPhase2LifetimeDefault = `1h`;
-export const updateKawaiiBodyIpsecConnectionsItemFirewallOneIngressItemSourceDefault = `0.0.0.0/0`;
-export const updateKawaiiBodyIpsecConnectionsItemFirewallOneIngressItemProtocolDefault = `tcp`;
-export const updateKawaiiBodyIpsecConnectionsItemFirewallOneEgressPolicyDefault = `accept`;
-export const updateKawaiiBodyIpsecConnectionsItemFirewallOneEgressItemDestinationDefault = `0.0.0.0/0`;
-export const updateKawaiiBodyIpsecConnectionsItemFirewallOneEgressItemProtocolDefault = `tcp`;
 
 export const UpdateKawaiiBody = zod.object({
-  "id": zod.string().optional().describe('The Kawaii ID (auto-generated).'),
-  "name": zod.string().optional().describe('The Kawaii name.'),
+  "name": zod.string().optional().describe('The Kawaii name, auto-generated from the project name.'),
   "description": zod.string().optional().describe('The Kawaii description.'),
-  "netip": zod.object({
-  "public": zod.array(zod.string()).describe('The Kawaii global public gateways virtual IP addresses (read-only).'),
-  "private": zod.array(zod.string()).describe('The Kawaii global private gateways virtual IP addresses (read-only).'),
-  "zones": zod.array(zod.object({
-  "zone": zod.string().describe('The Kawaii zone name (read-only).'),
-  "public": zod.string().describe('The Kawaii zone gateway public virtual IP (read-only).'),
-  "private": zod.string().describe('The Kawaii zone gateway private virtual IP (read-only).')
-}).describe('A Kawaii Network IP zone settings.')).describe('The Kawaii per-zone list of Kowabunga virtual IP addresses.')
-}).describe('A Kawaii Network IP settings.').optional().describe('The Kawaii list of assigned virtual IPs per-zone addresses (read-only).'),
   "firewall": zod.object({
   "ingress": zod.array(zod.object({
   "source": zod.string().default(updateKawaiiBodyFirewallOneIngressItemSourceDefault).describe('The source IP or CIDR to accept public traffic from.'),
@@ -186,64 +118,14 @@ export const UpdateKawaiiBody = zod.object({
   "destination": zod.string().default(updateKawaiiBodyFirewallOneEgressItemDestinationDefault).describe('The destination IP or CIDR to accept/drop public traffic to.'),
   "protocol": zod.enum(['tcp', 'udp']).default(updateKawaiiBodyFirewallOneEgressItemProtocolDefault).describe('The transport layer protocol to accept/drop public traffic to.'),
   "ports": zod.string().describe('The port (or list of ports) to accept/drop public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall egress rule.')).optional().describe('The Kawaii public firewall list of egress rules. Kawaii default policy is to accept all outgoing traffic, including ICMP. Specified ruleset will be explicitly dropped if egress_policy is set to accept, and explicitly accepted if egress policy is set to drop..')
-}).describe('A Kawaii public firewall settings.').optional().describe('The Kawaii firewall settings from/to public Internet).'),
+}).describe('A Kawaii public firewall egress rule.')).optional().describe('The Kawaii public firewall list of egress rules. Kawaii default policy is to accept all outgoing traffic, including ICMP. Specified ruleset will be explicitly dropped if egress_policy is set to accept, and explicitly accepted if egress policy is set to drop.')
+}).describe('A Kawaii public firewall settings.').optional().describe('The Kawaii firewall settings from/to public Internet.'),
   "dnat": zod.array(zod.object({
   "destination": zod.string().describe('Target private IP address to forward public traffic to.'),
   "protocol": zod.enum(['tcp', 'udp']).default(updateKawaiiBodyDnatItemProtocolDefault).describe('The transport layer protocol to forward public traffic to.'),
   "ports": zod.string().describe('The port (or list of ports) to forward public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall destination NAT rule.')).optional().describe('The Kawaii list of NAT forwarding entries. Kawaii will forward public Internet traffic from all public virtual IPs to requested private subnet IP addresses.'),
-  "vpc_peerings": zod.array(zod.object({
-  "subnet": zod.string().describe('Kowabunga Subnet ID to be peered with (subnet local IP addresses will be automatically assigned to Kawaii instances)..'),
-  "policy": zod.enum(['accept', 'drop']).default(updateKawaiiBodyVpcPeeringsItemPolicyDefault).describe('The default VPC traffic forwarding policy.'),
-  "ingress": zod.array(zod.object({
-  "protocol": zod.enum(['tcp', 'udp']).default(updateKawaiiBodyVpcPeeringsItemIngressItemProtocolDefault).describe('The transport layer protocol to forward public traffic to.'),
-  "ports": zod.string().describe('The port (or list of ports) to forward public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii VPC firewall forwarding rule.')).optional().describe('The firewall list of forwarding ingress rules from VPC peered subnet. ICMP traffic is always accepted. The specified ruleset will be explicitly accepted if drop is the default policy (useless otherwise).'),
-  "egress": zod.array(zod.object({
-  "protocol": zod.enum(['tcp', 'udp']).default(updateKawaiiBodyVpcPeeringsItemEgressItemProtocolDefault).describe('The transport layer protocol to forward public traffic to.'),
-  "ports": zod.string().describe('The port (or list of ports) to forward public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii VPC firewall forwarding rule.')).optional().describe('The firewall list of forwarding egress rules to VPC peered subnet. ICMP traffic is always accepted. The specified ruleset will be explicitly accepted if drop is the default policy (useless otherwise).'),
-  "netip": zod.array(zod.object({
-  "zone": zod.string().describe('The Kawaii zone name (read-only).'),
-  "private": zod.string().describe('The Kawaii zone gateway private IP address in VPC peered subnet  (read-only).')
-}).describe('A Kawaii VPC Network IP zone settings.')).optional().describe('The per-zone auto-assigned private IPs in peered subnet (read-only).')
-}).describe('A Kawaii internal VPC subnet peering.')).optional().describe('The Kawaii list of Kowabunga private VPC subnet peering entries.'),
-  "ipsec_connections": zod.array(zod.object({
-  "id": zod.string().optional().describe('The Kawaii IPsec connection ID (auto-generated).'),
-  "name": zod.string().describe('The Kawaii IPsec connection name.'),
-  "description": zod.string().optional().describe('The Kawaii IPsec connection description.'),
-  "ip": zod.string().optional().describe('The Kawaii IPsec connection IPSec IP.'),
-  "remote_ip": zod.string().describe('The Kawaii IPsec connection remote peer VPN Gateway.'),
-  "remote_subnet": zod.string().describe('The Kawaii IPsec connection remote subnet.'),
-  "pre_shared_key": zod.string().describe('The Kawaii IPsec connection pre-shared key(PSK).'),
-  "dpd_timeout_action": zod.enum(['clear', 'restart', 'start']).default(updateKawaiiBodyIpsecConnectionsItemDpdTimeoutActionDefault).describe('The Kawaii IPsec connection Dead Peer Detection Action (clear,restart or trap).'),
-  "dpd_timeout": zod.string().default(updateKawaiiBodyIpsecConnectionsItemDpdTimeoutDefault).describe('The Kawaii IPsec connection Dead Peer Detection Timeout.'),
-  "start_action": zod.enum(['none', 'start', 'trap']).default(updateKawaiiBodyIpsecConnectionsItemStartActionDefault).describe('The Kawaii IPsec connection start action (none, start, trap).'),
-  "rekey_time": zod.string().default(updateKawaiiBodyIpsecConnectionsItemRekeyTimeDefault).describe('The Kawaii IPsec connection rekey time. Default is 2h.'),
-  "phase1_lifetime": zod.string().default(updateKawaiiBodyIpsecConnectionsItemPhase1LifetimeDefault).describe('The Kawaii IPsec connection Lifetime for phase 1 negociation. Default is 1h.'),
-  "phase1_dh_group_number": zod.union([zod.literal(2),zod.literal(5),zod.literal(14),zod.literal(15),zod.literal(16),zod.literal(17),zod.literal(18),zod.literal(19),zod.literal(20),zod.literal(21),zod.literal(22),zod.literal(23),zod.literal(24)]).describe('The Kawaii IPsec connection phase 1 Diffie Hellman IANA algorithm.'),
-  "phase1_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 1 integrity algorithm..'),
-  "phase1_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 1 encryption algorithm..'),
-  "phase2_lifetime": zod.string().default(updateKawaiiBodyIpsecConnectionsItemPhase2LifetimeDefault).describe('The Kawaii IPsec connection Lifetime for phase 2 negociation. Default is 1h.'),
-  "phase2_dh_group_number": zod.union([zod.literal(2),zod.literal(5),zod.literal(14),zod.literal(15),zod.literal(16),zod.literal(17),zod.literal(18),zod.literal(19),zod.literal(20),zod.literal(21),zod.literal(22),zod.literal(23),zod.literal(24)]).describe('The Kawaii IPsec connection phase 2 Diffie Hellman IANA algorithm.'),
-  "phase2_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 2 integrity algorithm..'),
-  "phase2_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 2 encryption algorithm..'),
-  "firewall": zod.object({
-  "ingress": zod.array(zod.object({
-  "source": zod.string().default(updateKawaiiBodyIpsecConnectionsItemFirewallOneIngressItemSourceDefault).describe('The source IP or CIDR to accept public traffic from.'),
-  "protocol": zod.enum(['tcp', 'udp']).default(updateKawaiiBodyIpsecConnectionsItemFirewallOneIngressItemProtocolDefault).describe('The transport layer protocol to accept public traffic from.'),
-  "ports": zod.string().describe('The port (or list of ports) to accept public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall ingress rule.')).optional().describe('The Kawaii public firewall list of ingress rules. Kawaii default policy is to drop all incoming traffic, including ICMP. Specified ruleset will be explicitly accepted.'),
-  "egress_policy": zod.enum(['accept', 'drop']).default(updateKawaiiBodyIpsecConnectionsItemFirewallOneEgressPolicyDefault).describe('The default public traffic egress policy.'),
-  "egress": zod.array(zod.object({
-  "destination": zod.string().default(updateKawaiiBodyIpsecConnectionsItemFirewallOneEgressItemDestinationDefault).describe('The destination IP or CIDR to accept/drop public traffic to.'),
-  "protocol": zod.enum(['tcp', 'udp']).default(updateKawaiiBodyIpsecConnectionsItemFirewallOneEgressItemProtocolDefault).describe('The transport layer protocol to accept/drop public traffic to.'),
-  "ports": zod.string().describe('The port (or list of ports) to accept/drop public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall egress rule.')).optional().describe('The Kawaii public firewall list of egress rules. Kawaii default policy is to accept all outgoing traffic, including ICMP. Specified ruleset will be explicitly dropped if egress_policy is set to accept, and explicitly accepted if egress policy is set to drop..')
-}).describe('A Kawaii public firewall settings.').optional().describe('The Kawaii IPsec connection firewall settings on the IPsec interface.')
-}).describe('A Kawaii IPsec connection.')).optional().describe('The Kawaii list of Kowabunga IPsec connections.')
-}).describe('A Kawaii (Kowabunga Adapative WAn Intelligent Interface) is a network gateway used for your Internet inbound and outbound traffic.')
+}).describe('A Kawaii public firewall destination NAT rule.')).optional().describe('The Kawaii list of NAT forwarding entries. Kawaii will forward public Internet traffic from all public virtual IPs to requested private subnet IP addresses.')
+}).describe('A Kawaii update (unspecified properties are left unchanged).')
 
 export const updateKawaiiResponseFirewallOneIngressItemSourceDefault = `0.0.0.0/0`;
 export const updateKawaiiResponseFirewallOneIngressItemProtocolDefault = `tcp`;
@@ -254,30 +136,19 @@ export const updateKawaiiResponseDnatItemProtocolDefault = `tcp`;
 export const updateKawaiiResponseVpcPeeringsItemPolicyDefault = `drop`;
 export const updateKawaiiResponseVpcPeeringsItemIngressItemProtocolDefault = `tcp`;
 export const updateKawaiiResponseVpcPeeringsItemEgressItemProtocolDefault = `tcp`;
-export const updateKawaiiResponseIpsecConnectionsItemDpdTimeoutActionDefault = `restart`;
-export const updateKawaiiResponseIpsecConnectionsItemDpdTimeoutDefault = `240s`;
-export const updateKawaiiResponseIpsecConnectionsItemStartActionDefault = `start`;
-export const updateKawaiiResponseIpsecConnectionsItemRekeyTimeDefault = `2h`;
-export const updateKawaiiResponseIpsecConnectionsItemPhase1LifetimeDefault = `1h`;
-export const updateKawaiiResponseIpsecConnectionsItemPhase2LifetimeDefault = `1h`;
-export const updateKawaiiResponseIpsecConnectionsItemFirewallOneIngressItemSourceDefault = `0.0.0.0/0`;
-export const updateKawaiiResponseIpsecConnectionsItemFirewallOneIngressItemProtocolDefault = `tcp`;
-export const updateKawaiiResponseIpsecConnectionsItemFirewallOneEgressPolicyDefault = `accept`;
-export const updateKawaiiResponseIpsecConnectionsItemFirewallOneEgressItemDestinationDefault = `0.0.0.0/0`;
-export const updateKawaiiResponseIpsecConnectionsItemFirewallOneEgressItemProtocolDefault = `tcp`;
 
 export const UpdateKawaiiResponse = zod.object({
-  "id": zod.string().optional().describe('The Kawaii ID (auto-generated).'),
-  "name": zod.string().optional().describe('The Kawaii name.'),
+  "id": zod.string().optional().describe('The Kawaii ID (auto-generated) (read-only).'),
+  "name": zod.string().optional().describe('The Kawaii name, auto-generated from the project name.'),
   "description": zod.string().optional().describe('The Kawaii description.'),
   "netip": zod.object({
   "public": zod.array(zod.string()).describe('The Kawaii global public gateways virtual IP addresses (read-only).'),
   "private": zod.array(zod.string()).describe('The Kawaii global private gateways virtual IP addresses (read-only).'),
   "zones": zod.array(zod.object({
   "zone": zod.string().describe('The Kawaii zone name (read-only).'),
-  "public": zod.string().describe('The Kawaii zone gateway public virtual IP (read-only).'),
+  "public": zod.string().optional().describe('The Kawaii zone gateway public virtual IP (unset for VPC peered subnets) (read-only).'),
   "private": zod.string().describe('The Kawaii zone gateway private virtual IP (read-only).')
-}).describe('A Kawaii Network IP zone settings.')).describe('The Kawaii per-zone list of Kowabunga virtual IP addresses.')
+}).describe('A Kawaii Network IP zone settings.')).describe('The Kawaii per-zone list of Kowabunga virtual IP addresses (read-only).')
 }).describe('A Kawaii Network IP settings.').optional().describe('The Kawaii list of assigned virtual IPs per-zone addresses (read-only).'),
   "firewall": zod.object({
   "ingress": zod.array(zod.object({
@@ -290,63 +161,30 @@ export const UpdateKawaiiResponse = zod.object({
   "destination": zod.string().default(updateKawaiiResponseFirewallOneEgressItemDestinationDefault).describe('The destination IP or CIDR to accept/drop public traffic to.'),
   "protocol": zod.enum(['tcp', 'udp']).default(updateKawaiiResponseFirewallOneEgressItemProtocolDefault).describe('The transport layer protocol to accept/drop public traffic to.'),
   "ports": zod.string().describe('The port (or list of ports) to accept/drop public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall egress rule.')).optional().describe('The Kawaii public firewall list of egress rules. Kawaii default policy is to accept all outgoing traffic, including ICMP. Specified ruleset will be explicitly dropped if egress_policy is set to accept, and explicitly accepted if egress policy is set to drop..')
-}).describe('A Kawaii public firewall settings.').optional().describe('The Kawaii firewall settings from/to public Internet).'),
+}).describe('A Kawaii public firewall egress rule.')).optional().describe('The Kawaii public firewall list of egress rules. Kawaii default policy is to accept all outgoing traffic, including ICMP. Specified ruleset will be explicitly dropped if egress_policy is set to accept, and explicitly accepted if egress policy is set to drop.')
+}).describe('A Kawaii public firewall settings.').optional().describe('The Kawaii firewall settings from/to public Internet.'),
   "dnat": zod.array(zod.object({
   "destination": zod.string().describe('Target private IP address to forward public traffic to.'),
   "protocol": zod.enum(['tcp', 'udp']).default(updateKawaiiResponseDnatItemProtocolDefault).describe('The transport layer protocol to forward public traffic to.'),
   "ports": zod.string().describe('The port (or list of ports) to forward public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
 }).describe('A Kawaii public firewall destination NAT rule.')).optional().describe('The Kawaii list of NAT forwarding entries. Kawaii will forward public Internet traffic from all public virtual IPs to requested private subnet IP addresses.'),
   "vpc_peerings": zod.array(zod.object({
-  "subnet": zod.string().describe('Kowabunga Subnet ID to be peered with (subnet local IP addresses will be automatically assigned to Kawaii instances)..'),
+  "subnet": zod.string().describe('Kowabunga Subnet ID to be peered with (subnet local IP addresses will be automatically assigned to Kawaii instances).'),
   "policy": zod.enum(['accept', 'drop']).default(updateKawaiiResponseVpcPeeringsItemPolicyDefault).describe('The default VPC traffic forwarding policy.'),
   "ingress": zod.array(zod.object({
-  "protocol": zod.enum(['tcp', 'udp']).default(updateKawaiiResponseVpcPeeringsItemIngressItemProtocolDefault).describe('The transport layer protocol to forward public traffic to.'),
-  "ports": zod.string().describe('The port (or list of ports) to forward public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
+  "protocol": zod.enum(['tcp', 'udp']).default(updateKawaiiResponseVpcPeeringsItemIngressItemProtocolDefault).describe('The transport layer protocol to forward VPC traffic to.'),
+  "ports": zod.string().describe('The port (or list of ports) to forward VPC traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
 }).describe('A Kawaii VPC firewall forwarding rule.')).optional().describe('The firewall list of forwarding ingress rules from VPC peered subnet. ICMP traffic is always accepted. The specified ruleset will be explicitly accepted if drop is the default policy (useless otherwise).'),
   "egress": zod.array(zod.object({
-  "protocol": zod.enum(['tcp', 'udp']).default(updateKawaiiResponseVpcPeeringsItemEgressItemProtocolDefault).describe('The transport layer protocol to forward public traffic to.'),
-  "ports": zod.string().describe('The port (or list of ports) to forward public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
+  "protocol": zod.enum(['tcp', 'udp']).default(updateKawaiiResponseVpcPeeringsItemEgressItemProtocolDefault).describe('The transport layer protocol to forward VPC traffic to.'),
+  "ports": zod.string().describe('The port (or list of ports) to forward VPC traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
 }).describe('A Kawaii VPC firewall forwarding rule.')).optional().describe('The firewall list of forwarding egress rules to VPC peered subnet. ICMP traffic is always accepted. The specified ruleset will be explicitly accepted if drop is the default policy (useless otherwise).'),
   "netip": zod.array(zod.object({
   "zone": zod.string().describe('The Kawaii zone name (read-only).'),
-  "private": zod.string().describe('The Kawaii zone gateway private IP address in VPC peered subnet  (read-only).')
-}).describe('A Kawaii VPC Network IP zone settings.')).optional().describe('The per-zone auto-assigned private IPs in peered subnet (read-only).')
-}).describe('A Kawaii internal VPC subnet peering.')).optional().describe('The Kawaii list of Kowabunga private VPC subnet peering entries.'),
-  "ipsec_connections": zod.array(zod.object({
-  "id": zod.string().optional().describe('The Kawaii IPsec connection ID (auto-generated).'),
-  "name": zod.string().describe('The Kawaii IPsec connection name.'),
-  "description": zod.string().optional().describe('The Kawaii IPsec connection description.'),
-  "ip": zod.string().optional().describe('The Kawaii IPsec connection IPSec IP.'),
-  "remote_ip": zod.string().describe('The Kawaii IPsec connection remote peer VPN Gateway.'),
-  "remote_subnet": zod.string().describe('The Kawaii IPsec connection remote subnet.'),
-  "pre_shared_key": zod.string().describe('The Kawaii IPsec connection pre-shared key(PSK).'),
-  "dpd_timeout_action": zod.enum(['clear', 'restart', 'start']).default(updateKawaiiResponseIpsecConnectionsItemDpdTimeoutActionDefault).describe('The Kawaii IPsec connection Dead Peer Detection Action (clear,restart or trap).'),
-  "dpd_timeout": zod.string().default(updateKawaiiResponseIpsecConnectionsItemDpdTimeoutDefault).describe('The Kawaii IPsec connection Dead Peer Detection Timeout.'),
-  "start_action": zod.enum(['none', 'start', 'trap']).default(updateKawaiiResponseIpsecConnectionsItemStartActionDefault).describe('The Kawaii IPsec connection start action (none, start, trap).'),
-  "rekey_time": zod.string().default(updateKawaiiResponseIpsecConnectionsItemRekeyTimeDefault).describe('The Kawaii IPsec connection rekey time. Default is 2h.'),
-  "phase1_lifetime": zod.string().default(updateKawaiiResponseIpsecConnectionsItemPhase1LifetimeDefault).describe('The Kawaii IPsec connection Lifetime for phase 1 negociation. Default is 1h.'),
-  "phase1_dh_group_number": zod.union([zod.literal(2),zod.literal(5),zod.literal(14),zod.literal(15),zod.literal(16),zod.literal(17),zod.literal(18),zod.literal(19),zod.literal(20),zod.literal(21),zod.literal(22),zod.literal(23),zod.literal(24)]).describe('The Kawaii IPsec connection phase 1 Diffie Hellman IANA algorithm.'),
-  "phase1_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 1 integrity algorithm..'),
-  "phase1_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 1 encryption algorithm..'),
-  "phase2_lifetime": zod.string().default(updateKawaiiResponseIpsecConnectionsItemPhase2LifetimeDefault).describe('The Kawaii IPsec connection Lifetime for phase 2 negociation. Default is 1h.'),
-  "phase2_dh_group_number": zod.union([zod.literal(2),zod.literal(5),zod.literal(14),zod.literal(15),zod.literal(16),zod.literal(17),zod.literal(18),zod.literal(19),zod.literal(20),zod.literal(21),zod.literal(22),zod.literal(23),zod.literal(24)]).describe('The Kawaii IPsec connection phase 2 Diffie Hellman IANA algorithm.'),
-  "phase2_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 2 integrity algorithm..'),
-  "phase2_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 2 encryption algorithm..'),
-  "firewall": zod.object({
-  "ingress": zod.array(zod.object({
-  "source": zod.string().default(updateKawaiiResponseIpsecConnectionsItemFirewallOneIngressItemSourceDefault).describe('The source IP or CIDR to accept public traffic from.'),
-  "protocol": zod.enum(['tcp', 'udp']).default(updateKawaiiResponseIpsecConnectionsItemFirewallOneIngressItemProtocolDefault).describe('The transport layer protocol to accept public traffic from.'),
-  "ports": zod.string().describe('The port (or list of ports) to accept public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall ingress rule.')).optional().describe('The Kawaii public firewall list of ingress rules. Kawaii default policy is to drop all incoming traffic, including ICMP. Specified ruleset will be explicitly accepted.'),
-  "egress_policy": zod.enum(['accept', 'drop']).default(updateKawaiiResponseIpsecConnectionsItemFirewallOneEgressPolicyDefault).describe('The default public traffic egress policy.'),
-  "egress": zod.array(zod.object({
-  "destination": zod.string().default(updateKawaiiResponseIpsecConnectionsItemFirewallOneEgressItemDestinationDefault).describe('The destination IP or CIDR to accept/drop public traffic to.'),
-  "protocol": zod.enum(['tcp', 'udp']).default(updateKawaiiResponseIpsecConnectionsItemFirewallOneEgressItemProtocolDefault).describe('The transport layer protocol to accept/drop public traffic to.'),
-  "ports": zod.string().describe('The port (or list of ports) to accept/drop public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall egress rule.')).optional().describe('The Kawaii public firewall list of egress rules. Kawaii default policy is to accept all outgoing traffic, including ICMP. Specified ruleset will be explicitly dropped if egress_policy is set to accept, and explicitly accepted if egress policy is set to drop..')
-}).describe('A Kawaii public firewall settings.').optional().describe('The Kawaii IPsec connection firewall settings on the IPsec interface.')
-}).describe('A Kawaii IPsec connection.')).optional().describe('The Kawaii list of Kowabunga IPsec connections.')
+  "public": zod.string().optional().describe('The Kawaii zone gateway public virtual IP (unset for VPC peered subnets) (read-only).'),
+  "private": zod.string().describe('The Kawaii zone gateway private virtual IP (read-only).')
+}).describe('A Kawaii Network IP zone settings.')).optional().describe('The per-zone auto-assigned private IPs in peered subnet (read-only).')
+}).describe('A Kawaii internal VPC subnet peering.')).optional().describe('The Kawaii list of Kowabunga private VPC subnet peering entries. Can only be set at creation time, ignored on updates.')
 }).describe('A Kawaii (Kowabunga Adapative WAn Intelligent Interface) is a network gateway used for your Internet inbound and outbound traffic.')
 
 /**
@@ -374,43 +212,32 @@ export const createKawaiiIpSecBodyPhase1LifetimeDefault = `1h`;
 export const createKawaiiIpSecBodyPhase2LifetimeDefault = `1h`;
 export const createKawaiiIpSecBodyFirewallOneIngressItemSourceDefault = `0.0.0.0/0`;
 export const createKawaiiIpSecBodyFirewallOneIngressItemProtocolDefault = `tcp`;
-export const createKawaiiIpSecBodyFirewallOneEgressPolicyDefault = `accept`;
-export const createKawaiiIpSecBodyFirewallOneEgressItemDestinationDefault = `0.0.0.0/0`;
-export const createKawaiiIpSecBodyFirewallOneEgressItemProtocolDefault = `tcp`;
 
 export const CreateKawaiiIpSecBody = zod.object({
-  "id": zod.string().optional().describe('The Kawaii IPsec connection ID (auto-generated).'),
   "name": zod.string().describe('The Kawaii IPsec connection name.'),
   "description": zod.string().optional().describe('The Kawaii IPsec connection description.'),
-  "ip": zod.string().optional().describe('The Kawaii IPsec connection IPSec IP.'),
-  "remote_ip": zod.string().describe('The Kawaii IPsec connection remote peer VPN Gateway.'),
+  "remote_ip": zod.string().describe('The Kawaii IPsec connection remote peer VPN gateway IP address.'),
   "remote_subnet": zod.string().describe('The Kawaii IPsec connection remote subnet.'),
-  "pre_shared_key": zod.string().describe('The Kawaii IPsec connection pre-shared key(PSK).'),
-  "dpd_timeout_action": zod.enum(['clear', 'restart', 'start']).default(createKawaiiIpSecBodyDpdTimeoutActionDefault).describe('The Kawaii IPsec connection Dead Peer Detection Action (clear,restart or trap).'),
-  "dpd_timeout": zod.string().default(createKawaiiIpSecBodyDpdTimeoutDefault).describe('The Kawaii IPsec connection Dead Peer Detection Timeout.'),
-  "start_action": zod.enum(['none', 'start', 'trap']).default(createKawaiiIpSecBodyStartActionDefault).describe('The Kawaii IPsec connection start action (none, start, trap).'),
-  "rekey_time": zod.string().default(createKawaiiIpSecBodyRekeyTimeDefault).describe('The Kawaii IPsec connection rekey time. Default is 2h.'),
-  "phase1_lifetime": zod.string().default(createKawaiiIpSecBodyPhase1LifetimeDefault).describe('The Kawaii IPsec connection Lifetime for phase 1 negociation. Default is 1h.'),
+  "pre_shared_key": zod.string().describe('The Kawaii IPsec connection pre-shared key (PSK).'),
+  "dpd_timeout_action": zod.enum(['clear', 'trap', 'restart']).default(createKawaiiIpSecBodyDpdTimeoutActionDefault).describe('The Kawaii IPsec connection Dead Peer Detection (DPD) timeout action.'),
+  "dpd_timeout": zod.string().default(createKawaiiIpSecBodyDpdTimeoutDefault).describe('The Kawaii IPsec connection Dead Peer Detection (DPD) timeout.'),
+  "start_action": zod.enum(['none', 'start', 'trap']).default(createKawaiiIpSecBodyStartActionDefault).describe('The Kawaii IPsec connection start action.'),
+  "rekey_time": zod.string().default(createKawaiiIpSecBodyRekeyTimeDefault).describe('The Kawaii IPsec connection rekey time.'),
+  "phase1_lifetime": zod.string().default(createKawaiiIpSecBodyPhase1LifetimeDefault).describe('The Kawaii IPsec connection lifetime for phase 1 negotiation.'),
   "phase1_dh_group_number": zod.union([zod.literal(2),zod.literal(5),zod.literal(14),zod.literal(15),zod.literal(16),zod.literal(17),zod.literal(18),zod.literal(19),zod.literal(20),zod.literal(21),zod.literal(22),zod.literal(23),zod.literal(24)]).describe('The Kawaii IPsec connection phase 1 Diffie Hellman IANA algorithm.'),
-  "phase1_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 1 integrity algorithm..'),
-  "phase1_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 1 encryption algorithm..'),
-  "phase2_lifetime": zod.string().default(createKawaiiIpSecBodyPhase2LifetimeDefault).describe('The Kawaii IPsec connection Lifetime for phase 2 negociation. Default is 1h.'),
+  "phase1_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 1 integrity algorithm.'),
+  "phase1_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 1 encryption algorithm.'),
+  "phase2_lifetime": zod.string().default(createKawaiiIpSecBodyPhase2LifetimeDefault).describe('The Kawaii IPsec connection lifetime for phase 2 negotiation.'),
   "phase2_dh_group_number": zod.union([zod.literal(2),zod.literal(5),zod.literal(14),zod.literal(15),zod.literal(16),zod.literal(17),zod.literal(18),zod.literal(19),zod.literal(20),zod.literal(21),zod.literal(22),zod.literal(23),zod.literal(24)]).describe('The Kawaii IPsec connection phase 2 Diffie Hellman IANA algorithm.'),
-  "phase2_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 2 integrity algorithm..'),
-  "phase2_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 2 encryption algorithm..'),
+  "phase2_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 2 integrity algorithm.'),
+  "phase2_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 2 encryption algorithm.'),
   "firewall": zod.object({
   "ingress": zod.array(zod.object({
   "source": zod.string().default(createKawaiiIpSecBodyFirewallOneIngressItemSourceDefault).describe('The source IP or CIDR to accept public traffic from.'),
   "protocol": zod.enum(['tcp', 'udp']).default(createKawaiiIpSecBodyFirewallOneIngressItemProtocolDefault).describe('The transport layer protocol to accept public traffic from.'),
   "ports": zod.string().describe('The port (or list of ports) to accept public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall ingress rule.')).optional().describe('The Kawaii public firewall list of ingress rules. Kawaii default policy is to drop all incoming traffic, including ICMP. Specified ruleset will be explicitly accepted.'),
-  "egress_policy": zod.enum(['accept', 'drop']).default(createKawaiiIpSecBodyFirewallOneEgressPolicyDefault).describe('The default public traffic egress policy.'),
-  "egress": zod.array(zod.object({
-  "destination": zod.string().default(createKawaiiIpSecBodyFirewallOneEgressItemDestinationDefault).describe('The destination IP or CIDR to accept/drop public traffic to.'),
-  "protocol": zod.enum(['tcp', 'udp']).default(createKawaiiIpSecBodyFirewallOneEgressItemProtocolDefault).describe('The transport layer protocol to accept/drop public traffic to.'),
-  "ports": zod.string().describe('The port (or list of ports) to accept/drop public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall egress rule.')).optional().describe('The Kawaii public firewall list of egress rules. Kawaii default policy is to accept all outgoing traffic, including ICMP. Specified ruleset will be explicitly dropped if egress_policy is set to accept, and explicitly accepted if egress policy is set to drop..')
-}).describe('A Kawaii public firewall settings.').optional().describe('The Kawaii IPsec connection firewall settings on the IPsec interface.')
+}).describe('A Kawaii public firewall ingress rule.')).optional().describe('The Kawaii IPsec connection firewall list of ingress rules. Default policy is to drop all incoming traffic from the remote peer, including ICMP. Specified ruleset will be explicitly accepted.')
+}).describe('A Kawaii IPsec connection firewall settings.').optional().describe('The Kawaii IPsec connection firewall settings on the IPsec interface.')
 }).describe('A Kawaii IPsec connection.')
 
 export const createKawaiiIpSecResponseDpdTimeoutActionDefault = `restart`;
@@ -421,43 +248,34 @@ export const createKawaiiIpSecResponsePhase1LifetimeDefault = `1h`;
 export const createKawaiiIpSecResponsePhase2LifetimeDefault = `1h`;
 export const createKawaiiIpSecResponseFirewallOneIngressItemSourceDefault = `0.0.0.0/0`;
 export const createKawaiiIpSecResponseFirewallOneIngressItemProtocolDefault = `tcp`;
-export const createKawaiiIpSecResponseFirewallOneEgressPolicyDefault = `accept`;
-export const createKawaiiIpSecResponseFirewallOneEgressItemDestinationDefault = `0.0.0.0/0`;
-export const createKawaiiIpSecResponseFirewallOneEgressItemProtocolDefault = `tcp`;
 
 export const CreateKawaiiIpSecResponse = zod.object({
-  "id": zod.string().optional().describe('The Kawaii IPsec connection ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kawaii IPsec connection ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kawaii IPsec connection name.'),
   "description": zod.string().optional().describe('The Kawaii IPsec connection description.'),
-  "ip": zod.string().optional().describe('The Kawaii IPsec connection IPSec IP.'),
-  "remote_ip": zod.string().describe('The Kawaii IPsec connection remote peer VPN Gateway.'),
+  "ip": zod.string().optional().describe('The Kawaii IPsec connection local IPsec IP address (read-only).'),
+  "remote_ip": zod.string().describe('The Kawaii IPsec connection remote peer VPN gateway IP address.'),
   "remote_subnet": zod.string().describe('The Kawaii IPsec connection remote subnet.'),
-  "pre_shared_key": zod.string().describe('The Kawaii IPsec connection pre-shared key(PSK).'),
-  "dpd_timeout_action": zod.enum(['clear', 'restart', 'start']).default(createKawaiiIpSecResponseDpdTimeoutActionDefault).describe('The Kawaii IPsec connection Dead Peer Detection Action (clear,restart or trap).'),
-  "dpd_timeout": zod.string().default(createKawaiiIpSecResponseDpdTimeoutDefault).describe('The Kawaii IPsec connection Dead Peer Detection Timeout.'),
-  "start_action": zod.enum(['none', 'start', 'trap']).default(createKawaiiIpSecResponseStartActionDefault).describe('The Kawaii IPsec connection start action (none, start, trap).'),
-  "rekey_time": zod.string().default(createKawaiiIpSecResponseRekeyTimeDefault).describe('The Kawaii IPsec connection rekey time. Default is 2h.'),
-  "phase1_lifetime": zod.string().default(createKawaiiIpSecResponsePhase1LifetimeDefault).describe('The Kawaii IPsec connection Lifetime for phase 1 negociation. Default is 1h.'),
+  "pre_shared_key": zod.string().describe('The Kawaii IPsec connection pre-shared key (PSK).'),
+  "dpd_timeout_action": zod.enum(['clear', 'trap', 'restart']).default(createKawaiiIpSecResponseDpdTimeoutActionDefault).describe('The Kawaii IPsec connection Dead Peer Detection (DPD) timeout action.'),
+  "dpd_timeout": zod.string().default(createKawaiiIpSecResponseDpdTimeoutDefault).describe('The Kawaii IPsec connection Dead Peer Detection (DPD) timeout.'),
+  "start_action": zod.enum(['none', 'start', 'trap']).default(createKawaiiIpSecResponseStartActionDefault).describe('The Kawaii IPsec connection start action.'),
+  "rekey_time": zod.string().default(createKawaiiIpSecResponseRekeyTimeDefault).describe('The Kawaii IPsec connection rekey time.'),
+  "phase1_lifetime": zod.string().default(createKawaiiIpSecResponsePhase1LifetimeDefault).describe('The Kawaii IPsec connection lifetime for phase 1 negotiation.'),
   "phase1_dh_group_number": zod.union([zod.literal(2),zod.literal(5),zod.literal(14),zod.literal(15),zod.literal(16),zod.literal(17),zod.literal(18),zod.literal(19),zod.literal(20),zod.literal(21),zod.literal(22),zod.literal(23),zod.literal(24)]).describe('The Kawaii IPsec connection phase 1 Diffie Hellman IANA algorithm.'),
-  "phase1_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 1 integrity algorithm..'),
-  "phase1_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 1 encryption algorithm..'),
-  "phase2_lifetime": zod.string().default(createKawaiiIpSecResponsePhase2LifetimeDefault).describe('The Kawaii IPsec connection Lifetime for phase 2 negociation. Default is 1h.'),
+  "phase1_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 1 integrity algorithm.'),
+  "phase1_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 1 encryption algorithm.'),
+  "phase2_lifetime": zod.string().default(createKawaiiIpSecResponsePhase2LifetimeDefault).describe('The Kawaii IPsec connection lifetime for phase 2 negotiation.'),
   "phase2_dh_group_number": zod.union([zod.literal(2),zod.literal(5),zod.literal(14),zod.literal(15),zod.literal(16),zod.literal(17),zod.literal(18),zod.literal(19),zod.literal(20),zod.literal(21),zod.literal(22),zod.literal(23),zod.literal(24)]).describe('The Kawaii IPsec connection phase 2 Diffie Hellman IANA algorithm.'),
-  "phase2_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 2 integrity algorithm..'),
-  "phase2_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 2 encryption algorithm..'),
+  "phase2_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 2 integrity algorithm.'),
+  "phase2_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 2 encryption algorithm.'),
   "firewall": zod.object({
   "ingress": zod.array(zod.object({
   "source": zod.string().default(createKawaiiIpSecResponseFirewallOneIngressItemSourceDefault).describe('The source IP or CIDR to accept public traffic from.'),
   "protocol": zod.enum(['tcp', 'udp']).default(createKawaiiIpSecResponseFirewallOneIngressItemProtocolDefault).describe('The transport layer protocol to accept public traffic from.'),
   "ports": zod.string().describe('The port (or list of ports) to accept public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall ingress rule.')).optional().describe('The Kawaii public firewall list of ingress rules. Kawaii default policy is to drop all incoming traffic, including ICMP. Specified ruleset will be explicitly accepted.'),
-  "egress_policy": zod.enum(['accept', 'drop']).default(createKawaiiIpSecResponseFirewallOneEgressPolicyDefault).describe('The default public traffic egress policy.'),
-  "egress": zod.array(zod.object({
-  "destination": zod.string().default(createKawaiiIpSecResponseFirewallOneEgressItemDestinationDefault).describe('The destination IP or CIDR to accept/drop public traffic to.'),
-  "protocol": zod.enum(['tcp', 'udp']).default(createKawaiiIpSecResponseFirewallOneEgressItemProtocolDefault).describe('The transport layer protocol to accept/drop public traffic to.'),
-  "ports": zod.string().describe('The port (or list of ports) to accept/drop public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall egress rule.')).optional().describe('The Kawaii public firewall list of egress rules. Kawaii default policy is to accept all outgoing traffic, including ICMP. Specified ruleset will be explicitly dropped if egress_policy is set to accept, and explicitly accepted if egress policy is set to drop..')
-}).describe('A Kawaii public firewall settings.').optional().describe('The Kawaii IPsec connection firewall settings on the IPsec interface.')
+}).describe('A Kawaii public firewall ingress rule.')).optional().describe('The Kawaii IPsec connection firewall list of ingress rules. Default policy is to drop all incoming traffic from the remote peer, including ICMP. Specified ruleset will be explicitly accepted.')
+}).describe('A Kawaii IPsec connection firewall settings.').optional().describe('The Kawaii IPsec connection firewall settings on the IPsec interface.')
 }).describe('A Kawaii IPsec connection.')
 
 /**
@@ -465,7 +283,7 @@ export const CreateKawaiiIpSecResponse = zod.object({
  */
 export const DeleteKawaiiIpSecParams = zod.object({
   "kawaiiId": zod.string().describe('The ID of the Kawaii.'),
-  "KawaiiIpSecId": zod.string().describe('The ID of the Kawaii IPsec connection.')
+  "kawaiiIpSecId": zod.string().describe('The ID of the Kawaii IPsec connection.')
 })
 
 export const DeleteKawaiiIpSecResponse = zod.unknown()
@@ -475,7 +293,7 @@ export const DeleteKawaiiIpSecResponse = zod.unknown()
  */
 export const ReadKawaiiIpSecParams = zod.object({
   "kawaiiId": zod.string().describe('The ID of the Kawaii.'),
-  "KawaiiIpSecId": zod.string().describe('The ID of the Kawaii IPsec connection.')
+  "kawaiiIpSecId": zod.string().describe('The ID of the Kawaii IPsec connection.')
 })
 
 export const readKawaiiIpSecResponseDpdTimeoutActionDefault = `restart`;
@@ -486,43 +304,34 @@ export const readKawaiiIpSecResponsePhase1LifetimeDefault = `1h`;
 export const readKawaiiIpSecResponsePhase2LifetimeDefault = `1h`;
 export const readKawaiiIpSecResponseFirewallOneIngressItemSourceDefault = `0.0.0.0/0`;
 export const readKawaiiIpSecResponseFirewallOneIngressItemProtocolDefault = `tcp`;
-export const readKawaiiIpSecResponseFirewallOneEgressPolicyDefault = `accept`;
-export const readKawaiiIpSecResponseFirewallOneEgressItemDestinationDefault = `0.0.0.0/0`;
-export const readKawaiiIpSecResponseFirewallOneEgressItemProtocolDefault = `tcp`;
 
 export const ReadKawaiiIpSecResponse = zod.object({
-  "id": zod.string().optional().describe('The Kawaii IPsec connection ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kawaii IPsec connection ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kawaii IPsec connection name.'),
   "description": zod.string().optional().describe('The Kawaii IPsec connection description.'),
-  "ip": zod.string().optional().describe('The Kawaii IPsec connection IPSec IP.'),
-  "remote_ip": zod.string().describe('The Kawaii IPsec connection remote peer VPN Gateway.'),
+  "ip": zod.string().optional().describe('The Kawaii IPsec connection local IPsec IP address (read-only).'),
+  "remote_ip": zod.string().describe('The Kawaii IPsec connection remote peer VPN gateway IP address.'),
   "remote_subnet": zod.string().describe('The Kawaii IPsec connection remote subnet.'),
-  "pre_shared_key": zod.string().describe('The Kawaii IPsec connection pre-shared key(PSK).'),
-  "dpd_timeout_action": zod.enum(['clear', 'restart', 'start']).default(readKawaiiIpSecResponseDpdTimeoutActionDefault).describe('The Kawaii IPsec connection Dead Peer Detection Action (clear,restart or trap).'),
-  "dpd_timeout": zod.string().default(readKawaiiIpSecResponseDpdTimeoutDefault).describe('The Kawaii IPsec connection Dead Peer Detection Timeout.'),
-  "start_action": zod.enum(['none', 'start', 'trap']).default(readKawaiiIpSecResponseStartActionDefault).describe('The Kawaii IPsec connection start action (none, start, trap).'),
-  "rekey_time": zod.string().default(readKawaiiIpSecResponseRekeyTimeDefault).describe('The Kawaii IPsec connection rekey time. Default is 2h.'),
-  "phase1_lifetime": zod.string().default(readKawaiiIpSecResponsePhase1LifetimeDefault).describe('The Kawaii IPsec connection Lifetime for phase 1 negociation. Default is 1h.'),
+  "pre_shared_key": zod.string().describe('The Kawaii IPsec connection pre-shared key (PSK).'),
+  "dpd_timeout_action": zod.enum(['clear', 'trap', 'restart']).default(readKawaiiIpSecResponseDpdTimeoutActionDefault).describe('The Kawaii IPsec connection Dead Peer Detection (DPD) timeout action.'),
+  "dpd_timeout": zod.string().default(readKawaiiIpSecResponseDpdTimeoutDefault).describe('The Kawaii IPsec connection Dead Peer Detection (DPD) timeout.'),
+  "start_action": zod.enum(['none', 'start', 'trap']).default(readKawaiiIpSecResponseStartActionDefault).describe('The Kawaii IPsec connection start action.'),
+  "rekey_time": zod.string().default(readKawaiiIpSecResponseRekeyTimeDefault).describe('The Kawaii IPsec connection rekey time.'),
+  "phase1_lifetime": zod.string().default(readKawaiiIpSecResponsePhase1LifetimeDefault).describe('The Kawaii IPsec connection lifetime for phase 1 negotiation.'),
   "phase1_dh_group_number": zod.union([zod.literal(2),zod.literal(5),zod.literal(14),zod.literal(15),zod.literal(16),zod.literal(17),zod.literal(18),zod.literal(19),zod.literal(20),zod.literal(21),zod.literal(22),zod.literal(23),zod.literal(24)]).describe('The Kawaii IPsec connection phase 1 Diffie Hellman IANA algorithm.'),
-  "phase1_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 1 integrity algorithm..'),
-  "phase1_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 1 encryption algorithm..'),
-  "phase2_lifetime": zod.string().default(readKawaiiIpSecResponsePhase2LifetimeDefault).describe('The Kawaii IPsec connection Lifetime for phase 2 negociation. Default is 1h.'),
+  "phase1_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 1 integrity algorithm.'),
+  "phase1_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 1 encryption algorithm.'),
+  "phase2_lifetime": zod.string().default(readKawaiiIpSecResponsePhase2LifetimeDefault).describe('The Kawaii IPsec connection lifetime for phase 2 negotiation.'),
   "phase2_dh_group_number": zod.union([zod.literal(2),zod.literal(5),zod.literal(14),zod.literal(15),zod.literal(16),zod.literal(17),zod.literal(18),zod.literal(19),zod.literal(20),zod.literal(21),zod.literal(22),zod.literal(23),zod.literal(24)]).describe('The Kawaii IPsec connection phase 2 Diffie Hellman IANA algorithm.'),
-  "phase2_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 2 integrity algorithm..'),
-  "phase2_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 2 encryption algorithm..'),
+  "phase2_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 2 integrity algorithm.'),
+  "phase2_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 2 encryption algorithm.'),
   "firewall": zod.object({
   "ingress": zod.array(zod.object({
   "source": zod.string().default(readKawaiiIpSecResponseFirewallOneIngressItemSourceDefault).describe('The source IP or CIDR to accept public traffic from.'),
   "protocol": zod.enum(['tcp', 'udp']).default(readKawaiiIpSecResponseFirewallOneIngressItemProtocolDefault).describe('The transport layer protocol to accept public traffic from.'),
   "ports": zod.string().describe('The port (or list of ports) to accept public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall ingress rule.')).optional().describe('The Kawaii public firewall list of ingress rules. Kawaii default policy is to drop all incoming traffic, including ICMP. Specified ruleset will be explicitly accepted.'),
-  "egress_policy": zod.enum(['accept', 'drop']).default(readKawaiiIpSecResponseFirewallOneEgressPolicyDefault).describe('The default public traffic egress policy.'),
-  "egress": zod.array(zod.object({
-  "destination": zod.string().default(readKawaiiIpSecResponseFirewallOneEgressItemDestinationDefault).describe('The destination IP or CIDR to accept/drop public traffic to.'),
-  "protocol": zod.enum(['tcp', 'udp']).default(readKawaiiIpSecResponseFirewallOneEgressItemProtocolDefault).describe('The transport layer protocol to accept/drop public traffic to.'),
-  "ports": zod.string().describe('The port (or list of ports) to accept/drop public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall egress rule.')).optional().describe('The Kawaii public firewall list of egress rules. Kawaii default policy is to accept all outgoing traffic, including ICMP. Specified ruleset will be explicitly dropped if egress_policy is set to accept, and explicitly accepted if egress policy is set to drop..')
-}).describe('A Kawaii public firewall settings.').optional().describe('The Kawaii IPsec connection firewall settings on the IPsec interface.')
+}).describe('A Kawaii public firewall ingress rule.')).optional().describe('The Kawaii IPsec connection firewall list of ingress rules. Default policy is to drop all incoming traffic from the remote peer, including ICMP. Specified ruleset will be explicitly accepted.')
+}).describe('A Kawaii IPsec connection firewall settings.').optional().describe('The Kawaii IPsec connection firewall settings on the IPsec interface.')
 }).describe('A Kawaii IPsec connection.')
 
 /**
@@ -530,55 +339,38 @@ export const ReadKawaiiIpSecResponse = zod.object({
  */
 export const UpdateKawaiiIpSecParams = zod.object({
   "kawaiiId": zod.string().describe('The ID of the Kawaii.'),
-  "KawaiiIpSecId": zod.string().describe('The ID of the Kawaii IPsec connection.')
+  "kawaiiIpSecId": zod.string().describe('The ID of the Kawaii IPsec connection.')
 })
 
-export const updateKawaiiIpSecBodyDpdTimeoutActionDefault = `restart`;
-export const updateKawaiiIpSecBodyDpdTimeoutDefault = `240s`;
-export const updateKawaiiIpSecBodyStartActionDefault = `start`;
-export const updateKawaiiIpSecBodyRekeyTimeDefault = `2h`;
-export const updateKawaiiIpSecBodyPhase1LifetimeDefault = `1h`;
-export const updateKawaiiIpSecBodyPhase2LifetimeDefault = `1h`;
 export const updateKawaiiIpSecBodyFirewallOneIngressItemSourceDefault = `0.0.0.0/0`;
 export const updateKawaiiIpSecBodyFirewallOneIngressItemProtocolDefault = `tcp`;
-export const updateKawaiiIpSecBodyFirewallOneEgressPolicyDefault = `accept`;
-export const updateKawaiiIpSecBodyFirewallOneEgressItemDestinationDefault = `0.0.0.0/0`;
-export const updateKawaiiIpSecBodyFirewallOneEgressItemProtocolDefault = `tcp`;
 
 export const UpdateKawaiiIpSecBody = zod.object({
-  "id": zod.string().optional().describe('The Kawaii IPsec connection ID (auto-generated).'),
-  "name": zod.string().describe('The Kawaii IPsec connection name.'),
+  "name": zod.string().optional().describe('The Kawaii IPsec connection name.'),
   "description": zod.string().optional().describe('The Kawaii IPsec connection description.'),
-  "ip": zod.string().optional().describe('The Kawaii IPsec connection IPSec IP.'),
-  "remote_ip": zod.string().describe('The Kawaii IPsec connection remote peer VPN Gateway.'),
-  "remote_subnet": zod.string().describe('The Kawaii IPsec connection remote subnet.'),
-  "pre_shared_key": zod.string().describe('The Kawaii IPsec connection pre-shared key(PSK).'),
-  "dpd_timeout_action": zod.enum(['clear', 'restart', 'start']).default(updateKawaiiIpSecBodyDpdTimeoutActionDefault).describe('The Kawaii IPsec connection Dead Peer Detection Action (clear,restart or trap).'),
-  "dpd_timeout": zod.string().default(updateKawaiiIpSecBodyDpdTimeoutDefault).describe('The Kawaii IPsec connection Dead Peer Detection Timeout.'),
-  "start_action": zod.enum(['none', 'start', 'trap']).default(updateKawaiiIpSecBodyStartActionDefault).describe('The Kawaii IPsec connection start action (none, start, trap).'),
-  "rekey_time": zod.string().default(updateKawaiiIpSecBodyRekeyTimeDefault).describe('The Kawaii IPsec connection rekey time. Default is 2h.'),
-  "phase1_lifetime": zod.string().default(updateKawaiiIpSecBodyPhase1LifetimeDefault).describe('The Kawaii IPsec connection Lifetime for phase 1 negociation. Default is 1h.'),
-  "phase1_dh_group_number": zod.union([zod.literal(2),zod.literal(5),zod.literal(14),zod.literal(15),zod.literal(16),zod.literal(17),zod.literal(18),zod.literal(19),zod.literal(20),zod.literal(21),zod.literal(22),zod.literal(23),zod.literal(24)]).describe('The Kawaii IPsec connection phase 1 Diffie Hellman IANA algorithm.'),
-  "phase1_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 1 integrity algorithm..'),
-  "phase1_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 1 encryption algorithm..'),
-  "phase2_lifetime": zod.string().default(updateKawaiiIpSecBodyPhase2LifetimeDefault).describe('The Kawaii IPsec connection Lifetime for phase 2 negociation. Default is 1h.'),
-  "phase2_dh_group_number": zod.union([zod.literal(2),zod.literal(5),zod.literal(14),zod.literal(15),zod.literal(16),zod.literal(17),zod.literal(18),zod.literal(19),zod.literal(20),zod.literal(21),zod.literal(22),zod.literal(23),zod.literal(24)]).describe('The Kawaii IPsec connection phase 2 Diffie Hellman IANA algorithm.'),
-  "phase2_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 2 integrity algorithm..'),
-  "phase2_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 2 encryption algorithm..'),
+  "remote_ip": zod.string().optional().describe('The Kawaii IPsec connection remote peer VPN gateway IP address.'),
+  "remote_subnet": zod.string().optional().describe('The Kawaii IPsec connection remote subnet.'),
+  "pre_shared_key": zod.string().optional().describe('The Kawaii IPsec connection pre-shared key (PSK).'),
+  "dpd_timeout_action": zod.enum(['clear', 'trap', 'restart']).optional().describe('The Kawaii IPsec connection Dead Peer Detection (DPD) timeout action.'),
+  "dpd_timeout": zod.string().optional().describe('The Kawaii IPsec connection Dead Peer Detection (DPD) timeout.'),
+  "start_action": zod.enum(['none', 'start', 'trap']).optional().describe('The Kawaii IPsec connection start action.'),
+  "rekey_time": zod.string().optional().describe('The Kawaii IPsec connection rekey time.'),
+  "phase1_lifetime": zod.string().optional().describe('The Kawaii IPsec connection lifetime for phase 1 negotiation.'),
+  "phase1_dh_group_number": zod.union([zod.literal(2),zod.literal(5),zod.literal(14),zod.literal(15),zod.literal(16),zod.literal(17),zod.literal(18),zod.literal(19),zod.literal(20),zod.literal(21),zod.literal(22),zod.literal(23),zod.literal(24)]).optional().describe('The Kawaii IPsec connection phase 1 Diffie Hellman IANA algorithm.'),
+  "phase1_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).optional().describe('The Kawaii IPsec connection phase 1 integrity algorithm.'),
+  "phase1_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).optional().describe('The Kawaii IPsec connection phase 1 encryption algorithm.'),
+  "phase2_lifetime": zod.string().optional().describe('The Kawaii IPsec connection lifetime for phase 2 negotiation.'),
+  "phase2_dh_group_number": zod.union([zod.literal(2),zod.literal(5),zod.literal(14),zod.literal(15),zod.literal(16),zod.literal(17),zod.literal(18),zod.literal(19),zod.literal(20),zod.literal(21),zod.literal(22),zod.literal(23),zod.literal(24)]).optional().describe('The Kawaii IPsec connection phase 2 Diffie Hellman IANA algorithm.'),
+  "phase2_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).optional().describe('The Kawaii IPsec connection phase 2 integrity algorithm.'),
+  "phase2_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).optional().describe('The Kawaii IPsec connection phase 2 encryption algorithm.'),
   "firewall": zod.object({
   "ingress": zod.array(zod.object({
   "source": zod.string().default(updateKawaiiIpSecBodyFirewallOneIngressItemSourceDefault).describe('The source IP or CIDR to accept public traffic from.'),
   "protocol": zod.enum(['tcp', 'udp']).default(updateKawaiiIpSecBodyFirewallOneIngressItemProtocolDefault).describe('The transport layer protocol to accept public traffic from.'),
   "ports": zod.string().describe('The port (or list of ports) to accept public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall ingress rule.')).optional().describe('The Kawaii public firewall list of ingress rules. Kawaii default policy is to drop all incoming traffic, including ICMP. Specified ruleset will be explicitly accepted.'),
-  "egress_policy": zod.enum(['accept', 'drop']).default(updateKawaiiIpSecBodyFirewallOneEgressPolicyDefault).describe('The default public traffic egress policy.'),
-  "egress": zod.array(zod.object({
-  "destination": zod.string().default(updateKawaiiIpSecBodyFirewallOneEgressItemDestinationDefault).describe('The destination IP or CIDR to accept/drop public traffic to.'),
-  "protocol": zod.enum(['tcp', 'udp']).default(updateKawaiiIpSecBodyFirewallOneEgressItemProtocolDefault).describe('The transport layer protocol to accept/drop public traffic to.'),
-  "ports": zod.string().describe('The port (or list of ports) to accept/drop public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall egress rule.')).optional().describe('The Kawaii public firewall list of egress rules. Kawaii default policy is to accept all outgoing traffic, including ICMP. Specified ruleset will be explicitly dropped if egress_policy is set to accept, and explicitly accepted if egress policy is set to drop..')
-}).describe('A Kawaii public firewall settings.').optional().describe('The Kawaii IPsec connection firewall settings on the IPsec interface.')
-}).describe('A Kawaii IPsec connection.')
+}).describe('A Kawaii public firewall ingress rule.')).optional().describe('The Kawaii IPsec connection firewall list of ingress rules. Default policy is to drop all incoming traffic from the remote peer, including ICMP. Specified ruleset will be explicitly accepted.')
+}).describe('A Kawaii IPsec connection firewall settings.').optional().describe('The Kawaii IPsec connection firewall settings on the IPsec interface.')
+}).describe('A Kawaii IPsec connection update (unspecified properties are left unchanged).')
 
 export const updateKawaiiIpSecResponseDpdTimeoutActionDefault = `restart`;
 export const updateKawaiiIpSecResponseDpdTimeoutDefault = `240s`;
@@ -588,42 +380,33 @@ export const updateKawaiiIpSecResponsePhase1LifetimeDefault = `1h`;
 export const updateKawaiiIpSecResponsePhase2LifetimeDefault = `1h`;
 export const updateKawaiiIpSecResponseFirewallOneIngressItemSourceDefault = `0.0.0.0/0`;
 export const updateKawaiiIpSecResponseFirewallOneIngressItemProtocolDefault = `tcp`;
-export const updateKawaiiIpSecResponseFirewallOneEgressPolicyDefault = `accept`;
-export const updateKawaiiIpSecResponseFirewallOneEgressItemDestinationDefault = `0.0.0.0/0`;
-export const updateKawaiiIpSecResponseFirewallOneEgressItemProtocolDefault = `tcp`;
 
 export const UpdateKawaiiIpSecResponse = zod.object({
-  "id": zod.string().optional().describe('The Kawaii IPsec connection ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kawaii IPsec connection ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kawaii IPsec connection name.'),
   "description": zod.string().optional().describe('The Kawaii IPsec connection description.'),
-  "ip": zod.string().optional().describe('The Kawaii IPsec connection IPSec IP.'),
-  "remote_ip": zod.string().describe('The Kawaii IPsec connection remote peer VPN Gateway.'),
+  "ip": zod.string().optional().describe('The Kawaii IPsec connection local IPsec IP address (read-only).'),
+  "remote_ip": zod.string().describe('The Kawaii IPsec connection remote peer VPN gateway IP address.'),
   "remote_subnet": zod.string().describe('The Kawaii IPsec connection remote subnet.'),
-  "pre_shared_key": zod.string().describe('The Kawaii IPsec connection pre-shared key(PSK).'),
-  "dpd_timeout_action": zod.enum(['clear', 'restart', 'start']).default(updateKawaiiIpSecResponseDpdTimeoutActionDefault).describe('The Kawaii IPsec connection Dead Peer Detection Action (clear,restart or trap).'),
-  "dpd_timeout": zod.string().default(updateKawaiiIpSecResponseDpdTimeoutDefault).describe('The Kawaii IPsec connection Dead Peer Detection Timeout.'),
-  "start_action": zod.enum(['none', 'start', 'trap']).default(updateKawaiiIpSecResponseStartActionDefault).describe('The Kawaii IPsec connection start action (none, start, trap).'),
-  "rekey_time": zod.string().default(updateKawaiiIpSecResponseRekeyTimeDefault).describe('The Kawaii IPsec connection rekey time. Default is 2h.'),
-  "phase1_lifetime": zod.string().default(updateKawaiiIpSecResponsePhase1LifetimeDefault).describe('The Kawaii IPsec connection Lifetime for phase 1 negociation. Default is 1h.'),
+  "pre_shared_key": zod.string().describe('The Kawaii IPsec connection pre-shared key (PSK).'),
+  "dpd_timeout_action": zod.enum(['clear', 'trap', 'restart']).default(updateKawaiiIpSecResponseDpdTimeoutActionDefault).describe('The Kawaii IPsec connection Dead Peer Detection (DPD) timeout action.'),
+  "dpd_timeout": zod.string().default(updateKawaiiIpSecResponseDpdTimeoutDefault).describe('The Kawaii IPsec connection Dead Peer Detection (DPD) timeout.'),
+  "start_action": zod.enum(['none', 'start', 'trap']).default(updateKawaiiIpSecResponseStartActionDefault).describe('The Kawaii IPsec connection start action.'),
+  "rekey_time": zod.string().default(updateKawaiiIpSecResponseRekeyTimeDefault).describe('The Kawaii IPsec connection rekey time.'),
+  "phase1_lifetime": zod.string().default(updateKawaiiIpSecResponsePhase1LifetimeDefault).describe('The Kawaii IPsec connection lifetime for phase 1 negotiation.'),
   "phase1_dh_group_number": zod.union([zod.literal(2),zod.literal(5),zod.literal(14),zod.literal(15),zod.literal(16),zod.literal(17),zod.literal(18),zod.literal(19),zod.literal(20),zod.literal(21),zod.literal(22),zod.literal(23),zod.literal(24)]).describe('The Kawaii IPsec connection phase 1 Diffie Hellman IANA algorithm.'),
-  "phase1_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 1 integrity algorithm..'),
-  "phase1_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 1 encryption algorithm..'),
-  "phase2_lifetime": zod.string().default(updateKawaiiIpSecResponsePhase2LifetimeDefault).describe('The Kawaii IPsec connection Lifetime for phase 2 negociation. Default is 1h.'),
+  "phase1_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 1 integrity algorithm.'),
+  "phase1_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 1 encryption algorithm.'),
+  "phase2_lifetime": zod.string().default(updateKawaiiIpSecResponsePhase2LifetimeDefault).describe('The Kawaii IPsec connection lifetime for phase 2 negotiation.'),
   "phase2_dh_group_number": zod.union([zod.literal(2),zod.literal(5),zod.literal(14),zod.literal(15),zod.literal(16),zod.literal(17),zod.literal(18),zod.literal(19),zod.literal(20),zod.literal(21),zod.literal(22),zod.literal(23),zod.literal(24)]).describe('The Kawaii IPsec connection phase 2 Diffie Hellman IANA algorithm.'),
-  "phase2_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 2 integrity algorithm..'),
-  "phase2_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 2 encryption algorithm..'),
+  "phase2_integrity_algorithm": zod.enum(['SHA1', 'SHA256', 'SHA384', 'SHA512']).describe('The Kawaii IPsec connection phase 2 integrity algorithm.'),
+  "phase2_encryption_algorithm": zod.enum(['AES128', 'AES256', 'CAMELLIA128', 'CAMELLIA256']).describe('The Kawaii IPsec connection phase 2 encryption algorithm.'),
   "firewall": zod.object({
   "ingress": zod.array(zod.object({
   "source": zod.string().default(updateKawaiiIpSecResponseFirewallOneIngressItemSourceDefault).describe('The source IP or CIDR to accept public traffic from.'),
   "protocol": zod.enum(['tcp', 'udp']).default(updateKawaiiIpSecResponseFirewallOneIngressItemProtocolDefault).describe('The transport layer protocol to accept public traffic from.'),
   "ports": zod.string().describe('The port (or list of ports) to accept public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall ingress rule.')).optional().describe('The Kawaii public firewall list of ingress rules. Kawaii default policy is to drop all incoming traffic, including ICMP. Specified ruleset will be explicitly accepted.'),
-  "egress_policy": zod.enum(['accept', 'drop']).default(updateKawaiiIpSecResponseFirewallOneEgressPolicyDefault).describe('The default public traffic egress policy.'),
-  "egress": zod.array(zod.object({
-  "destination": zod.string().default(updateKawaiiIpSecResponseFirewallOneEgressItemDestinationDefault).describe('The destination IP or CIDR to accept/drop public traffic to.'),
-  "protocol": zod.enum(['tcp', 'udp']).default(updateKawaiiIpSecResponseFirewallOneEgressItemProtocolDefault).describe('The transport layer protocol to accept/drop public traffic to.'),
-  "ports": zod.string().describe('The port (or list of ports) to accept/drop public traffic from. Ranges are accepted. Format is a-b,c-d (e.g. 443; 22,80,443; 80,443,3000-3005).')
-}).describe('A Kawaii public firewall egress rule.')).optional().describe('The Kawaii public firewall list of egress rules. Kawaii default policy is to accept all outgoing traffic, including ICMP. Specified ruleset will be explicitly dropped if egress_policy is set to accept, and explicitly accepted if egress policy is set to drop..')
-}).describe('A Kawaii public firewall settings.').optional().describe('The Kawaii IPsec connection firewall settings on the IPsec interface.')
+}).describe('A Kawaii public firewall ingress rule.')).optional().describe('The Kawaii IPsec connection firewall list of ingress rules. Default policy is to drop all incoming traffic from the remote peer, including ICMP. Specified ruleset will be explicitly accepted.')
+}).describe('A Kawaii IPsec connection firewall settings.').optional().describe('The Kawaii IPsec connection firewall settings on the IPsec interface.')
 }).describe('A Kawaii IPsec connection.')
 

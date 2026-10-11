@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   useMutation,
@@ -29,7 +29,9 @@ import type {
   ConflictResponse,
   ForbiddenResponse,
   InsufficientResourceResponse,
+  InternalServerErrorResponse,
   Kylo,
+  KyloUpdate,
   NotFoundResponse,
   ObjectIds,
   UnauthorizedResponse,
@@ -92,7 +94,7 @@ export const getListKylosQueryKey = () => {
     }
 
 
-export const getListKylosQueryOptions = <TData = Awaited<ReturnType<typeof listKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKylos>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getListKylosQueryOptions = <TData = Awaited<ReturnType<typeof listKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKylos>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -111,10 +113,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ListKylosQueryResult = NonNullable<Awaited<ReturnType<typeof listKylos>>>
-export type ListKylosQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse>
+export type ListKylosQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>
 
 
-export function useListKylos<TData = Awaited<ReturnType<typeof listKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListKylos<TData = Awaited<ReturnType<typeof listKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKylos>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof listKylos>>,
@@ -124,7 +126,7 @@ export function useListKylos<TData = Awaited<ReturnType<typeof listKylos>>, TErr
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListKylos<TData = Awaited<ReturnType<typeof listKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListKylos<TData = Awaited<ReturnType<typeof listKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKylos>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof listKylos>>,
@@ -134,12 +136,12 @@ export function useListKylos<TData = Awaited<ReturnType<typeof listKylos>>, TErr
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useListKylos<TData = Awaited<ReturnType<typeof listKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListKylos<TData = Awaited<ReturnType<typeof listKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKylos>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useListKylos<TData = Awaited<ReturnType<typeof listKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse>>(
+export function useListKylos<TData = Awaited<ReturnType<typeof listKylos>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | InternalServerErrorResponse>>(
   options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listKylos>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -184,7 +186,7 @@ export const deleteKylo = async (kyloId: string, options?: Parameters<typeof kow
 
 export const getDeleteKyloMutationKey = () => ['deleteKylo'] as const;
 
-export const getDeleteKyloMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+export const getDeleteKyloMutationOptions = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteKylo>>, TError,DeleteKyloMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteKylo>>, TError,DeleteKyloMutationVariables, TContext> => {
 
@@ -213,10 +215,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type DeleteKyloMutationResult = NonNullable<Awaited<ReturnType<typeof deleteKylo>>>
 
-    export type DeleteKyloMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>
+    export type DeleteKyloMutationError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>
     export type DeleteKyloMutationVariables = {kyloId: string}
 
-    export const useDeleteKylo = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse>,
+    export const useDeleteKylo = <TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | ConflictResponse | UnprocessableEntityResponse | InternalServerErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteKylo>>, TError,DeleteKyloMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof deleteKylo>>,
@@ -259,7 +261,7 @@ export const getReadKyloQueryKey = (kyloId: string,) => {
     }
 
 
-export const getReadKyloQueryOptions = <TData = Awaited<ReturnType<typeof readKylo>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(kyloId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKylo>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
+export const getReadKyloQueryOptions = <TData = Awaited<ReturnType<typeof readKylo>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(kyloId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKylo>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -278,10 +280,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type ReadKyloQueryResult = NonNullable<Awaited<ReturnType<typeof readKylo>>>
-export type ReadKyloQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>
+export type ReadKyloQueryError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>
 
 
-export function useReadKylo<TData = Awaited<ReturnType<typeof readKylo>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKylo<TData = Awaited<ReturnType<typeof readKylo>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kyloId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKylo>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof readKylo>>,
@@ -291,7 +293,7 @@ export function useReadKylo<TData = Awaited<ReturnType<typeof readKylo>>, TError
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadKylo<TData = Awaited<ReturnType<typeof readKylo>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKylo<TData = Awaited<ReturnType<typeof readKylo>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kyloId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKylo>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof readKylo>>,
@@ -301,12 +303,12 @@ export function useReadKylo<TData = Awaited<ReturnType<typeof readKylo>>, TError
       >, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useReadKylo<TData = Awaited<ReturnType<typeof readKylo>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKylo<TData = Awaited<ReturnType<typeof readKylo>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kyloId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKylo>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useReadKylo<TData = Awaited<ReturnType<typeof readKylo>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse>>(
+export function useReadKylo<TData = Awaited<ReturnType<typeof readKylo>>, TError = ErrorType<UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | InternalServerErrorResponse>>(
  kyloId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof readKylo>>, TError, TData>>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
@@ -335,7 +337,7 @@ export const getUpdateKyloUrl = (kyloId: string,) => {
  * Updates a Kylo configuration.
  */
 export const updateKylo = async (kyloId: string,
-    kylo: Kylo, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Kylo> => {
+    kyloUpdate: KyloUpdate, options?: Parameters<typeof kowabungaFetch>[1]): Promise<Kylo> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -356,7 +358,7 @@ return kowabungaFetch<Kylo>(getUpdateKyloUrl(kyloId),
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(kylo)
+    body: JSON.stringify(kyloUpdate)
   }
 );}
 
@@ -366,7 +368,7 @@ return kowabungaFetch<Kylo>(getUpdateKyloUrl(kyloId),
 
 export const getUpdateKyloMutationKey = () => ['updateKylo'] as const;
 
-export const getUpdateKyloMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+export const getUpdateKyloMutationOptions = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKylo>>, TError,UpdateKyloMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateKylo>>, TError,UpdateKyloMutationVariables, TContext> => {
 
@@ -394,11 +396,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type UpdateKyloMutationResult = NonNullable<Awaited<ReturnType<typeof updateKylo>>>
-    export type UpdateKyloMutationBody = BodyType<Kylo>
-    export type UpdateKyloMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>
-    export type UpdateKyloMutationVariables = {kyloId: string;data: BodyType<Kylo>}
+    export type UpdateKyloMutationBody = BodyType<KyloUpdate>
+    export type UpdateKyloMutationError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>
+    export type UpdateKyloMutationVariables = {kyloId: string;data: BodyType<KyloUpdate>}
 
-    export const useUpdateKylo = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InsufficientResourceResponse>,
+    export const useUpdateKylo = <TError = ErrorType<BadRequestResponse | UnauthorizedResponse | ForbiddenResponse | NotFoundResponse | UnprocessableEntityResponse | InternalServerErrorResponse | InsufficientResourceResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateKylo>>, TError,UpdateKyloMutationVariables, TContext>, request?: SecondParameter<typeof kowabungaFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateKylo>>,

@@ -18,7 +18,7 @@ import {
   useReadStoragePool,
 } from '@/api/generated/endpoints/pool/pool'
 import {
-  useListRegionStorageNFSs,
+  useListRegionStorageNFSes,
   useListRegionStoragePools,
   useListRegionVNets,
 } from '@/api/generated/endpoints/region/region'
@@ -49,7 +49,7 @@ function KaktusPage() {
   const { region, zone } = useScope()
   const kaktuses = useListZoneKaktuses(zone ?? '', { query: { enabled: !!zone } })
   const pools = useListRegionStoragePools(region ?? '', { query: { enabled: !!region } })
-  const nfs = useListRegionStorageNFSs(region ?? '', undefined, { query: { enabled: !!region } })
+  const nfs = useListRegionStorageNFSes(region ?? '', { query: { enabled: !!region } })
   const vnets = useListRegionVNets(region ?? '', { query: { enabled: !!region } })
 
   return (

@@ -3,15 +3,15 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 
 /**
  * A availability zone.
  */
 export interface Zone {
-  /** The availability zone ID (auto-generated). */
-  id?: string;
+  /** The availability zone ID (auto-generated) (read-only). */
+  readonly id?: string;
   /** The availability zone name. */
   name: string;
   /** The availability zone description. */

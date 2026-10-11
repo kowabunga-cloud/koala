@@ -3,20 +3,20 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 
 /**
  * A Kowabunga authentication security token consists of an API key granting access to resources.
  */
 export interface ApiToken {
-  /** The server-to-server authentication security token ID (auto-generated). */
-  id?: string;
+  /** The server-to-server authentication security token ID (auto-generated) (read-only). */
+  readonly id?: string;
   /** The server-to-server authentication security token name. */
   name: string;
   /** The server-to-server authentication security token description. */
   description?: string;
-  /** Does the API token expires at some stage ?. */
+  /** Whether the API token expires at some stage. */
   expire: boolean;
   /** Expiration date of the token (YYYY-MM-DD format). */
   expiration_date?: string;

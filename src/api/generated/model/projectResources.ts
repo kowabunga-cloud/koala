@@ -3,19 +3,31 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 
 /**
  * A global project resource quotas/usage (0 for unlimited).
  */
 export interface ProjectResources {
-  /** The maximum total number of vCPUs allowed to be consumed by sum of all instances. */
+  /**
+     * The total number of vCPUs consumed by (or allowed for) the sum of all instances.
+     * @minimum 0
+     */
   vcpus?: number;
-  /** The maximum total memory (in bytes) allowed to be consumed by sum of all instances. */
+  /**
+     * The total memory (in bytes) consumed by (or allowed for) the sum of all instances.
+     * @minimum 0
+     */
   memory?: number;
-  /** The maximum total disk capacity allowed to be consumed by sum of all instances. */
+  /**
+     * The total disk capacity (in bytes) consumed by (or allowed for) the sum of all volumes.
+     * @minimum 0
+     */
   storage?: number;
-  /** The maximum number of instances allowed to be spawned. */
+  /**
+     * The number of instances spawned (or allowed to be).
+     * @minimum 0
+     */
   instances?: number;
 }

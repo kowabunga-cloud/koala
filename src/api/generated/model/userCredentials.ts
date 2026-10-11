@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 
 /**
@@ -15,5 +15,5 @@ export interface UserCredentials {
   /** The user password for login. */
   password: string;
   /** The resulting server-generated JWT token for Bearer Authentication (read-only). */
-  jwt?: string;
+  readonly jwt?: string;
 }

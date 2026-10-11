@@ -3,15 +3,15 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 
 /**
  * A Kiwi (Kowabunga Inner Wan Interface) provides edge-network services..
  */
 export interface Kiwi {
-  /** The Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. ID (auto-generated). */
-  id?: string;
+  /** The Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. ID (auto-generated) (read-only). */
+  readonly id?: string;
   /** The Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. name. */
   name: string;
   /** The Kiwi (Kowabunga Inner Wan Interface) provides edge-network services. description. */

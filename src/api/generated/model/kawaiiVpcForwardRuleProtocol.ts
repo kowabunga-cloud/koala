@@ -3,11 +3,11 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 
 /**
- * The transport layer protocol to forward public traffic to.
+ * The transport layer protocol to forward VPC traffic to.
  */
 export type KawaiiVpcForwardRuleProtocol = typeof KawaiiVpcForwardRuleProtocol[keyof typeof KawaiiVpcForwardRuleProtocol];
 

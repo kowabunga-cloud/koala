@@ -3,15 +3,15 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 
 /**
  * A network adapter.
  */
 export interface Adapter {
-  /** The network adapter ID (auto-generated). */
-  id?: string;
+  /** The network adapter ID (auto-generated) (read-only). */
+  readonly id?: string;
   /** The network adapter name. */
   name: string;
   /** The network adapter description. */

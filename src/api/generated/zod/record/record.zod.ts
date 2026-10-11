@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import * as zod from 'zod';
 
@@ -25,10 +25,10 @@ export const ReadDnsRecordParams = zod.object({
 })
 
 export const ReadDnsRecordResponse = zod.object({
-  "id": zod.string().optional().describe('The DNS record ID (auto-generated).'),
+  "id": zod.string().optional().describe('The DNS record ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The DNS record name.'),
   "description": zod.string().optional().describe('The DNS record description.'),
-  "domain": zod.string().optional().describe('The DNS record associated domain (inherited from associated project).'),
+  "domain": zod.string().optional().describe('The DNS record associated domain, inherited from associated project (read-only).'),
   "addresses": zod.array(zod.string()).describe('A list of IPv4 addresses to be associated to the record.')
 }).describe('A DNS record.')
 
@@ -40,18 +40,16 @@ export const UpdateDnsRecordParams = zod.object({
 })
 
 export const UpdateDnsRecordBody = zod.object({
-  "id": zod.string().optional().describe('The DNS record ID (auto-generated).'),
-  "name": zod.string().describe('The DNS record name.'),
+  "name": zod.string().optional().describe('The DNS record name.'),
   "description": zod.string().optional().describe('The DNS record description.'),
-  "domain": zod.string().optional().describe('The DNS record associated domain (inherited from associated project).'),
-  "addresses": zod.array(zod.string()).describe('A list of IPv4 addresses to be associated to the record.')
-}).describe('A DNS record.')
+  "addresses": zod.array(zod.string()).optional().describe('A list of IPv4 addresses to be associated to the record.')
+}).describe('A DNS record update (unspecified properties are left unchanged).')
 
 export const UpdateDnsRecordResponse = zod.object({
-  "id": zod.string().optional().describe('The DNS record ID (auto-generated).'),
+  "id": zod.string().optional().describe('The DNS record ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The DNS record name.'),
   "description": zod.string().optional().describe('The DNS record description.'),
-  "domain": zod.string().optional().describe('The DNS record associated domain (inherited from associated project).'),
+  "domain": zod.string().optional().describe('The DNS record associated domain, inherited from associated project (read-only).'),
   "addresses": zod.array(zod.string()).describe('A list of IPv4 addresses to be associated to the record.')
 }).describe('A DNS record.')
 

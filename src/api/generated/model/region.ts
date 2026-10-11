@@ -3,15 +3,15 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 
 /**
  * A region.
  */
 export interface Region {
-  /** The region ID (auto-generated). */
-  id?: string;
+  /** The region ID (auto-generated) (read-only). */
+  readonly id?: string;
   /** The region name. */
   name: string;
   /** The region description. */

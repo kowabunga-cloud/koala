@@ -3,11 +3,11 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 
 /**
- * Type of operating system if OS kind (useful to determine cloud-init parameters for instance).
+ * Type of operating system (useful to determine cloud-init parameters for instance). Can only be set at creation time, ignored on updates.
  */
 export type TemplateOs = typeof TemplateOs[keyof typeof TemplateOs];
 

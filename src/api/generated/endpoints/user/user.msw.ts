@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import {
   HttpResponse,
@@ -14,6 +14,7 @@ import type {
 } from 'msw';
 
 import type {
+  ApiToken,
   ObjectIds,
   User,
   UserCredentials
@@ -24,10 +25,11 @@ import {
   getListUsersResponseMock,
   getLoginResponseMock,
   getReadUserResponseMock,
+  getSetUserApiTokenResponseMock,
   getUpdateUserResponseMock
 } from './user.faker';
 
-export { getLoginResponseMock, getListUsersResponseMock, getCreateUserResponseMock, getReadUserResponseMock, getUpdateUserResponseMock } from './user.faker';
+export { getLoginResponseMock, getListUsersResponseMock, getCreateUserResponseMock, getReadUserResponseMock, getUpdateUserResponseMock, getSetUserApiTokenResponseMock } from './user.faker';
 
 
 export const getLoginMockHandler = (overrideResponse?: UserCredentials | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<UserCredentials> | UserCredentials), options?: RequestHandlerOptions) => {
@@ -37,7 +39,7 @@ export const getLoginMockHandler = (overrideResponse?: UserCredentials | ((info:
     return HttpResponse.json(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
     : getLoginResponseMock(),
-      { status: 201
+      { status: 200
       })
   }, options)
 }
@@ -52,8 +54,8 @@ export const getLogoutMockHandler = (overrideResponse?: void | ((info: Parameter
   }, options)
 }
 
-export const getResetPasswordMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
-  return http.put('/api/v1/resetPassword', async (info: Parameters<Parameters<typeof http.put>[1]>[0]) => {
+export const getResetPasswordMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.post('/api/v1/resetPassword', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,
@@ -140,11 +142,13 @@ export const getResetUserPasswordMockHandler = (overrideResponse?: void | ((info
   }, options)
 }
 
-export const getSetUserApiTokenMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+export const getSetUserApiTokenMockHandler = (overrideResponse?: ApiToken | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<ApiToken> | ApiToken), options?: RequestHandlerOptions) => {
   return http.patch('/api/v1/user/:userId/token', async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
-  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
-    return new HttpResponse(null,
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getSetUserApiTokenResponseMock(),
       { status: 200
       })
   }, options)

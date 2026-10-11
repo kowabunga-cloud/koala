@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Kowabunga API
  * Kvm Orchestrator With A BUNch of Goods Added
- * OpenAPI spec version: 0.57.1
+ * OpenAPI spec version: 0.58.0
  */
 import * as zod from 'zod';
 
@@ -18,14 +18,13 @@ export const ListTeamsResponse = zod.array(ListTeamsResponseItem)
  * Creates a new Kowabunga users team.
  */
 export const CreateTeamBody = zod.object({
-  "id": zod.string().optional().describe('The Kowabunga users team ID (auto-generated).'),
   "name": zod.string().describe('The Kowabunga users team name.'),
   "description": zod.string().optional().describe('The Kowabunga users team description.'),
   "users": zod.array(zod.string()).describe('List of user IDs that are part of the team.')
 }).describe('A Kowabunga users team.')
 
 export const CreateTeamResponse = zod.object({
-  "id": zod.string().optional().describe('The Kowabunga users team ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kowabunga users team ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kowabunga users team name.'),
   "description": zod.string().optional().describe('The Kowabunga users team description.'),
   "users": zod.array(zod.string()).describe('List of user IDs that are part of the team.')
@@ -48,7 +47,7 @@ export const ReadTeamParams = zod.object({
 })
 
 export const ReadTeamResponse = zod.object({
-  "id": zod.string().optional().describe('The Kowabunga users team ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kowabunga users team ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kowabunga users team name.'),
   "description": zod.string().optional().describe('The Kowabunga users team description.'),
   "users": zod.array(zod.string()).describe('List of user IDs that are part of the team.')
@@ -62,14 +61,13 @@ export const UpdateTeamParams = zod.object({
 })
 
 export const UpdateTeamBody = zod.object({
-  "id": zod.string().optional().describe('The Kowabunga users team ID (auto-generated).'),
-  "name": zod.string().describe('The Kowabunga users team name.'),
+  "name": zod.string().optional().describe('The Kowabunga users team name.'),
   "description": zod.string().optional().describe('The Kowabunga users team description.'),
-  "users": zod.array(zod.string()).describe('List of user IDs that are part of the team.')
-}).describe('A Kowabunga users team.')
+  "users": zod.array(zod.string()).optional().describe('List of user IDs that are part of the team.')
+}).describe('A Kowabunga users team update (unspecified properties are left unchanged).')
 
 export const UpdateTeamResponse = zod.object({
-  "id": zod.string().optional().describe('The Kowabunga users team ID (auto-generated).'),
+  "id": zod.string().optional().describe('The Kowabunga users team ID (auto-generated) (read-only).'),
   "name": zod.string().describe('The Kowabunga users team name.'),
   "description": zod.string().optional().describe('The Kowabunga users team description.'),
   "users": zod.array(zod.string()).describe('List of user IDs that are part of the team.')
