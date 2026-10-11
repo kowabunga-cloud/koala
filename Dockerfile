@@ -15,7 +15,7 @@
 # variables (see https://static-web-server.net/configuration/environment-variables/).
 
 # static files are platform-independent: built once, on the build platform
-FROM --platform=$BUILDPLATFORM node:24-alpine@sha256:ebfe2f90462722a7a4de65e91990e97fe0d401c70e0e762c5b53302f905ec1c1 AS build
+FROM --platform=$BUILDPLATFORM node:25-alpine@sha256:bdf2cca6fe3dabd014ea60163eca3f0f7015fbd5c7ee1b0e9ccb4ced6eb02ef4 AS build
 
 WORKDIR /src
 COPY package.json package-lock.json ./
@@ -25,7 +25,7 @@ RUN --mount=type=cache,target=/root/.npm \
 COPY . .
 RUN npm run build
 
-FROM ghcr.io/static-web-server/static-web-server:2.44.0@sha256:2c1a7c3e0feaea5859307403b74e1c575f3ec1499094fc077344173d11abaae2 AS server
+FROM ghcr.io/static-web-server/static-web-server:2.44.1@sha256:94618e3d17802265a21926217e6f9e7832b311b6fbf5933684001739fafed06a AS server
 
 FROM scratch
 
